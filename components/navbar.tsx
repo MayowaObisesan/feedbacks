@@ -25,6 +25,7 @@ import {
   SearchIcon,
   Logo,
 } from "@/components/icons";
+import ConnectButton from "./ConnectButton";
 
 export const Navbar = () => {
   const searchInput = (
@@ -49,7 +50,7 @@ export const Navbar = () => {
   );
 
   return (
-    <NextUINavbar maxWidth="xl" position="sticky">
+    <NextUINavbar maxWidth="full" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
@@ -63,7 +64,7 @@ export const Navbar = () => {
               <NextLink
                 className={clsx(
                   linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium",
+                  "data-[active=true]:text-primary data-[active=true]:font-medium"
                 )}
                 color="foreground"
                 href={item.href}
@@ -92,7 +93,7 @@ export const Navbar = () => {
           <ThemeSwitch />
         </NavbarItem>
         <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
-        <NavbarItem className="hidden md:flex">
+        {/* <NavbarItem className="hidden md:flex">
           <Button
             isExternal
             as={Link}
@@ -103,6 +104,13 @@ export const Navbar = () => {
           >
             Sponsor
           </Button>
+        </NavbarItem> */}
+        <NavbarItem className="">
+          <div className="flex items-center">
+            {/* <w3m-button /> */}
+            {/* <w3m-button size="md" /> */}
+            <ConnectButton />
+          </div>
         </NavbarItem>
       </NavbarContent>
 
@@ -124,8 +132,8 @@ export const Navbar = () => {
                   index === 2
                     ? "primary"
                     : index === siteConfig.navMenuItems.length - 1
-                      ? "danger"
-                      : "foreground"
+                    ? "danger"
+                    : "foreground"
                 }
                 href="#"
                 size="lg"
