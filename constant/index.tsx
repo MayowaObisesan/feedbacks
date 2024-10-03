@@ -1,8 +1,9 @@
-import feedbacksABI from "../abis/feedbacks.json";
+import feedbacksABI from "../abis/feedbacksTestnet.abi.json";
 
 export const FEEDBACK_MAINNET_ADDRESS =
   "0xae778C70c611EF36C04D0CF91D53534Ea7ECAD76";
 export const FEEDBACK_TESTNET_ADDRESS =
-  "0x3751f2E35cFaC2d1c463041F18C35983642B836C";
-export const FEEDBACK_ADDRESS = FEEDBACK_MAINNET_ADDRESS;
+  "0x47BB9492C953285eF0080470ED5C692683C7853e";
+// "0xa4F7696B7De85Aa868d89Ee2Ac25cacc856A163c";
+export const FEEDBACK_ADDRESS = FEEDBACK_TESTNET_ADDRESS;
 export const FEEDBACKS_ABI = feedbacksABI;

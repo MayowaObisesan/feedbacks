@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Navbar as NextUINavbar,
   NavbarContent,
@@ -26,8 +28,13 @@ import {
   Logo,
 } from "@/components/icons";
 import ConnectButton from "./ConnectButton";
+import { useFeedbacksContext } from "@/context";
+import { User } from "@nextui-org/user";
+import { Skeleton } from "@nextui-org/skeleton";
+import { CreateProfileModal } from "./profileModal";
 
 export const Navbar = () => {
+  const { profileExist } = useFeedbacksContext();
   const searchInput = (
     <Input
       aria-label="Search"
@@ -49,13 +56,29 @@ export const Navbar = () => {
     />
   );
 
+  const Profile = () => {
+    const { myProfile, isFetchingMyProfile } = useFeedbacksContext();
+
+    return (
+      <Skeleton isLoaded={!isFetchingMyProfile} className="rounded-full">
+        <User
+          name={myProfile?.name}
+          description={<NextLink href="/me">@{myProfile?.name}</NextLink>}
+          avatarProps={{
+            src: "https://avatars.githubusercontent.com/u/30373425?v=4",
+          }}
+        />
+      </Skeleton>
+    );
+  };
+
   return (
     <NextUINavbar maxWidth="full" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
             <Logo />
-            <p className="font-bold text-inherit">ACME</p>
+            <p className="font-bold text-inherit">Feedbacks</p>
           </NextLink>
         </NavbarBrand>
         <ul className="hidden lg:flex gap-4 justify-start ml-2">
@@ -92,6 +115,13 @@ export const Navbar = () => {
           </Link>
           <ThemeSwitch />
         </NavbarItem>
+        {profileExist ? (
+          <NavbarItem className="flex">{<Profile />}</NavbarItem>
+        ) : (
+          <div>
+            <CreateProfileModal buttonText="Create Profile" />
+          </div>
+        )}
         <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
         {/* <NavbarItem className="hidden md:flex">
           <Button

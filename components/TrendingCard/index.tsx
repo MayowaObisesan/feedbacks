@@ -2,25 +2,34 @@
 
 import { formatCount } from "@/utils";
 import { Card, CardBody } from "@nextui-org/card";
+import { Skeleton } from "@nextui-org/skeleton";
+import Link from "next/link";
 import React from "react";
 
 interface ITrendingBrandCard {
   name: string;
+  rawName: string;
   feedbackCount: number;
 }
 
-export function TrendingBrandCard({ name, feedbackCount }: ITrendingBrandCard) {
+export function TrendingBrandCard({
+  name,
+  rawName,
+  feedbackCount,
+}: ITrendingBrandCard) {
   return (
-    <Card className="min-w-[280px] lg:min-w-[360px] h-[200px]" as={"button"}>
-      <CardBody className="flex flex-col justify-center px-8">
-        <div className="font-normal text-5xl leading-normal text-ellipsis whitespace-nowrap overflow-hidden">
-          {name}
+    <Link href={`/brand/${name}`}>
+      <Card className="min-w-[280px] lg:min-w-[360px] h-[200px]" as={"button"}>
+        <CardBody className="flex flex-col justify-center px-8">
+          <div className="font-normal text-5xl leading-normal text-ellipsis whitespace-nowrap overflow-hidden">
+            {rawName}
+          </div>
+        </CardBody>
+        <div className="absolute left-8 bottom-4 font-extrabold text-sm py-4">
+          {formatCount(feedbackCount)} Feedback
         </div>
-      </CardBody>
-      <div className="absolute left-8 bottom-4 font-extrabold text-sm py-4">
-        {formatCount(feedbackCount)} Feedback
-      </div>
-    </Card>
+      </Card>
+    </Link>
   );
 }
 

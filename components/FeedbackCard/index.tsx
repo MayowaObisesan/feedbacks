@@ -1,12 +1,20 @@
 "use client";
 
+import { useFeedbacksContext } from "@/context";
+import { IFeedbacks } from "@/types";
+import { shortenAddress } from "@/utils";
 import { Avatar } from "@nextui-org/avatar";
 import { Button } from "@nextui-org/button";
 import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
+import { Skeleton } from "@nextui-org/skeleton";
 import React from "react";
+import { Address } from "viem";
 
-export default function FeedbackCard() {
+export default function FeedbackCard(props: IFeedbacks) {
   const [isFollowed, setIsFollowed] = React.useState(false);
+  const { myProfile } = useFeedbacksContext();
+  const userName = props.sender;
+  const userAddress = props.sender;
 
   return (
     <Card
@@ -24,12 +32,22 @@ export default function FeedbackCard() {
             src="https://nextui.org/avatars/avatar-1.png"
           />
           <div className="flex flex-col gap-1 items-start justify-center">
-            <h4 className="text-small font-semibold leading-none text-default-600">
-              Zoey Lang
-            </h4>
-            <h5 className="text-small tracking-tight text-default-400">
-              @zoeylang
-            </h5>
+            <Skeleton
+              isLoaded={!["", null, undefined].includes(userName)}
+              className="rounded-full"
+            >
+              <h4 className="text-small font-semibold leading-none text-default-600">
+                {myProfile.name === userName ? "You" : userName}
+              </h4>
+            </Skeleton>
+            <Skeleton
+              isLoaded={![`0x{""}`, null, undefined].includes(userAddress)}
+              className="rounded-full"
+            >
+              <h5 className="text-small tracking-tight text-default-400">
+                @{shortenAddress(userAddress)}
+              </h5>
+            </Skeleton>
           </div>
         </div>
         <Button
@@ -48,10 +66,7 @@ export default function FeedbackCard() {
         </Button>
       </CardHeader>
       <CardBody className="px-3 py-0 text-small text-default-400">
-        <p>
-          Frontend developer and UI/UX enthusiast. Join me on this coding
-          adventure!
-        </p>
+        <span>{props.feedbackText}</span>
         <span className="pt-2">
           #FrontendWithZoey
           <span className="py-2" aria-label="computer" role="img">

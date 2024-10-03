@@ -15,3 +15,18 @@ export function formatCount(num: number, precision: number = 1) {
 
 // Example usage:
 // console.log(formatCount(15000)); // Output: 15K
+
+export const shortenAddress = (addr: string) => {
+    return `${addr?.substring(0, 6)}...${addr?.substring(addr.length - 4)}`;
+};
+
+export function formattedDate(_currentDate: any) {
+    return _currentDate.toLocaleString('en-US', {
+        year: '2-digit',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+}

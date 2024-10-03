@@ -1,0 +1,1545 @@
+[
+    {
+        "inputs": [],
+        "name": "BrandAlreadyExist",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "BrandDoesNotExist",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "NotBrandOwner",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ProfileAlreadyExist",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ProfileDoesNotExist",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "brandId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "createdAt",
+                "type": "uint256"
+            }
+        ],
+        "name": "BrandRegistered",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "eventId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "brandId",
+                "type": "uint256"
+            }
+        ],
+        "name": "EventBrandConfirmed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "eventId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "brandId",
+                "type": "uint256"
+            }
+        ],
+        "name": "EventBrandInvited",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "eventId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "brandId",
+                "type": "uint256"
+            }
+        ],
+        "name": "EventBrandRemove",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "feedbackId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "feedbackText",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "sender",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "recipientId",
+                "type": "uint256"
+            }
+        ],
+        "name": "FeedbackSubmitted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "productId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "description",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "brandId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "createdAt",
+                "type": "uint256"
+            }
+        ],
+        "name": "ProductRegistered",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "email",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "bio",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "profilePictureHash",
+                "type": "string"
+            }
+        ],
+        "name": "ProfileCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "email",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "bio",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "profilePictureHash",
+                "type": "string"
+            }
+        ],
+        "name": "ProfileUpdated",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_address",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_inviteId",
+                "type": "uint256"
+            }
+        ],
+        "name": "addInvite",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "brandCounter",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_name",
+                "type": "string"
+            }
+        ],
+        "name": "brandExists",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "brandFeedbacks",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "brandOwners",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "brands",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "brandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "rawName",
+                "type": "string"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "createdAt",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "feedbackCount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "followersCount",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_eventId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_brandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_indexInArray",
+                "type": "uint256"
+            }
+        ],
+        "name": "confirmJointBrandEvent",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_brandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "_name",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_description",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_eventLocation",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_eventStartDate",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_eventEndDate",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_eventWebsite",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_eventRegistrationLink",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "_brandIds",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "createEvent",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_name",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_description",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_brandId",
+                "type": "uint256"
+            }
+        ],
+        "name": "createProduct",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_name",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_email",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_bio",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_profilePictureHash",
+                "type": "string"
+            }
+        ],
+        "name": "createProfile",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "eventBrandInvites",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "eventCounter",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "eventFeedbacks",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "events",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "eventId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "brandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "description",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "eventLocation",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "eventStartDate",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "eventEndDate",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "eventWebsite",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "eventRegistrationLink",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "createdAt",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "feedbackCounter",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "feedbacks",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "feedbackId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "feedbackText",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "sender",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "recipientId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "eventId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "productId",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_nameFilter",
+                "type": "string"
+            },
+            {
+                "internalType": "address",
+                "name": "_ownerFilter",
+                "type": "address"
+            }
+        ],
+        "name": "getAllBrands",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "brandId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "rawName",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "createdAt",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "feedbackCount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "followersCount",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct FeedbackPlatform.Brand[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_brandIdFilter",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "_nameFilter",
+                "type": "string"
+            }
+        ],
+        "name": "getAllEvents",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "eventId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "brandId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "description",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventLocation",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventStartDate",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventEndDate",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventWebsite",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventRegistrationLink",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256[]",
+                        "name": "brandIds",
+                        "type": "uint256[]"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "createdAt",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct FeedbackPlatform.Event[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_senderFilter",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_recipientIdFilter",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_eventIdFilter",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_productIdFilter",
+                "type": "uint256"
+            }
+        ],
+        "name": "getAllFeedbacks",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "feedbackId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "feedbackText",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "sender",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "recipientId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "eventId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "productId",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct FeedbackPlatform.Feedback[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_brandIdFilter",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "_nameFilter",
+                "type": "string"
+            }
+        ],
+        "name": "getAllProducts",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "productId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "description",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "brandId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "createdAt",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct FeedbackPlatform.Product[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_brandId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getBrand",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "brandId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "rawName",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "createdAt",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "feedbackCount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "followersCount",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct FeedbackPlatform.Brand",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_feedbackId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getFeedback",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "feedbackId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "feedbackText",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "sender",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "recipientId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "eventId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "productId",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct FeedbackPlatform.Feedback",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_address",
+                "type": "address"
+            }
+        ],
+        "name": "getInvitesForAddress",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "_eventIds",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "getMultipleEvents",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "eventId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "brandId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "description",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventLocation",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventStartDate",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventEndDate",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventWebsite",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventRegistrationLink",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256[]",
+                        "name": "brandIds",
+                        "type": "uint256[]"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "createdAt",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct FeedbackPlatform.Event[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "getProfile",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "email",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "bio",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "profilePictureHash",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "creationTime",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "lastUpdated",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct FeedbackPlatform.Profile",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "productCounter",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_brandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "_name",
+                "type": "string"
+            }
+        ],
+        "name": "productExists",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "productFeedbacks",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "products",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "productId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "description",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "brandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "createdAt",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "profileCounter",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "profileExists",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_name",
+                "type": "string"
+            }
+        ],
+        "name": "registerBrand",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_eventId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_brandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_indexInArray",
+                "type": "uint256"
+            }
+        ],
+        "name": "removeJointBrandEvent",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_fromBrandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_toBrandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_eventId",
+                "type": "uint256"
+            }
+        ],
+        "name": "sendJoinBrandEventInvite",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_recipientId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "_feedbackText",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_eventId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_productId",
+                "type": "uint256"
+            }
+        ],
+        "name": "submitFeedback",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_brandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "_name",
+                "type": "string"
+            }
+        ],
+        "name": "updateBrand",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_name",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_email",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_bio",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_profilePictureHash",
+                "type": "string"
+            }
+        ],
+        "name": "updateProfile",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "userFeedbacks",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]
