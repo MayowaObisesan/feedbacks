@@ -42,7 +42,11 @@ export default function RootLayout({
   const initialState = cookieToInitialState(config, headers().get("cookie"));
 
   return (
-    <html suppressHydrationWarning lang="en">
+    <html
+      suppressHydrationWarning
+      lang="en"
+      // data-theme={theme === "light" ? "dark" : "light"}
+    >
       <head />
       <body
         className={clsx(
@@ -57,7 +61,9 @@ export default function RootLayout({
                 <NextTopLoader />
                 <Toaster position="top-center" richColors />
                 <Navbar />
-                <main className="w-full mx-auto flex-grow">{children}</main>
+                <main className="relative w-full h-full overflow-auto mx-auto flex-grow">
+                  {children}
+                </main>
                 <footer className="w-full flex items-center justify-center py-3">
                   <Link
                     isExternal

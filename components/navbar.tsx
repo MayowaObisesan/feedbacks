@@ -32,6 +32,7 @@ import { useFeedbacksContext } from "@/context";
 import { User } from "@nextui-org/user";
 import { Skeleton } from "@nextui-org/skeleton";
 import { CreateProfileModal } from "./profileModal";
+import { parseImageHash } from "@/utils";
 
 export const Navbar = () => {
   const { profileExist } = useFeedbacksContext();
@@ -57,15 +58,17 @@ export const Navbar = () => {
   );
 
   const Profile = () => {
-    const { myProfile, isFetchingMyProfile } = useFeedbacksContext();
+    const { myProfileData, isMyProfileDataFetching } = useFeedbacksContext();
 
     return (
-      <Skeleton isLoaded={!isFetchingMyProfile} className="rounded-full">
+      <Skeleton isLoaded={!isMyProfileDataFetching} className="rounded-full">
         <User
-          name={myProfile?.name}
-          description={<NextLink href="/me">@{myProfile?.name}</NextLink>}
+          name={myProfileData?.name}
+          description={<NextLink href="/me">@{myProfileData?.name}</NextLink>}
           avatarProps={{
-            src: "https://avatars.githubusercontent.com/u/30373425?v=4",
+            src:
+              parseImageHash(myProfileData?.profilePictureHash) ||
+              "https://avatars.githubusercontent.com/u/30373425?v=4",
           }}
         />
       </Skeleton>

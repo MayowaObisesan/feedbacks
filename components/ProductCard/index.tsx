@@ -1,22 +1,36 @@
+import { formatDate, parseImageHash } from "@/utils";
+import { parseDateTime } from "@internationalized/date";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { Image } from "@nextui-org/image";
 
-function ProductCard() {
+interface IProductCard {
+  productId: number;
+  name: string;
+  description: string;
+  brandId: number;
+  createdAt: number;
+  imageHash: string;
+}
+
+function ProductCard(props: IProductCard) {
   return (
-    <Card className="py-4">
-      <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-        <p className="text-tiny uppercase font-bold">Daily Mix</p>
-        <small className="text-default-500">12 Tracks</small>
-        <h4 className="font-bold text-large">Frontend Radio</h4>
-      </CardHeader>
+    <Card className="py-4 max-w-80">
       <CardBody className="overflow-visible py-2">
         <Image
           alt="Card background"
           className="object-cover rounded-xl"
-          src="https://nextui.org/images/hero-card-complete.jpeg"
-          width={270}
+          src={parseImageHash(props.imageHash)}
+          width={"100%"}
         />
       </CardBody>
+      <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+        {/* <p className="text-tiny uppercase font-bold">
+          {formatDate(Number(props.createdAt))}
+        </p> */}
+        <h4 className="font-bold text-medium">Frontend Radio - {props.name}</h4>
+        <small className="text-default-500">{props.description}</small>
+        {/* <div className="text-sm">{props.description}</div> */}
+      </CardHeader>
     </Card>
   );
 }

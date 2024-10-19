@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes starShrinks {
+    from {
+        animation-timing-function: ease-in;
+        transform: scale(1, 1);
+    }
+
+    20% {
+        animation-timing-function: ease-out;
+        transform: scale(0.6, 0.6);
+    }
+
+    40%,
+    to {
+        transform: scale(0.67, 0.67);
+    }
+}

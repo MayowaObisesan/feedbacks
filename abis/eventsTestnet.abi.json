@@ -1,0 +1,1197 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_address",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_inviteId",
+                "type": "uint256"
+            }
+        ],
+        "name": "addInvite",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_eventId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_brandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_indexInArray",
+                "type": "uint256"
+            }
+        ],
+        "name": "confirmJointBrandEvent",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "brandId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "name",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "description",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventLocation",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventStartDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventEndDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventWebsite",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventRegistrationLink",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "brandIds",
+                                "type": "uint256[]"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "createdAt",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "updatedAt",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventBasicInfo",
+                        "name": "eventBasicInfo",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventImageHash",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "tags",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventOtherInfo",
+                        "name": "eventOtherInfo",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct EventsPlatform.Event",
+                "name": "_event",
+                "type": "tuple"
+            }
+        ],
+        "name": "createEvent",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_brandPlatformAddress",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_message",
+                "type": "string"
+            }
+        ],
+        "name": "NoEventDate",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_message",
+                "type": "string"
+            }
+        ],
+        "name": "NoEventDescription",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_message",
+                "type": "string"
+            }
+        ],
+        "name": "NoEventName",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_message",
+                "type": "string"
+            }
+        ],
+        "name": "NotAuthorized",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_message",
+                "type": "string"
+            }
+        ],
+        "name": "NotBrandOwner",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "eventId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "brandId",
+                "type": "uint256"
+            }
+        ],
+        "name": "EventBrandConfirmed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "eventId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "brandId",
+                "type": "uint256"
+            }
+        ],
+        "name": "EventBrandInvited",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "eventId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "brandId",
+                "type": "uint256"
+            }
+        ],
+        "name": "EventBrandRemove",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "eventId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "brandId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "description",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "createdAt",
+                "type": "uint256"
+            }
+        ],
+        "name": "EventRegistered",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_eventId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_brandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_indexInArray",
+                "type": "uint256"
+            }
+        ],
+        "name": "removeJointBrandEvent",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_fromBrandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_toBrandId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_eventId",
+                "type": "uint256"
+            }
+        ],
+        "name": "sendJoinBrandEventInvite",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_eventId",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "brandId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "name",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "description",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventLocation",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventStartDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventEndDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventWebsite",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventRegistrationLink",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "brandIds",
+                                "type": "uint256[]"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "createdAt",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "updatedAt",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventBasicInfo",
+                        "name": "eventBasicInfo",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventImageHash",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "tags",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventOtherInfo",
+                        "name": "eventOtherInfo",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct EventsPlatform.Event",
+                "name": "_event",
+                "type": "tuple"
+            }
+        ],
+        "name": "updateEvent",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "eventCounter",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "events",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "eventId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "brandId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "description",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventLocation",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventStartDate",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventEndDate",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventWebsite",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventRegistrationLink",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256[]",
+                        "name": "brandIds",
+                        "type": "uint256[]"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "createdAt",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "updatedAt",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct EventsPlatform.EventBasicInfo",
+                "name": "eventBasicInfo",
+                "type": "tuple"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "eventId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "eventImageHash",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "tags",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct EventsPlatform.EventOtherInfo",
+                "name": "eventOtherInfo",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_brandIdFilter",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "_nameFilter",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_tagFilter",
+                "type": "string"
+            }
+        ],
+        "name": "getAllEvents",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "brandId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "name",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "description",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventLocation",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventStartDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventEndDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventWebsite",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventRegistrationLink",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "brandIds",
+                                "type": "uint256[]"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "createdAt",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "updatedAt",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventBasicInfo",
+                        "name": "eventBasicInfo",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventImageHash",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "tags",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventOtherInfo",
+                        "name": "eventOtherInfo",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct EventsPlatform.Event[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_eventId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getEvent",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "brandId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "name",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "description",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventLocation",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventStartDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventEndDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventWebsite",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventRegistrationLink",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "brandIds",
+                                "type": "uint256[]"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "createdAt",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "updatedAt",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventBasicInfo",
+                        "name": "eventBasicInfo",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventImageHash",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "tags",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventOtherInfo",
+                        "name": "eventOtherInfo",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct EventsPlatform.Event",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_address",
+                "type": "address"
+            }
+        ],
+        "name": "getInvitesForAddress",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "_eventIds",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "getMultipleEvents",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "brandId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "name",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "description",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventLocation",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventStartDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventEndDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventWebsite",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventRegistrationLink",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "brandIds",
+                                "type": "uint256[]"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "createdAt",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "updatedAt",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventBasicInfo",
+                        "name": "eventBasicInfo",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventImageHash",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "tags",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventOtherInfo",
+                        "name": "eventOtherInfo",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct EventsPlatform.Event[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getMyEvents",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "brandId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "name",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "description",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventLocation",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventStartDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventEndDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventWebsite",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventRegistrationLink",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "brandIds",
+                                "type": "uint256[]"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "createdAt",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "updatedAt",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventBasicInfo",
+                        "name": "eventBasicInfo",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventImageHash",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "tags",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventOtherInfo",
+                        "name": "eventOtherInfo",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct EventsPlatform.Event[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_owner",
+                "type": "address"
+            }
+        ],
+        "name": "getUserEvents",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "brandId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "name",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "description",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventLocation",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventStartDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventEndDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventWebsite",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventRegistrationLink",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "brandIds",
+                                "type": "uint256[]"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "createdAt",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "updatedAt",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventBasicInfo",
+                        "name": "eventBasicInfo",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "eventId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventImageHash",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "tags",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.EventOtherInfo",
+                        "name": "eventOtherInfo",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct EventsPlatform.Event[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]

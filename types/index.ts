@@ -19,9 +19,12 @@ export interface IBrands {
   name: string;
   rawName: string;
   owner: string;
-  feedbackCount: number;
   createdAt: string;
+  updatedAt: string;
+  feedbackCount: number;
   followersCount: number;
+  category: string;
+  imageHash: string;
 }
 
 export interface IEvents {
@@ -40,6 +43,7 @@ export interface IEvents {
 }
 
 export interface IFeedbacks {
+  isLoaded?: any;
   feedbackId: number;
   feedbackText: string;
   timestamp: number;
@@ -47,4 +51,17 @@ export interface IFeedbacks {
   recipientId: number;
   eventId: number; // Optional, 0 if not related to an event
   productId: number; // Optional, 0 if not related to a product
+  starRating: number; // Optional, 0 if not related to a product
+}
+
+export interface IProduct {
+  productId: number;
+  owner: string;
+  name: string;
+  rawName: string;
+  description: string;
+  brandId: number;
+  createdAt: number;
+  updatedAt: number;
+  imageHash: string;
 }

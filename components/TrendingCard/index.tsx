@@ -19,7 +19,11 @@ export function TrendingBrandCard({
 }: ITrendingBrandCard) {
   return (
     <Link href={`/brand/${name}`}>
-      <Card className="min-w-[280px] lg:min-w-[360px] h-[200px]" as={"button"}>
+      <Card
+        className="min-w-[280px] lg:min-w-[360px] h-[200px]"
+        as={"button"}
+        isPressable
+      >
         <CardBody className="flex flex-col justify-center px-8">
           <div className="font-normal text-5xl leading-normal text-ellipsis whitespace-nowrap overflow-hidden">
             {rawName}

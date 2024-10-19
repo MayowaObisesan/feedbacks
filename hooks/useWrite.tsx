@@ -1,4 +1,5 @@
 import { FEEDBACK_ADDRESS, FEEDBACKS_ABI } from "@/constant";
+import { Abi, Address } from "viem";
 import {
   useSimulateContract,
   useWriteContract,
@@ -7,16 +8,24 @@ import {
 
 //[x] - you can change the name of the props here
 export interface addProps {
+  contractAddress: Address;
+  contractAbi: Abi;
   functionName: string;
   args?: Array<any>;
   value?: bigint;
 }
 
 //-[x] - you can change the name of custom hook function name
-const useWrite = ({ functionName, args, value }: addProps) => {
+const useWrite = ({
+  contractAddress,
+  contractAbi,
+  functionName,
+  args,
+  value,
+}: addProps) => {
   const { data } = useSimulateContract({
-    abi: FEEDBACKS_ABI,
-    address: FEEDBACK_ADDRESS,
+    abi: contractAbi,
+    address: contractAddress,
     functionName,
     args,
   });

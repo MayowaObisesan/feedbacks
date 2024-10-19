@@ -15,6 +15,9 @@ import { LucidePlus } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useWriteContract } from "wagmi";
+import Rating from "../RatingStars/Rating";
+import RatingComponent from "../RatingStars/RatingComponent";
+import { RatingTag } from "@/utils";
 
 const feedbackSampleList = [
   "The course content was well-structured, and the instructor clearly had a deep understanding of Rust. I loved how practical examples were integrated throughout, which made the learning process smoother!",
@@ -50,13 +53,14 @@ export function CreateFeedbackModal({
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const { writeContract, isPending, isSuccess, isError } = useWriteContract();
   const [feedbackContent, setFeedbackContent] = useState<string>("");
+  const [rating, setRating] = useState<number>(2);
 
   const onCreateProduct = () => {
     writeContract({
       abi: FEEDBACKS_ABI,
       address: FEEDBACK_ADDRESS,
       functionName: "submitFeedback",
-      args: [brandId, feedbackContent, 0, 0], // 0, 0 because I am just creating this feedback for a brand and not for a product nor event
+      args: [brandId, feedbackContent, 0, 0, rating], // 0, 0 because I am just creating this feedback for a brand and not for a product nor event
     });
   };
 
@@ -83,6 +87,7 @@ export function CreateFeedbackModal({
       </Button>
       <Modal
         isOpen={isOpen}
+        isDismissable={false}
         onOpenChange={onOpenChange}
         placement="auto"
         backdrop="opaque"
@@ -99,10 +104,11 @@ export function CreateFeedbackModal({
               <ModalHeader className="flex flex-col gap-1">
                 Submit Feedback
               </ModalHeader>
-              <ModalBody className="space-y-4">
+              <ModalBody className="space-y-2">
                 <Textarea
                   isRequired
                   label="Your Feedback"
+                  labelPlacement="outside"
                   placeholder={`e.g., ${getRandomFeedback(feedbackSampleList)}`}
                   className=""
                   value={feedbackContent}
@@ -111,6 +117,21 @@ export function CreateFeedbackModal({
                     input: "placeholder:text-default-300",
                   }}
                 />
+                <div className="space-y-2">
+                  <div className="text-small">Set a Rating</div>
+                  {/* <Rating setRating={setRating} /> */}
+                  <RatingComponent
+                    selectedRating={rating}
+                    setSelectedRating={setRating}
+                  />
+                </div>
+                {rating > 0 ? (
+                  <div className="font-bold text-warning">
+                    {RatingTag(rating)}
+                  </div>
+                ) : (
+                  <div>No rating selected</div>
+                )}
               </ModalBody>
               <ModalFooter>
                 <Button

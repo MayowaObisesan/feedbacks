@@ -9,16 +9,18 @@ import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
 import { Skeleton } from "@nextui-org/skeleton";
 import React from "react";
 import { Address } from "viem";
+import { StarItem } from "../RatingStars/RatingComponent";
 
 export default function FeedbackCard(props: IFeedbacks) {
   const [isFollowed, setIsFollowed] = React.useState(false);
-  const { myProfile } = useFeedbacksContext();
+  const { myProfileData } = useFeedbacksContext();
   const userName = props.sender;
   const userAddress = props.sender;
+  const isLoaded = props.isLoaded;
 
   return (
     <Card
-      className="min-w-[340px]"
+      className=""
       classNames={{
         base: "p-4",
       }}
@@ -33,11 +35,12 @@ export default function FeedbackCard(props: IFeedbacks) {
           />
           <div className="flex flex-col gap-1 items-start justify-center">
             <Skeleton
-              isLoaded={!["", null, undefined].includes(userName)}
+              // isLoaded={!["", null, undefined].includes(userName)}
+              isLoaded={isLoaded}
               className="rounded-full"
             >
               <h4 className="text-small font-semibold leading-none text-default-600">
-                {myProfile.name === userName ? "You" : userName}
+                {myProfileData?.name === userName ? "You" : userName}
               </h4>
             </Skeleton>
             <Skeleton
@@ -75,13 +78,25 @@ export default function FeedbackCard(props: IFeedbacks) {
         </span>
       </CardBody>
       <CardFooter className="gap-3">
-        <div className="flex gap-1">
+        {/* <div className="flex gap-1">
           <p className="font-semibold text-default-400 text-small">4</p>
           <p className=" text-default-400 text-small">Following</p>
         </div>
         <div className="flex gap-1">
           <p className="font-semibold text-default-400 text-small">97.1K</p>
           <p className="text-default-400 text-small">Followers</p>
+        </div> */}
+        <div className="flex flex-row items-center">
+          {Array.from({ length: props.starRating }).map((_, index) => (
+            <>
+              <StarItem
+                key={index + 1}
+                rating={index + 1}
+                selectedRating={props.starRating}
+                setSelectedRating={() => null}
+              />
+            </>
+          ))}
         </div>
       </CardFooter>
     </Card>

@@ -1,17 +1,9 @@
 "use client";
 
-import {
-  FEEDBACK_ADDRESS,
-  FEEDBACKS_ABI,
-  PRODUCT_ABI,
-  PRODUCT_ADDRESS,
-} from "@/constant";
+import { BRAND_ABI, BRAND_ADDRESS, BRAND_CATEGORIES } from "@/constant";
 import { useFeedbacksContext } from "@/context";
-import { Avatar } from "@nextui-org/avatar";
 import { Button } from "@nextui-org/button";
 import { Card, CardBody } from "@nextui-org/card";
-import { Image } from "@nextui-org/image";
-import { Input, Textarea } from "@nextui-org/input";
 import {
   Modal,
   ModalBody,
@@ -22,7 +14,6 @@ import {
 } from "@nextui-org/modal";
 import axios from "axios";
 import {
-  LucideCamera,
   LucideCheckCheck,
   LucidePlus,
   LucideUpload,
@@ -31,52 +22,71 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useWriteContract } from "wagmi";
-import { CameraIcon } from "../icons/CameraIcon";
 import { Chip } from "@nextui-org/chip";
+import { Image } from "@nextui-org/image";
+import { Avatar } from "@nextui-org/avatar";
+import { CameraIcon } from "../icons/CameraIcon";
+import { Input } from "@nextui-org/input";
+import { Select, SelectItem } from "@nextui-org/select";
+import { CreateProfileModal } from "../profileModal";
+import { useBrandRead } from "@/hooks/useRead";
+import { IBrands } from "@/types";
+import { parseImageHash } from "@/utils";
 
-export function CreateProductModal({
-  brandId,
-  buttonText = "Create Product",
-}: {
-  brandId: number | null;
-  buttonText?: string;
-}) {
-  const { myProfileData } = useFeedbacksContext();
+const UpdateBrandModal = ({ brandId }: { brandId: number | null }) => {
+  const { data: _brandData, isFetching: isBrandDataFetching } = useBrandRead({
+    functionName: "getBrand",
+    args: [brandId],
+  });
+  const brandData: IBrands = _brandData as IBrands;
+  console.log(brandData);
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const { writeContract, isPending, isSuccess, isError } = useWriteContract();
-  const [productName, setProductName] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  // const [fileImg, setFileImg] = useState(null);
+  const [brandName, setBrandName] = useState<string>(brandData?.name);
+  const { profileExist } = useFeedbacksContext();
+  const [categoryValues, setCategoryValues] = useState<any>(
+    brandData ? brandData?.category.split(",") : new Set([])
+  );
 
-  const [imageHash, setImageHash] = useState<string>("");
+  const [imageHash, setImageHash] = useState<string>(brandData?.imageHash);
   const [imageUploadPending, setImageUploadPending] = useState<boolean>(false);
   const [imageUploadSuccessful, setImageUploadSuccessful] =
     useState<boolean>(false);
 
   // For dp upload state management
-  const [dp, setDp] = useState<string>("");
-  const [dpPreview, setDpPreview] = useState<string>("");
+  const [dp, setDp] = useState<string>(parseImageHash(imageHash));
+  const [dpPreview, setDpPreview] = useState<string>(parseImageHash(imageHash));
   const [isDpUploading, setisDpUploading] = useState<boolean>(false);
   const profileImageRef = useRef(null);
   const imageHashRef = useRef("");
 
-  const onCreateProduct = () => {
+  useEffect(() => {
+    setBrandName(brandData?.rawName);
+    setCategoryValues(brandData?.category.split(","));
+  }, [brandData]);
+
+  const onUpdateBrand = () => {
     writeContract({
-      abi: PRODUCT_ABI,
-      address: PRODUCT_ADDRESS,
-      functionName: "createProduct",
-      args: [productName, description, brandId, imageHash],
+      abi: BRAND_ABI,
+      address: BRAND_ADDRESS,
+      functionName: "updateBrand",
+      args: [
+        brandData?.brandId,
+        brandName,
+        Array.from(categoryValues).join(", "),
+        imageHash,
+      ],
     });
   };
 
   useEffect(() => {
     if (isSuccess) {
       onClose();
-      toast.success("Product created successfully.");
+      toast.success("Brand Updated successfully.");
     }
 
     if (isError) {
-      toast.error("Unable to create Product");
+      toast.error("Unable to Update Brand");
     }
   }, [isSuccess, isError]);
 
@@ -134,6 +144,15 @@ export function CreateProductModal({
     setImageUploadPending(false);
   };
 
+  const handleClose = (categoryToRemove: string) => {
+    setCategoryValues(
+      Array.from(categoryValues).filter((it) => it !== categoryToRemove)
+    );
+    if (categoryValues.length === 1) {
+      setCategoryValues(new Set([]));
+    }
+  };
+
   return (
     <>
       <Button
@@ -142,7 +161,7 @@ export function CreateProductModal({
         variant="shadow"
         startContent={<LucidePlus size={16} strokeWidth={4} />}
       >
-        {buttonText}
+        Update Brand
       </Button>
       <Modal
         isOpen={isOpen}
@@ -150,19 +169,33 @@ export function CreateProductModal({
         placement="auto"
         backdrop="opaque"
         classNames={{
-          base: "px-3 py-4",
+          wrapper: "",
+          base: "relative px-3 py-4",
           backdrop:
             "bg-gradient-to-t from-zinc-900 to-zinc-900/80 backdrop-opacity-90",
         }}
         hideCloseButton={false}
+        isDismissable={false}
       >
-        <ModalContent>
+        <ModalContent className="relative overflow-auto">
           {(onClose) => (
             <>
+              {!profileExist && (
+                <>
+                  <Card className="inline-flex">
+                    <CardBody>
+                      <div className="flex flex-row justify-around items-center gap-x-4 text-center">
+                        <span>Kindly set your name first.</span>
+                        <CreateProfileModal buttonText="Add username" />
+                      </div>
+                    </CardBody>
+                  </Card>
+                </>
+              )}
               <ModalHeader className="flex flex-col gap-1">
-                Create Product
+                Update Brand
               </ModalHeader>
-              <ModalBody className="space-y-4">
+              <ModalBody>
                 <div className="card items-center gap-y-4 shrink-0 my-4 w-full">
                   {imageUploadPending && (
                     <Chip
@@ -196,21 +229,21 @@ export function CreateProductModal({
                         />
                       )}
                       {/* <div
-                    className="w-32 rounded-full ring ring-primary-content ring-offset-base-100 ring-offset-2"
-                    ref={profileImageRef}
-                  >
-                    <Image
-                      width={100}
-                      height={100}
-                      alt=""
-                      src={
-                        userData.profilePicture == ""
-                          ? defaultImage
-                          : userData.profilePicture
-                      }
-                      className="bg-base-300"
-                    />
-                  </div> */}
+                      className="w-32 rounded-full ring ring-primary-content ring-offset-base-100 ring-offset-2"
+                      ref={profileImageRef}
+                    >
+                      <Image
+                        width={100}
+                        height={100}
+                        alt=""
+                        src={
+                          userData.profilePicture == ""
+                            ? defaultImage
+                            : userData.profilePicture
+                        }
+                        className="bg-base-300"
+                      />
+                    </div> */}
                     </div>
                     {dpPreview && (
                       <Button
@@ -277,28 +310,61 @@ export function CreateProductModal({
                 </div>
                 <Input
                   isRequired
+                  isClearable
                   autoFocus
-                  label="Username"
-                  placeholder="e.g., Samsung S25"
+                  label="Name"
+                  placeholder="Update your brand name"
                   variant="flat"
-                  value={productName}
-                  onValueChange={setProductName}
+                  defaultValue={brandData?.rawName}
+                  value={brandName}
+                  onValueChange={setBrandName}
                 />
-                <Textarea
-                  label="Description"
-                  placeholder="The latest flagship of the Samsung Galaxy lineups"
+
+                <Select
+                  label="Category"
+                  placeholder="Select a Brand category"
+                  selectionMode="multiple"
                   className=""
-                  value={description}
-                  onValueChange={setDescription}
-                />
+                  selectedKeys={categoryValues}
+                  onSelectionChange={setCategoryValues}
+                >
+                  {BRAND_CATEGORIES.map((eachBrandCategory, index) => (
+                    <SelectItem key={eachBrandCategory}>
+                      {eachBrandCategory}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <div className="flex gap-2">
+                  {categoryValues &&
+                    Array.from(categoryValues as string).map(
+                      (eachCategoryValue, index) => (
+                        <Chip
+                          key={index}
+                          onClose={() => handleClose(eachCategoryValue)}
+                          variant="flat"
+                        >
+                          {eachCategoryValue}
+                        </Chip>
+                      )
+                    )}
+                </div>
               </ModalBody>
               <ModalFooter>
+                {/* <Button color="danger" variant="flat" onPress={onClose}>
+                    Close
+                  </Button> */}
                 <Button
                   color="primary"
-                  onPress={onCreateProduct}
+                  onPress={onUpdateBrand}
                   isLoading={isPending}
+                  isDisabled={
+                    brandName?.length < 1 ||
+                    (categoryValues &&
+                      Array.from(categoryValues)?.length < 1) ||
+                    (imageUploadPending && !imageUploadSuccessful)
+                  }
                 >
-                  {isPending ? "Creating..." : "Create"}
+                  {isPending ? "Creating..." : "Update"}
                 </Button>
               </ModalFooter>
             </>
@@ -307,4 +373,6 @@ export function CreateProductModal({
       </Modal>
     </>
   );
-}
+};
+
+export default UpdateBrandModal;

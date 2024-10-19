@@ -1,6 +1,11 @@
 "use client";
 
-import { FEEDBACK_ADDRESS, FEEDBACKS_ABI } from "@/constant";
+import {
+  EVENT_ABI,
+  EVENT_ADDRESS,
+  FEEDBACK_ADDRESS,
+  FEEDBACKS_ABI,
+} from "@/constant";
 import { Button } from "@nextui-org/button";
 import { Input, Textarea } from "@nextui-org/input";
 import {
@@ -32,11 +37,12 @@ import { I18nProvider } from "@react-aria/i18n";
 import { DateRangePicker } from "@nextui-org/date-picker";
 import { RangeValue } from "@react-types/shared";
 import { SearchIcon } from "./icons";
-import useRead from "@/hooks/useRead";
+import useRead, { useBrandRead } from "@/hooks/useRead";
 import { zeroAddress } from "viem";
 import { Listbox, ListboxItem } from "@nextui-org/listbox";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import { Chip } from "@nextui-org/chip";
+import { useFeedbacksContext } from "@/context";
 
 export function CreateEventModal({
   brandId,
@@ -45,6 +51,7 @@ export function CreateEventModal({
   brandId: number | null;
   buttonText?: string;
 }) {
+  const { myAddress } = useFeedbacksContext();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const { writeContract, isPending, isSuccess, isError, error } =
     useWriteContract();
@@ -71,26 +78,30 @@ export function CreateEventModal({
 
   const brandArrayValues = Array.from(brandSelected);
 
-  const { data } = useRead({
+  const { data } = useBrandRead({
     functionName: "getAllBrands",
-    args: [brandSearch, zeroAddress],
+    args: [brandSearch, zeroAddress, ""],
   });
 
   const onCreateEvent = () => {
     writeContract({
-      abi: FEEDBACKS_ABI,
-      address: FEEDBACK_ADDRESS,
+      abi: EVENT_ABI,
+      address: EVENT_ADDRESS,
       functionName: "createEvent",
       args: [
-        brandId,
-        name,
-        description,
-        eventLocation,
-        eventDuration.start,
-        eventDuration.end,
-        eventWebsite,
-        eventRegistrationLink,
-        brandArrayValues.map(Number),
+        [
+          myAddress,
+          brandId,
+          name,
+          description,
+          eventLocation,
+          eventDuration.start,
+          eventDuration.end,
+          eventWebsite,
+          eventRegistrationLink,
+          brandArrayValues.map(Number),
+        ],
+        [],
       ],
     });
   };
@@ -200,6 +211,13 @@ export function CreateEventModal({
                   variant="flat"
                   value={eventWebsite}
                   onValueChange={setEventWebsite}
+                  startContent={
+                    <div className="pointer-events-none flex items-center">
+                      <span className="text-default-400 text-small">
+                        https://
+                      </span>
+                    </div>
+                  }
                 />
                 <Input
                   type="text"

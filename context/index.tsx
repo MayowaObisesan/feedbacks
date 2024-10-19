@@ -1,18 +1,22 @@
 "use client";
 
-import useRead from "@/hooks/useRead";
+import useRead, {
+  useBrandRead,
+  useEventRead,
+  useFeedbackRead,
+} from "@/hooks/useRead";
 import { createContext, useCallback, useContext, useEffect } from "react";
 import { useIsFirstRender } from "@uidotdev/usehooks";
 import { useAccount } from "wagmi";
-import { Address } from "viem";
+import { Address, zeroAddress } from "viem";
 import { IBrands, IEvents, IFeedbacks, IProfile } from "@/types";
 
 interface IFeedbacksContext {
   myAddress: Address;
   allBrandsData: IBrands[];
   profileExist: boolean;
-  myProfile: IProfile;
-  isMyProfileFetching: boolean;
+  myProfileData: IProfile;
+  isMyProfileDataFetching: boolean;
   myEventInvites: number[];
   isMyEventInvitesFetching: boolean;
   isMyEventInvitesStale: boolean;
@@ -25,7 +29,28 @@ interface IFeedbacksContext {
   isMultipleInvitesDataSuccessful: boolean;
   myFeedbacksData: IFeedbacks[];
   isMyFeedbacksDataFetching: boolean;
+  isMyFeedbacksDataStale: boolean;
   isMyFeedbacksDataSuccessful: boolean;
+  allFeedbacksData: IFeedbacks[];
+  isAllFeedbacksDataFetching: boolean;
+  isAllFeedbacksDataStale: boolean;
+  isAllFeedbacksDataSuccessful: boolean;
+  myBrandsData: IBrands[];
+  isMyBrandsDataFetching: boolean;
+  isMyBrandsDataStale: boolean;
+  isMyBrandsDataSuccessful: boolean;
+  myFollowedBrandsData: IBrands[];
+  isMyFollowedBrandsDataFetching: boolean;
+  isMyFollowedBrandsDataStale: boolean;
+  isMyFollowedBrandsDataSuccessful: boolean;
+  myFollowedBrandsPaginatedData: IBrands[];
+  isMyFollowedBrandsPaginatedDataFetching: boolean;
+  isMyFollowedBrandsPaginatedDataStale: boolean;
+  isMyFollowedBrandsPaginatedDataSuccessful: boolean;
+  myEventsData: IEvents[];
+  isMyEventsDataFetching: boolean;
+  isMyEventsDataStale: boolean;
+  isMyEventsDataSuccessful: boolean;
 }
 
 interface FeedbacksProviderProps {
@@ -43,10 +68,13 @@ const FeedbacksContext = createContext<IFeedbacksContext | null>({
       feedbackCount: 0,
       createdAt: "",
       followersCount: 0,
+      updatedAt: "",
+      category: "",
+      imageHash: "",
     },
   ],
   profileExist: false,
-  myProfile: {
+  myProfileData: {
     name: "",
     bio: "",
     email: "",
@@ -54,7 +82,7 @@ const FeedbacksContext = createContext<IFeedbacksContext | null>({
     creationTime: "",
     lastUpdated: "",
   },
-  isMyProfileFetching: false,
+  isMyProfileDataFetching: false,
   myEventInvites: [],
   isMyEventInvitesFetching: false,
   isMyEventInvitesStale: false,
@@ -67,16 +95,37 @@ const FeedbacksContext = createContext<IFeedbacksContext | null>({
   isMultipleInvitesDataSuccessful: false,
   myFeedbacksData: [],
   isMyFeedbacksDataFetching: false,
+  isMyFeedbacksDataStale: false,
   isMyFeedbacksDataSuccessful: false,
+  allFeedbacksData: [],
+  isAllFeedbacksDataFetching: false,
+  isAllFeedbacksDataStale: false,
+  isAllFeedbacksDataSuccessful: false,
+  myBrandsData: [],
+  isMyBrandsDataFetching: false,
+  isMyBrandsDataStale: false,
+  isMyBrandsDataSuccessful: false,
+  myFollowedBrandsData: [],
+  isMyFollowedBrandsDataFetching: false,
+  isMyFollowedBrandsDataStale: false,
+  isMyFollowedBrandsDataSuccessful: false,
+  myFollowedBrandsPaginatedData: [],
+  isMyFollowedBrandsPaginatedDataFetching: false,
+  isMyFollowedBrandsPaginatedDataStale: false,
+  isMyFollowedBrandsPaginatedDataSuccessful: false,
+  myEventsData: [],
+  isMyEventsDataFetching: false,
+  isMyEventsDataStale: false,
+  isMyEventsDataSuccessful: false,
 });
 
-function reconstructMyProfile(myProfile: any) {
-  if (myProfile) {
+function reconstructMyProfile(myProfileData: any) {
+  if (myProfileData) {
     return {
-      name: myProfile[0],
-      email: myProfile[1],
-      bio: myProfile[2],
-      profilePictureHash: myProfile[3],
+      name: myProfileData[0],
+      email: myProfileData[1],
+      bio: myProfileData[2],
+      profilePictureHash: myProfileData[3],
     };
   } else {
     return {};
@@ -86,27 +135,28 @@ function reconstructMyProfile(myProfile: any) {
 const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
   const { address: myAddress } = useAccount();
   const isFirstRender = useIsFirstRender();
-  const { data: allBrandsData } = useRead({
+  const { data: allBrandsData } = useBrandRead({
     functionName: "getAllBrands",
-    args: ["", "0x0000000000000000000000000000000000000000"],
+    args: ["", "0x0000000000000000000000000000000000000000", ""],
   });
 
-  const { data: profileExist } = useRead({
+  const { data: profileExist } = useBrandRead({
     functionName: "profileExists",
     args: [myAddress],
   });
 
-  const { data: myProfile, isFetching: isMyProfileFetching } = useRead({
-    functionName: "getProfile",
-    args: [myAddress],
-  });
-  // const myProfile = reconstructMyProfile(_myProfile);
+  const { data: myProfileData, isFetching: isMyProfileDataFetching } =
+    useBrandRead({
+      functionName: "getProfile",
+      args: [myAddress],
+    });
+  // const myProfileData = reconstructMyProfile(_myProfile);
 
   const {
     data: myBrandCount,
     isFetching: isMyBrandCountFetching,
     isSuccess: isMyBrandCountSuccessful,
-  } = useRead({
+  } = useBrandRead({
     functionName: "brandOwners",
     args: [myAddress],
   });
@@ -116,19 +166,62 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
     isFetching: isMyEventInvitesFetching,
     isStale: isMyEventInvitesStale,
     isSuccess: isMyEventInvitesSuccessful,
-  } = useRead({
+  } = useEventRead({
     functionName: "getInvitesForAddress",
     args: [myAddress],
   });
 
   const {
-    data: myBrandFeedbacks,
-    isFetching: isMyBrandFeedbacksFetching,
-    isStale: isMyBrandFeedbacksStale,
-    isSuccess: isMyBrandFeedbacksSuccessful,
-  } = useRead({
-    functionName: "brandFeedbacks",
+    data: myBrandsData,
+    isFetching: isMyBrandsDataFetching,
+    isStale: isMyBrandsDataStale,
+    isSuccess: isMyBrandsDataSuccessful,
+  } = useBrandRead({
+    functionName: "getMyBrands",
+    args: [],
+    account: myAddress,
+  });
+
+  const {
+    data: myFollowedBrandsData,
+    isFetching: isMyFollowedBrandsDataFetching,
+    isStale: isMyFollowedBrandsDataStale,
+    isSuccess: isMyFollowedBrandsDataSuccessful,
+  } = useBrandRead({
+    functionName: "getFollowedBrands",
     args: [myAddress],
+  });
+
+  const {
+    data: myFollowedBrandsPaginatedData,
+    isFetching: isMyFollowedBrandsPaginatedDataFetching,
+    isStale: isMyFollowedBrandsPaginatedDataStale,
+    isSuccess: isMyFollowedBrandsPaginatedDataSuccessful,
+  } = useBrandRead({
+    functionName: "getFollowedBrandsPaginatedForLoop",
+    args: [myAddress, 1, 10],
+  });
+
+  const {
+    data: myFeedbacksData,
+    isFetching: isMyFeedbacksDataFetching,
+    isStale: isMyFeedbacksDataStale,
+    isSuccess: isMyFeedbacksDataSuccessful,
+  } = useFeedbackRead({
+    functionName: "getMyFeedbacks",
+    args: [],
+    account: myAddress,
+  });
+
+  const {
+    data: myEventsData,
+    isFetching: isMyEventsDataFetching,
+    isStale: isMyEventsDataStale,
+    isSuccess: isMyEventsDataSuccessful,
+  } = useEventRead({
+    functionName: "getMyEvents",
+    args: [],
+    account: myAddress,
   });
 
   const {
@@ -141,12 +234,13 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
   });
 
   const {
-    data: myFeedbacksData,
-    isFetching: isMyFeedbacksDataFetching,
-    isSuccess: isMyFeedbacksDataSuccessful,
-  } = useRead({
+    data: allFeedbacksData,
+    isFetching: isAllFeedbacksDataFetching,
+    isStale: isAllFeedbacksDataStale,
+    isSuccess: isAllFeedbacksDataSuccessful,
+  } = useFeedbackRead({
     functionName: "getAllFeedbacks",
-    args: [myAddress, 0, 0, 0],
+    args: [zeroAddress, 0, 0, 0],
   });
 
   const getInvitesForAddress = useCallback(() => {}, []);
@@ -159,8 +253,8 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
         myAddress,
         allBrandsData,
         profileExist,
-        myProfile,
-        isMyProfileFetching,
+        myProfileData,
+        isMyProfileDataFetching,
         myEventInvites,
         isMyEventInvitesFetching,
         isMyEventInvitesStale,
@@ -173,7 +267,28 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
         isMultipleInvitesDataSuccessful,
         myFeedbacksData,
         isMyFeedbacksDataFetching,
+        isMyFeedbacksDataStale,
         isMyFeedbacksDataSuccessful,
+        myBrandsData,
+        isMyBrandsDataFetching,
+        isMyBrandsDataStale,
+        isMyBrandsDataSuccessful,
+        myFollowedBrandsData,
+        isMyFollowedBrandsDataFetching,
+        isMyFollowedBrandsDataStale,
+        isMyFollowedBrandsDataSuccessful,
+        myFollowedBrandsPaginatedData,
+        isMyFollowedBrandsPaginatedDataFetching,
+        isMyFollowedBrandsPaginatedDataStale,
+        isMyFollowedBrandsPaginatedDataSuccessful,
+        myEventsData,
+        isMyEventsDataFetching,
+        isMyEventsDataStale,
+        isMyEventsDataSuccessful,
+        allFeedbacksData,
+        isAllFeedbacksDataFetching,
+        isAllFeedbacksDataStale,
+        isAllFeedbacksDataSuccessful,
       }}
     >
       {children}

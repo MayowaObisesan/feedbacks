@@ -17,5 +17,5 @@ module.exports = {
     },
   },
   darkMode: "class",
-  plugins: [daisyui, nextui()],
+  plugins: [nextui()],
 }
