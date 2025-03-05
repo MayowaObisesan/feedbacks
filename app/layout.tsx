@@ -13,7 +13,8 @@ import { headers } from "next/headers";
 import { config } from "@/config";
 import Web3ModalProvider from "@/context/wagmi";
 import FeedbacksProvider, { useFeedbacksContext } from "@/context";
-import { FEEDBACK_ADDRESS } from "@/constant";
+import { Toaster } from "sonner";
+import NextTopLoader from "nextjs-toploader";
 
 export const metadata: Metadata = {
   title: {
@@ -41,7 +42,11 @@ export default function RootLayout({
   const initialState = cookieToInitialState(config, headers().get("cookie"));
 
   return (
-    <html suppressHydrationWarning lang="en">
+    <html
+      suppressHydrationWarning
+      lang="en"
+      // data-theme={theme === "light" ? "dark" : "light"}
+    >
       <head />
       <body
         className={clsx(
@@ -53,19 +58,11 @@ export default function RootLayout({
           <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
             <FeedbacksProvider>
               <div className="relative flex flex-col h-screen">
-                <Navbar />
-                <main className="mx-auto flex-grow">{children}</main>
-                <footer className="w-full flex items-center justify-center py-3">
-                  <Link
-                    isExternal
-                    className="flex items-center gap-1 text-current"
-                    href="https://nextui-docs-v2.vercel.app?utm_source=next-app-template"
-                    title="nextui.org homepage"
-                  >
-                    <span className="text-default-600">Powered by</span>
-                    <p className="text-primary">NextUI</p>
-                  </Link>
-                </footer>
+                <NextTopLoader />
+                <Toaster position="top-center" richColors />
+                <main className="relative w-full h-full overflow-auto mx-auto flex-grow">
+                  {children}
+                </main>
               </div>
             </FeedbacksProvider>
           </Providers>

@@ -1,26 +1,47 @@
 "use client";
 
 import { formatCount } from "@/utils";
-import { Card, CardBody } from "@nextui-org/card";
+import { Card, CardBody, CardFooter } from "@nextui-org/card";
+import { Skeleton } from "@nextui-org/skeleton";
+import Link from "next/link";
 import React from "react";
+import { Avatar } from "@nextui-org/avatar";
+import { ITrendingBrandCard } from "@/types";
 
-interface ITrendingBrandCard {
-  name: string;
-  feedbackCount: number;
-}
-
-export function TrendingBrandCard({ name, feedbackCount }: ITrendingBrandCard) {
+export function TrendingBrandCard({
+  name,
+  rawName,
+  avatarUrl,
+  description,
+  feedbackCount,
+}: ITrendingBrandCard) {
   return (
-    <Card className="min-w-[280px] lg:min-w-[360px] h-[200px]" as={"button"}>
-      <CardBody className="flex flex-col justify-center px-8">
-        <div className="font-normal text-5xl leading-normal text-ellipsis whitespace-nowrap overflow-hidden">
-          {name}
-        </div>
-      </CardBody>
-      <div className="absolute left-8 bottom-4 font-extrabold text-sm py-4">
-        {formatCount(feedbackCount)} Feedback
-      </div>
-    </Card>
+    <Link href={`/app/brand/${name}`}>
+      <Card
+        className="min-w-[280px] max-w-[280px] lg:min-w-[360px] h-[200px]"
+        as={"button"}
+        isPressable
+      >
+        <CardBody className="relative flex flex-col justify-center px-8">
+          <Avatar
+            isBordered
+            radius="full"
+            size="md"
+            src={avatarUrl}
+            className={"absolute top-4 right-4"}
+          />
+          <div className="font-normal text-5xl leading-normal text-ellipsis whitespace-nowrap overflow-hidden">
+            {rawName}
+          </div>
+          <div className={"text-sm text-content4-foreground/75 text-ellipsis overflow-hidden whitespace-nowrap"}>{description}</div>
+        </CardBody>
+        <CardFooter>
+          <div className="absolute left-8 bottom-4 font-extrabold text-sm py-4">
+            {Number(formatCount(feedbackCount))} {feedbackCount > 0 ? "Feedbacks": "Feedback"}
+          </div>
+        </CardFooter>
+      </Card>
+    </Link>
   );
 }
 
