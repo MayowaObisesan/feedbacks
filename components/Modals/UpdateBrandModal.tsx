@@ -26,47 +26,71 @@ import { Chip } from "@nextui-org/chip";
 import { Image } from "@nextui-org/image";
 import { Avatar } from "@nextui-org/avatar";
 import { CameraIcon } from "../icons/CameraIcon";
-import { Input } from "@nextui-org/input";
+import { Input, Textarea } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
 import { CreateProfileModal } from "../profileModal";
 import { useBrandRead } from "@/hooks/useRead";
 import { IBrands } from "@/types";
-import { parseImageHash } from "@/utils";
+import { cleanBrandRawName, parseImageHash } from "@/utils";
+import { BrandService } from "@/services/brands";
+import { supabase } from "@/utils/supabase/supabase";
+import { DBTables } from "@/types/enums";
 
-const UpdateBrandModal = ({ brandId }: { brandId: number | null }) => {
-  const { data: _brandData, isFetching: isBrandDataFetching } = useBrandRead({
+const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | null; fullWidth?: boolean }) => {
+  const [brandData, setBrandData] = useState<IBrands | null>(null);
+
+  useEffect(() => {
+    const _getBrand = async () => {
+      const {data, error} = await BrandService.getBrandById(brandId!);
+
+      if (data && data.length > 0) {
+        setBrandData(data[0]);
+      }
+
+      if (error) {
+        console.error("Error fetching brand data", error);
+      }
+    }
+
+    if (brandId !== null) _getBrand();
+  }, [brandId]);
+
+  /*const { data: _brandData, isFetching: isBrandDataFetching } = useBrandRead({
     functionName: "getBrand",
     args: [brandId],
   });
-  const brandData: IBrands = _brandData as IBrands;
-  console.log(brandData);
+  const brandData: IBrands = _brandData as IBrands;*/
+
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const { writeContract, isPending, isSuccess, isError } = useWriteContract();
-  const [brandName, setBrandName] = useState<string>(brandData?.name);
+  const [brandName, setBrandName] = useState<string>(brandData?.name!);
+  const [brandDescription, setBrandDescription] = useState<string>(brandData?.description!);
   const { profileExist } = useFeedbacksContext();
   const [categoryValues, setCategoryValues] = useState<any>(
     brandData ? brandData?.category.split(",") : new Set([])
   );
 
-  const [imageHash, setImageHash] = useState<string>(brandData?.imageHash);
+  const [imageHash, setImageHash] = useState<string>(brandData?.brandImage!);
   const [imageUploadPending, setImageUploadPending] = useState<boolean>(false);
   const [imageUploadSuccessful, setImageUploadSuccessful] =
     useState<boolean>(false);
 
   // For dp upload state management
-  const [dp, setDp] = useState<string>(parseImageHash(imageHash));
-  const [dpPreview, setDpPreview] = useState<string>(parseImageHash(imageHash));
+  const [dp, setDp] = useState<string>(brandData?.brandImage!);
+  const [dpPreview, setDpPreview] = useState<string>(brandData?.brandImage!);
   const [isDpUploading, setisDpUploading] = useState<boolean>(false);
   const profileImageRef = useRef(null);
   const imageHashRef = useRef("");
 
   useEffect(() => {
-    setBrandName(brandData?.rawName);
+    setBrandName(brandData?.rawName!);
     setCategoryValues(brandData?.category.split(","));
+    setDp(brandData?.brandImage!);
+    setDpPreview(brandData?.brandImage!);
   }, [brandData]);
 
-  const onUpdateBrand = () => {
-    writeContract({
+  const onUpdateBrand = async () => {
+    /*writeContract({
       abi: BRAND_ABI,
       address: BRAND_ADDRESS,
       functionName: "updateBrand",
@@ -76,7 +100,57 @@ const UpdateBrandModal = ({ brandId }: { brandId: number | null }) => {
         Array.from(categoryValues).join(", "),
         imageHash,
       ],
-    });
+    });*/
+
+    const { data, error } = await supabase
+      .from(DBTables.Brand)
+      .update([{
+        name: cleanBrandRawName(brandName),
+        rawName: brandName,
+        // description: brandDescription,
+        category: Array.from(categoryValues).join(", "),
+        brandImage: imageHash,
+      }])
+      // .select();
+
+    if (data) {
+      onClose();
+      toast.success("Brand created successfully.");
+    }
+
+    if (error) {
+      console.error("error creating brand", error);
+      toast.error("Error creating brand. Kindly try again.");
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!dp) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("file", dp);
+      formData.append("upload_preset", "feedbacks_preset");
+
+      const res = await fetch(process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_URL!, {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+      console.log("image uploaded data", data);
+      setImageHash(data.secure_url);
+      setImageUploadSuccessful(true);
+      toast.success("Dp uploaded successfully");
+    } catch (error) {
+      console.log("Error uploading file: ");
+      console.log(error);
+      toast.error("Error uploading display picture");
+      setImageUploadSuccessful(false);
+    } finally {
+      setisDpUploading(false);
+      setImageUploadPending(false);
+    }
   };
 
   useEffect(() => {
@@ -160,6 +234,7 @@ const UpdateBrandModal = ({ brandId }: { brandId: number | null }) => {
         color="success"
         variant="shadow"
         startContent={<LucidePlus size={16} strokeWidth={4} />}
+        fullWidth={fullWidth}
       >
         Update Brand
       </Button>
@@ -180,7 +255,7 @@ const UpdateBrandModal = ({ brandId }: { brandId: number | null }) => {
         <ModalContent className="relative overflow-auto">
           {(onClose) => (
             <>
-              {!profileExist && (
+              {/*{!profileExist && (
                 <>
                   <Card className="inline-flex">
                     <CardBody>
@@ -191,12 +266,12 @@ const UpdateBrandModal = ({ brandId }: { brandId: number | null }) => {
                     </CardBody>
                   </Card>
                 </>
-              )}
+              )}*/}
               <ModalHeader className="flex flex-col gap-1">
                 Update Brand
               </ModalHeader>
               <ModalBody>
-                <div className="card items-center gap-y-4 shrink-0 my-4 w-full">
+                <div className="flex flex-col items-center gap-y-4 shrink-0 my-4 w-full">
                   {imageUploadPending && (
                     <Chip
                       color="warning"
@@ -281,7 +356,7 @@ const UpdateBrandModal = ({ brandId }: { brandId: number | null }) => {
                       {!imageUploadSuccessful ? (
                         <Button
                           color="success"
-                          onClick={sendFileToIPFS}
+                          onClick={handleImageUpload}
                           isLoading={isDpUploading}
                           className="mt-8 font-bold"
                           startContent={
@@ -319,7 +394,16 @@ const UpdateBrandModal = ({ brandId }: { brandId: number | null }) => {
                   value={brandName}
                   onValueChange={setBrandName}
                 />
-
+                <Textarea
+                  label="Description"
+                  placeholder={`Describe your brand`}
+                  className=""
+                  value={brandData?.description}
+                  onValueChange={setBrandDescription}
+                  classNames={{
+                    input: "placeholder:text-default-300"
+                  }}
+                />
                 <Select
                   label="Category"
                   placeholder="Select a Brand category"

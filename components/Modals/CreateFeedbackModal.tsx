@@ -18,6 +18,9 @@ import { useWriteContract } from "wagmi";
 import Rating from "../RatingStars/Rating";
 import RatingComponent from "../RatingStars/RatingComponent";
 import { RatingTag } from "@/utils";
+import { supabase } from "@/utils/supabase/supabase";
+import { DBTables } from "@/types/enums";
+import { useFeedbacksContext } from "@/context";
 
 const feedbackSampleList = [
   "The course content was well-structured, and the instructor clearly had a deep understanding of Rust. I loved how practical examples were integrated throughout, which made the learning process smoother!",
@@ -46,22 +49,70 @@ function getRandomFeedback(feedbackList: string[]) {
 export function CreateFeedbackModal({
   brandId,
   buttonText = "Create Feedback",
+  fullWidth = false
 }: {
   brandId: number | null;
   buttonText?: string;
+  fullWidth?: boolean;
 }) {
+  const {user} = useFeedbacksContext();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const { writeContract, isPending, isSuccess, isError } = useWriteContract();
   const [feedbackContent, setFeedbackContent] = useState<string>("");
-  const [rating, setRating] = useState<number>(2);
+  const [rating, setRating] = useState<number | null>(2);
 
-  const onCreateProduct = () => {
-    writeContract({
+  const onCreateFeedback = async () => {
+    /*writeContract({
       abi: FEEDBACKS_ABI,
       address: FEEDBACK_ADDRESS,
       functionName: "submitFeedback",
       args: [brandId, feedbackContent, 0, 0, rating], // 0, 0 because I am just creating this feedback for a brand and not for a product nor event
-    });
+    });*/
+
+    const { data, error } = await supabase
+      .from(DBTables.Feedback)
+      .insert([{
+        recipientId: brandId,
+        title: "",
+        email: user?.email,
+        description: feedbackContent,
+        eventId: null,
+        productId: null,
+        starRating: rating
+      }])
+      .select();
+
+    // const {data: brand, error: brandError} = await supabase
+    //   .from(DBTables.Brand)
+    //   .select("*")
+    //   .eq('id', brandId);
+
+    const {data: feedbacks, count, error: feedbackError} = await supabase
+      .from(DBTables.Feedback)
+      .select('*', {count: 'exact', head: true})
+      .eq('recipientId', brandId)
+
+    console.log("Feedbacks data", feedbacks, count)
+
+    // Update the brands parameters also.
+    if (count! > 0) {
+      await supabase
+        .from(DBTables.Brand)
+        .update({
+          feedbackCount: count
+        })
+        .eq('id', brandId)
+    }
+
+    if (data) {
+      onClose();
+      toast.success("Feedback created successfully.");
+    }
+
+    if (error) {
+      console.error("error creating feedback", error);
+      toast.error("Error creating your feedback. Kindly try again.");
+    }
   };
 
   useEffect(() => {
@@ -82,6 +133,7 @@ export function CreateFeedbackModal({
         color="success"
         variant="shadow"
         startContent={<LucidePlus size={16} strokeWidth={4} />}
+        fullWidth={fullWidth}
       >
         {buttonText}
       </Button>
@@ -101,7 +153,7 @@ export function CreateFeedbackModal({
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
+              <ModalHeader className="flex flex-col gap-1 font-bold">
                 Submit Feedback
               </ModalHeader>
               <ModalBody className="space-y-2">
@@ -121,13 +173,13 @@ export function CreateFeedbackModal({
                   <div className="text-small">Set a Rating</div>
                   {/* <Rating setRating={setRating} /> */}
                   <RatingComponent
-                    selectedRating={rating}
+                    selectedRating={rating!}
                     setSelectedRating={setRating}
                   />
                 </div>
-                {rating > 0 ? (
+                {rating! > 0 ? (
                   <div className="font-bold text-warning">
-                    {RatingTag(rating)}
+                    {RatingTag(rating!)}
                   </div>
                 ) : (
                   <div>No rating selected</div>
@@ -136,7 +188,7 @@ export function CreateFeedbackModal({
               <ModalFooter>
                 <Button
                   color="primary"
-                  onPress={onCreateProduct}
+                  onPress={onCreateFeedback}
                   isLoading={isPending}
                   isDisabled={feedbackContent === ""}
                 >

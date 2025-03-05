@@ -51,6 +51,7 @@ export const useEventRead = ({ functionName, args, account }: readProps) => {
     address: EVENT_ADDRESS,
     functionName,
     args,
+    account: account
   });
 
   return data || [];
@@ -62,6 +63,7 @@ export const useFeedbackRead = ({ functionName, args, account }: readProps) => {
     address: FEEDBACK_ADDRESS,
     functionName,
     args,
+    account: account,
   });
 
   return data || [];
@@ -73,6 +75,7 @@ export const useProductRead = ({ functionName, args, account }: readProps) => {
     address: PRODUCT_ADDRESS,
     functionName,
     args,
+    account: account
   });
 
   return data || [];

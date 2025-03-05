@@ -90,18 +90,20 @@ export function CreateEventModal({
       functionName: "createEvent",
       args: [
         [
-          myAddress,
-          brandId,
-          name,
-          description,
-          eventLocation,
-          eventDuration.start,
-          eventDuration.end,
-          eventWebsite,
-          eventRegistrationLink,
-          brandArrayValues.map(Number),
+          [
+            myAddress,
+            brandId,
+            name,
+            description,
+            eventLocation,
+            eventDuration.start,
+            eventDuration.end,
+            eventWebsite,
+            eventRegistrationLink,
+            brandArrayValues.map(Number),
+          ],
+          ["", ""],
         ],
-        [],
       ],
     });
   };
@@ -128,7 +130,12 @@ export function CreateEventModal({
       return null;
     }
 
-    console.log(brandArrayValues, brandIds, brandArrayValues.map(Number));
+    console.log(
+      brandId,
+      brandArrayValues,
+      brandIds,
+      brandArrayValues.map(Number)
+    );
 
     return (
       <ScrollShadow
@@ -159,6 +166,7 @@ export function CreateEventModal({
         {buttonText}
       </Button>
       <Modal
+        isDismissable={false}
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         placement="auto"
@@ -177,133 +185,146 @@ export function CreateEventModal({
                 Add an Event
               </ModalHeader>
               <ModalBody className="space-y-4">
-                <Input
-                  isRequired
-                  autoFocus
-                  label="Name"
-                  placeholder="The event name"
-                  variant="flat"
-                  value={name}
-                  onValueChange={setName}
-                />
-                <Textarea
-                  label="Event description"
-                  placeholder="Desribe the Event"
-                  className=""
-                  value={description}
-                  onValueChange={setDescription}
-                />
-                <Textarea
-                  label="Location..."
-                  placeholder="Location of this event"
-                  className=""
-                  value={eventLocation}
-                  onValueChange={setEventLocation}
-                  description={
-                    "The Location for this event. Google embed is allowed"
-                  }
-                />
-                <Input
-                  type="url"
-                  isRequired
-                  label="Website"
-                  placeholder="Website for the event or your website."
-                  variant="flat"
-                  value={eventWebsite}
-                  onValueChange={setEventWebsite}
-                  startContent={
-                    <div className="pointer-events-none flex items-center">
-                      <span className="text-default-400 text-small">
-                        https://
-                      </span>
-                    </div>
-                  }
-                />
-                <Input
-                  type="text"
-                  isRequired
-                  label="Registration Link"
-                  placeholder="The registration link for the event"
-                  description="Enter the registration link for this event"
-                  variant="flat"
-                  value={eventRegistrationLink}
-                  onValueChange={setEventRegistrationLink}
-                />
-                <I18nProvider locale="en-us">
-                  <DateRangePicker
-                    label="Event duration"
-                    value={eventDuration}
-                    onChange={setEventDuration}
+                {/* TODO:
+                1. Use a Left panel for the event creation menus
+                2. Add the Event Image - It's own panel
+                3. Name, Description and Category - It's own panel
+                4. Location - It's own panel
+                5. Website and Registration Link - It's own panel
+                6. Event Duration (Big Calendar selection) - It's own Panel
+                7. Event Brands - It's own panel
+                 */}
+                <div>
+                  <Input
+                    isRequired
+                    autoFocus
+                    label="Name"
+                    placeholder="The event name"
+                    variant="flat"
+                    value={name}
+                    onValueChange={setName}
                   />
-                </I18nProvider>
-                <Input
-                  label="Event Brands"
-                  isClearable
-                  radius="lg"
-                  classNames={{
-                    label: "text-black/50 dark:text-white/90",
-                    input: [
-                      "bg-transparent",
-                      "text-black/90 dark:text-white/90",
-                      "placeholder:text-default-700/50 dark:placeholder:text-white/60",
-                    ],
-                    innerWrapper: "bg-transparent",
-                    inputWrapper: [
-                      "shadow-xl",
-                      "bg-default-200/50",
-                      "dark:bg-default/60",
-                      "backdrop-blur-xl",
-                      "backdrop-saturate-200",
-                      "hover:bg-default-200/70",
-                      "dark:hover:bg-default/70",
-                      "group-data-[focus=true]:bg-default-200/50",
-                      "dark:group-data-[focus=true]:bg-default/60",
-                      "!cursor-text",
-                    ],
-                  }}
-                  placeholder="Search brands"
-                  startContent={
-                    <SearchIcon className="text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0" />
-                  }
-                  onValueChange={setBrandSearch}
-                  onChange={(e) => {
-                    console.log("setbrandIds log target", e.target.value);
-                    setBrandIds((prev) => [prev.push(Number(e.target.value))]);
-                  }}
-                  onKeyUp={searchBrands}
-                />
-                <Listbox
-                  topContent={topContent}
-                  classNames={{
-                    base: "w-full",
-                    list: "max-h-[300px] overflow-scroll",
-                  }}
-                  //   defaultSelectedKeys={["1"]}
-                  items={brandSearchResults ?? []}
-                  label="Assigned to"
-                  selectionMode="multiple"
-                  onSelectionChange={setBrandSelected}
-                  variant="flat"
-                >
-                  {(item) => (
-                    <ListboxItem key={item?.brandId} textValue={item?.name}>
-                      <div className="flex gap-2 items-center">
-                        {/* <Avatar
+                  <Textarea
+                    label="Event description"
+                    placeholder="Desribe the Event"
+                    className=""
+                    value={description}
+                    onValueChange={setDescription}
+                  />
+                  <Textarea
+                    label="Location..."
+                    placeholder="Location of this event"
+                    className=""
+                    value={eventLocation}
+                    onValueChange={setEventLocation}
+                    description={
+                      "The Location for this event. Google embed is allowed"
+                    }
+                  />
+                  <Input
+                    type="url"
+                    isRequired
+                    label="Website"
+                    placeholder="Website for the event or your website."
+                    variant="flat"
+                    value={eventWebsite}
+                    onValueChange={setEventWebsite}
+                    startContent={
+                      <div className="pointer-events-none flex items-center">
+                        <span className="text-default-400 text-small">
+                          https://
+                        </span>
+                      </div>
+                    }
+                  />
+                  <Input
+                    type="text"
+                    isRequired
+                    label="Registration Link"
+                    placeholder="The registration link for the event"
+                    description="Enter the registration link for this event"
+                    variant="flat"
+                    value={eventRegistrationLink}
+                    onValueChange={setEventRegistrationLink}
+                  />
+                  <I18nProvider locale="en-us">
+                    <DateRangePicker
+                      label="Event duration"
+                      value={eventDuration}
+                      onChange={setEventDuration}
+                    />
+                  </I18nProvider>
+                  <Input
+                    label="Event Brands"
+                    isClearable
+                    radius="lg"
+                    classNames={{
+                      label: "text-black/50 dark:text-white/90",
+                      input: [
+                        "bg-transparent",
+                        "text-black/90 dark:text-white/90",
+                        "placeholder:text-default-700/50 dark:placeholder:text-white/60",
+                      ],
+                      innerWrapper: "bg-transparent",
+                      inputWrapper: [
+                        "shadow-xl",
+                        "bg-default-200/50",
+                        "dark:bg-default/60",
+                        "backdrop-blur-xl",
+                        "backdrop-saturate-200",
+                        "hover:bg-default-200/70",
+                        "dark:hover:bg-default/70",
+                        "group-data-[focus=true]:bg-default-200/50",
+                        "dark:group-data-[focus=true]:bg-default/60",
+                        "!cursor-text",
+                      ],
+                    }}
+                    placeholder="Search brands"
+                    startContent={
+                      <SearchIcon className="text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0" />
+                    }
+                    onValueChange={setBrandSearch}
+                    onChange={(e) => {
+                      console.log("setbrandIds log target", e.target.value);
+                      setBrandIds((prev) => [
+                        prev.push(Number(e.target.value)),
+                      ]);
+                    }}
+                    onKeyUp={searchBrands}
+                  />
+                  <Listbox
+                    topContent={topContent}
+                    classNames={{
+                      base: "w-full",
+                      list: "max-h-[300px] overflow-scroll",
+                    }}
+                    //   defaultSelectedKeys={["1"]}
+                    items={brandSearchResults ?? []}
+                    label="Assigned to"
+                    selectionMode="multiple"
+                    onSelectionChange={setBrandSelected}
+                    variant="flat"
+                  >
+                    {(item) => (
+                      <ListboxItem key={item?.brandId} textValue={item?.name}>
+                        <div className="flex gap-2 items-center">
+                          {/* <Avatar
                           alt={item.name}
                           className="flex-shrink-0"
                           size="sm"
                           src={item.avatar}
                         /> */}
-                        <div className="flex flex-col">
-                          <span className="text-small">{item?.name}</span>
-                          {/* <span className="text-tiny text-default-400">
+                          <div className="flex flex-col">
+                            <span className="text-small">{item?.name}</span>
+                            {/* <span className="text-tiny text-default-400">
                             {item.email}
                           </span> */}
+                          </div>
                         </div>
-                      </div>
-                    </ListboxItem>
-                  )}
-                </Listbox>
+                      </ListboxItem>
+                    )}
+                  </Listbox>
+                </div>
                 {/* <Dropdown>
                   <DropdownTrigger>
                     <Button variant="bordered">Open Menu</Button>

@@ -1,3 +1,36 @@
+import { useBrandRead } from "@/hooks/useRead";
+import { IProfile } from "@/types";
+import axios from "axios";
+import { toast } from "sonner";
+import { Address } from "viem";
+import { decryptClient } from "@/utils/clientCrypt";
+
+interface I_SendToIPFSProps {
+    dp: string | Blob;
+    setisDpUploading: (arg0: boolean) => void | React.Dispatch<React.SetStateAction<boolean>>;
+    imageHashRef: { current: any; };
+    setImageHash: (arg0: string) => void | React.Dispatch<React.SetStateAction<string>>;
+    setImageUploadPending: (arg0: boolean) => void | React.Dispatch<React.SetStateAction<boolean>>;
+    setImageUploadSuccessful: (arg0: boolean) => void | React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export function cleanBrandRawName(brandName: string) {
+    return brandName.trim().toLowerCase().split(" ").join("_");
+}
+
+export function capitalize(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// FETCH USER PROFILE HELPER FUNCTION
+export const FetchUserProfile = (address: Address) => {
+    const { data } = useBrandRead({
+        functionName: "getProfile",
+        args: [address],
+    });
+    return data as IProfile;
+};
+
 export function RatingTag(rating: number) {
     switch (rating) {
         case 1:
@@ -28,7 +61,7 @@ export function formatCount(num: number, precision: number = 1) {
     if (found) {
         return (num / found.threshold).toFixed(precision) + found.suffix;
     }
-    return num.toString();
+    return num;
 }
 
 // Example usage:
@@ -80,4 +113,44 @@ export const formatDate = (time: number) => {
     const formattedDate = `${monthName} ${day}, ${year}`;
 
     return formattedDate;
+};
+
+const sendFileToIPFS = async (dp: string, setisDpUploading: React.Dispatch<React.SetStateAction<boolean>>, imageHashRef: { current: any; }, setImageHash: React.Dispatch<React.SetStateAction<string>>, setImageUploadPending: React.Dispatch<React.SetStateAction<boolean>>, setImageUploadSuccessful: React.Dispatch<React.SetStateAction<boolean>>) => {
+    // console.log(dp, process.env.NEXT_PUBLIC_PINATA_JWT);
+    if (dp) {
+        try {
+            const formData = new FormData();
+            formData.append("file", dp);
+
+            setisDpUploading(true);
+            const resFile = await axios({
+                method: "post",
+                url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
+                data: formData,
+                headers: {
+                    // pinata_api_key: `${process.env.REACT_APP_PINATA_API_KEY}`,
+                    // pinata_secret_api_key: `${process.env.REACT_APP_PINATA_API_SECRET}`,
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`,
+                },
+            });
+
+            const ImgHash = `https://moccasin-many-grasshopper-363.mypinata.cloud/ipfs/${resFile.data.IpfsHash}`;
+            console.log(ImgHash);
+            imageHashRef.current = resFile?.data?.IpfsHash;
+            setImageHash(resFile?.data?.IpfsHash);
+            setImageUploadSuccessful(true);
+
+            //Take a look at your Pinata Pinned section, you will see a new file added to you list.
+            toast.success("Dp uploaded successfully");
+        } catch (error) {
+            console.log("Error sending File to IPFS: ");
+            console.log(error);
+            toast.error("Error uploading display picture");
+            setImageUploadSuccessful(false);
+        } finally {
+            setisDpUploading(false);
+            setImageUploadPending(false);
+        }
+    }
 };

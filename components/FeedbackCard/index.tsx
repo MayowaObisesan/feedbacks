@@ -1,59 +1,88 @@
 "use client";
 
 import { useFeedbacksContext } from "@/context";
-import { IFeedbacks } from "@/types";
-import { shortenAddress } from "@/utils";
+import { IBrands, IFeedbacks, IUser } from "@/types";
 import { Avatar } from "@nextui-org/avatar";
-import { Button } from "@nextui-org/button";
 import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
 import { Skeleton } from "@nextui-org/skeleton";
-import React from "react";
-import { Address } from "viem";
+import React, { useEffect } from "react";
 import { StarItem } from "../RatingStars/RatingComponent";
+import { DBTables } from "@/types/enums";
+import { BrandService } from "@/services/brands";
+import { supabase } from "@/utils/supabase/supabase";
+import { useIsMounted } from "usehooks-ts";
 
 export default function FeedbackCard(props: IFeedbacks) {
+  const [brandData, setBrandData] = React.useState<IBrands>();
+  const isMounted = useIsMounted()
+  const [userData, setUserData] = React.useState<IUser>();
   const [isFollowed, setIsFollowed] = React.useState(false);
-  const { myProfileData } = useFeedbacksContext();
-  const userName = props.sender;
+  const { myProfileData, user, userDB } = useFeedbacksContext();
+  // const user: IProfile = FetchUserProfile(props.sender);
   const userAddress = props.sender;
   const isLoaded = props.isLoaded;
 
+  useEffect(() => {
+    async function getBrand(){
+      const {data} = await BrandService.getBrandById(props.id)
+      if (data && data.length > 0) {
+        setBrandData(data[0])
+      }
+    }
+    getBrand()
+
+    async function getUser() {
+      const { data, error } = await supabase
+        .from(DBTables.User)
+        .select("*")
+        .eq('email', props.email);
+
+      if (error) {
+        console.error("Error fetching user", error)
+      }
+      if (data && data.length > 0) {
+        setUserData(data[0])
+      }
+    }
+    getUser()
+  }, [isMounted]);
+
   return (
     <Card
-      className=""
+      className="min-w-[280px] lg:min-w-[360px] h-[200px]"
       classNames={{
         base: "p-4",
       }}
     >
-      <CardHeader className="justify-between">
+      <CardHeader as={"a"} href={props?.email === user?.email ? "me" : `user/${userData?.userData?.user_metadata.user_name}`} className="justify-between">
         <div className="flex gap-5">
           <Avatar
             isBordered
             radius="full"
             size="md"
-            src="https://nextui.org/avatars/avatar-1.png"
+            src={props?.email === user?.email ? (userDB?.dp || user?.user_metadata.avatar_url) : (userData?.dp || userData?.userData?.user_metadata.avatar_url)}
           />
           <div className="flex flex-col gap-1 items-start justify-center">
             <Skeleton
-              // isLoaded={!["", null, undefined].includes(userName)}
-              isLoaded={isLoaded}
+              // isLoaded={!["", null, undefined].includes(user)}
+              isLoaded={!!userData}
               className="rounded-full"
             >
               <h4 className="text-small font-semibold leading-none text-default-600">
-                {myProfileData?.name === userName ? "You" : userName}
+                {props?.email === user?.email ? "You" : userData?.userData?.user_metadata.full_name}
               </h4>
             </Skeleton>
             <Skeleton
-              isLoaded={![`0x{""}`, null, undefined].includes(userAddress)}
+              isLoaded={!!props.email}
               className="rounded-full"
             >
               <h5 className="text-small tracking-tight text-default-400">
-                @{shortenAddress(userAddress)}
+                {props.email}
               </h5>
             </Skeleton>
           </div>
         </div>
-        <Button
+        {/*<Button
           className={
             isFollowed
               ? "bg-transparent text-foreground border-default-200"
@@ -66,16 +95,16 @@ export default function FeedbackCard(props: IFeedbacks) {
           onPress={() => setIsFollowed(!isFollowed)}
         >
           {isFollowed ? "Unfollow" : "Follow"}
-        </Button>
+        </Button>*/}
       </CardHeader>
       <CardBody className="px-3 py-0 text-small text-default-400">
-        <span>{props.feedbackText}</span>
-        <span className="pt-2">
+        <span>{props.description}</span>
+        {/*<span className="pt-2">
           #FrontendWithZoey
           <span className="py-2" aria-label="computer" role="img">
             💻
           </span>
-        </span>
+        </span>*/}
       </CardBody>
       <CardFooter className="gap-3">
         {/* <div className="flex gap-1">
@@ -87,7 +116,8 @@ export default function FeedbackCard(props: IFeedbacks) {
           <p className="text-default-400 text-small">Followers</p>
         </div> */}
         <div className="flex flex-row items-center">
-          {Array.from({ length: props.starRating }).map((_, index) => (
+          {/* TODO: Change length from 3 to a constant called FEEDBACK_STARS */}
+          {Array.from({ length: 3 }).map((_, index) => (
             <>
               <StarItem
                 key={index + 1}

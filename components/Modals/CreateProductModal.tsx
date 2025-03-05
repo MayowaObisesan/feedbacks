@@ -146,6 +146,7 @@ export function CreateProductModal({
       </Button>
       <Modal
         isOpen={isOpen}
+        isDismissable={false}
         onOpenChange={onOpenChange}
         placement="auto"
         backdrop="opaque"
@@ -163,7 +164,7 @@ export function CreateProductModal({
                 Create Product
               </ModalHeader>
               <ModalBody className="space-y-4">
-                <div className="card items-center gap-y-4 shrink-0 my-4 w-full">
+                <div className="flex flex-col items-center gap-y-4 shrink-0 my-4 w-full">
                   {imageUploadPending && (
                     <Chip
                       color="warning"

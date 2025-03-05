@@ -38,7 +38,13 @@ const useWrite = ({
   } = useWriteContract();
 
   console.log("write data", writeData, data);
-  writeContract(data!.request);
+  // writeContract(data!.request);
+  writeContract({
+    abi: contractAbi,
+    address: contractAddress,
+    functionName: "createProduct",
+    args: args,
+  });
 
   //[x] - example how to use is on Button in React
   // <button disabled={isPending} type="submit">

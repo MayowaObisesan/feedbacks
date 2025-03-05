@@ -5,15 +5,20 @@ import useRead, {
   useEventRead,
   useFeedbackRead,
 } from "@/hooks/useRead";
-import { createContext, useCallback, useContext, useEffect } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useIsFirstRender } from "@uidotdev/usehooks";
 import { useAccount } from "wagmi";
 import { Address, zeroAddress } from "viem";
-import { IBrands, IEvents, IFeedbacks, IProfile } from "@/types";
+import { IBrands, IEvents, IFeedbacks, IProfile, IUser } from "@/types";
+import { undefined } from "zod";
+import { supabase } from "@/utils/supabase/supabase";
+import { type User as I_User } from "@supabase/supabase-js";
+import { DBTables } from "@/types/enums";
 
 interface IFeedbacksContext {
   myAddress: Address;
-  allBrandsData: IBrands[];
+  allBrandsData: IBrands[] | undefined;
+  trendingBrandsData: IBrands[] | undefined;
   profileExist: boolean;
   myProfileData: IProfile;
   isMyProfileDataFetching: boolean;
@@ -51,28 +56,47 @@ interface IFeedbacksContext {
   isMyEventsDataFetching: boolean;
   isMyEventsDataStale: boolean;
   isMyEventsDataSuccessful: boolean;
+  userSessionData: any;
+  updateSessionData: any;
+  user: I_User | undefined;
+  SetUser: any;
+  userDB: IUser | undefined;
+  mySentFeedbacksData: IFeedbacks[] | undefined;
 }
 
 interface FeedbacksProviderProps {
   children: React.ReactNode | React.ReactNode[] | null;
 }
 
-const FeedbacksContext = createContext<IFeedbacksContext | null>({
+const FeedbacksContext = createContext<IFeedbacksContext>({
+  user: undefined as unknown as I_User,
+  SetUser: undefined,
+  userDB: undefined as unknown as IUser,
+  userSessionData: undefined,
+  updateSessionData: undefined,
+  mySentFeedbacksData: undefined as unknown as IFeedbacks[],
   myAddress: "0x",
   allBrandsData: [
     {
-      brandId: 0,
+      id: 0,
       name: "",
       rawName: "",
-      owner: "",
+      ownerEmail: "",
       feedbackCount: 0,
       createdAt: "",
       followersCount: 0,
+      brandImage: "",
+      api: "",
+      description: "",
+      userApiKey: "",
       updatedAt: "",
       category: "",
       imageHash: "",
+      brandId: 0,
+      followers: [""]
     },
   ],
+  trendingBrandsData: undefined as unknown as IBrands[],
   profileExist: false,
   myProfileData: {
     name: "",
@@ -116,7 +140,7 @@ const FeedbacksContext = createContext<IFeedbacksContext | null>({
   myEventsData: [],
   isMyEventsDataFetching: false,
   isMyEventsDataStale: false,
-  isMyEventsDataSuccessful: false,
+  isMyEventsDataSuccessful: false
 });
 
 function reconstructMyProfile(myProfileData: any) {
@@ -133,17 +157,87 @@ function reconstructMyProfile(myProfileData: any) {
 }
 
 const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
+  // For the w2 version of Feedbacks
+  const [userSessionData, setUserSessionData] = useState()
+  const [user, setUser] = useState<I_User>();
+  const [userDB, setUserDB] = useState<IUser>();
+  const [allBrandsData, setAllBrandsData] = useState<IBrands[]>([]);
+  const [trendingBrandsData, setTrendingBrandsData] = useState<IBrands[]>([]);
+  const [mySentFeedbacksData, setMySentFeedbacksData] = React.useState<IFeedbacks[]>([]);
+  const [profileExist, setProfileExist] = React.useState<boolean>(false);
+
   const { address: myAddress } = useAccount();
   const isFirstRender = useIsFirstRender();
-  const { data: allBrandsData } = useBrandRead({
+
+  // Fetch all brands
+  useEffect(() => {
+    async function getAllBrands() {
+      const {data: brands} = await supabase.from(DBTables.Brand).select('*').range(0, 10);
+
+      if (brands && brands.length > 0) {
+        setAllBrandsData(brands)
+      }
+    }
+
+    getAllBrands();
+
+    // Fetch trending brands
+    /*
+    // Criteria for Trending Brand
+    1. The Brand which has the most feedback within a certain duration usually 5 minutes.
+      i.e., the brand with the most feedback within the last 5 minutes.
+          => This can be achieved by querying the feedback table and grouping by brandId and then sorting by count.
+    */
+    async function getTrendingBrands() {
+      const {data: trendingBrands} = await supabase.from(DBTables.Brand).select('*').range(0, 10);
+      if (trendingBrands && trendingBrands.length > 0) {
+        setTrendingBrandsData(trendingBrands)
+      }
+    }
+    getTrendingBrands()
+
+    async function getMySentFeedbacks() {
+      const {data, error} = await supabase
+        .from(DBTables.Feedback)
+        .select("*")
+        .eq('email', user?.email!)
+        .range(0, 10);
+
+      if (error) {
+        console.error("Error occurred when fetching userFeedbacks", error)
+      }
+
+      if (data && data.length > 0) {
+        setMySentFeedbacksData(data);
+      }
+    }
+    getMySentFeedbacks()
+
+    async function getProfile() {
+      const {data, error} = await supabase
+        .from(DBTables.User)
+        .select("*")
+        .eq('email', user?.email);
+
+      if (error) {
+        console.error("Unable to fetch userProfile", error)
+      }
+      if (data && data.length > 0) {
+        setProfileExist(data[0])
+      }
+    }
+    getProfile()
+  }, [user]);
+
+  /*const { data: allBrandsData } = useBrandRead({
     functionName: "getAllBrands",
     args: ["", "0x0000000000000000000000000000000000000000", ""],
-  });
+  });*/
 
-  const { data: profileExist } = useBrandRead({
-    functionName: "profileExists",
-    args: [myAddress],
-  });
+  // const { data: profileExist } = useBrandRead({
+  //   functionName: "profileExists",
+  //   args: [myAddress],
+  // })
 
   const { data: myProfileData, isFetching: isMyProfileDataFetching } =
     useBrandRead({
@@ -228,9 +322,9 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
     data: multipleEventsInvitesData,
     isFetching: isMultipleInvitesDataFetching,
     isSuccess: isMultipleInvitesDataSuccessful,
-  } = useRead({
+  } = useEventRead({
     functionName: "getMultipleEvents",
-    args: [myEventInvites],
+    args: [[myEventInvites]],
   });
 
   const {
@@ -243,15 +337,37 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
     args: [zeroAddress, 0, 0, 0],
   });
 
-  const getInvitesForAddress = useCallback(() => {}, []);
+  const updateSessionData = useCallback((data: any) => {
+    setUserSessionData(data);
+  }, []);
 
-  useEffect(() => {}, [isFirstRender]);
+  const SetUser = async (user: I_User) => {
+    setUser(user)
+
+    const {data, error} = await supabase
+      .from(DBTables.User)
+      .select("*")
+      .eq("email", user?.email);
+
+    if (error) {
+      throw new Error("Unable to fetch your profile");
+    }
+
+    if (data && data.length > 0) {
+      setUserDB(data[0])
+    }
+  }
+
+  const getInvitesForAddress = useCallback(() => { }, []);
+
+  useEffect(() => { }, [isFirstRender]);
 
   return (
     <FeedbacksContext.Provider
       value={{
         myAddress,
         allBrandsData,
+        trendingBrandsData,
         profileExist,
         myProfileData,
         isMyProfileDataFetching,
@@ -289,6 +405,12 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
         isAllFeedbacksDataFetching,
         isAllFeedbacksDataStale,
         isAllFeedbacksDataSuccessful,
+        userSessionData,
+        updateSessionData,
+        user,
+        SetUser,
+        userDB,
+        mySentFeedbacksData,
       }}
     >
       {children}

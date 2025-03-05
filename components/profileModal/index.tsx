@@ -1,68 +1,113 @@
 "use client";
 
-import {
-  BRAND_ABI,
-  BRAND_ADDRESS,
-  FEEDBACK_ADDRESS,
-  FEEDBACKS_ABI,
-} from "@/constant";
+import { BRAND_ABI, BRAND_ADDRESS } from "@/constant";
 import { Avatar } from "@nextui-org/avatar";
 import { Button } from "@nextui-org/button";
 import { Card, CardBody } from "@nextui-org/card";
 import { Image } from "@nextui-org/image";
 import { Input, Textarea } from "@nextui-org/input";
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  useDisclosure,
-} from "@nextui-org/modal";
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/modal";
 import {
   LucideCheckCheck,
   LucideChevronLeft,
   LucideChevronRight,
-  LucideMail,
-  LucidePlus,
   LucideUpload,
-  LucideX,
+  LucideUserPlus2,
+  LucideX
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useWriteContract } from "wagmi";
 import { CameraIcon } from "../icons/CameraIcon";
 import axios from "axios";
 import { Tab, Tabs } from "@nextui-org/tabs";
 import { Chip } from "@nextui-org/chip";
+import { DBTables, E_ProfileAction } from "@/types/enums";
+import { supabase } from "@/utils/supabase/supabase";
+import { useFeedbacksContext } from "@/context";
 
-export function CreateProfileModal({ buttonText = "Create Profile" }) {
+export function CreateProfileModal({ action = E_ProfileAction.update, buttonText = "Create Profile", trigger, buttonProps }: {
+  action: E_ProfileAction,
+  buttonText: string,
+  trigger?: ReactNode,
+  buttonProps?: any
+}) {
+  const {user, userDB} = useFeedbacksContext();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const { writeContract, isPending, isSuccess, isError } = useWriteContract();
-  const [userName, setUserName] = useState<string>("");
+  const [userName, setUserName] = useState<string>(user?.user_metadata.user_name);
   const [email, setEmail] = useState<string>("");
-  const [bio, setBio] = useState<string>("");
-  const [imageHash, setImageHash] = useState<string>("");
+  const [bio, setBio] = useState<string>(userDB?.bio!);
+  const [imageHash, setImageHash] = useState<string>(user?.user_metadata.avatar_url);
   const [imageUploadPending, setImageUploadPending] = useState<boolean>(false);
   const [imageUploadSuccessful, setImageUploadSuccessful] =
-    useState<boolean>(false);
+    useState<boolean>(userDB?.dp || user?.user_metadata.avatar_url);
 
   // For dp upload state management
-  const [dp, setDp] = useState<string>("");
-  const [dpPreview, setDpPreview] = useState<string>("");
+  const [dp, setDp] = useState<string>(userDB?.dp || user?.user_metadata.avatar_url);
+  const [dpPreview, setDpPreview] = useState<string>(userDB?.dp || user?.user_metadata.avatar_url);
   const [isDpUploading, setisDpUploading] = useState<boolean>(false);
   const profileImageRef = useRef(null);
   const imageHashRef = useRef("");
 
   const [selected, setSelected] = useState("profileImage");
 
-  const onCreateProfile = () => {
+  const handleImageUpload = async () => {
+    if (!dp) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("file", dp);
+      formData.append("upload_preset", "feedbacks_preset");
+
+      const res = await fetch(process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_URL!, {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+      console.log("image uploaded data", data);
+      setImageHash(data.secure_url);
+      setImageUploadSuccessful(true);
+      toast.success("Dp uploaded successfully");
+    } catch (error) {
+      console.log("Error uploading file: ");
+      console.log(error);
+      toast.error("Error uploading display picture");
+      setImageUploadSuccessful(false);
+    } finally {
+      setisDpUploading(false);
+      setImageUploadPending(false);
+    }
+  };
+
+  const onCreateProfile = async () => {
     writeContract({
       abi: BRAND_ABI,
       address: BRAND_ADDRESS,
       functionName: "createProfile",
-      args: [userName, email, bio, imageHash],
+      args: [userName, email, bio, imageHash]
     });
+  };
+
+  const onUpdateProfile = async () => {
+    const { data, error } = await supabase
+      .from(DBTables.User)
+      .update({ bio: bio, dp: imageHash })
+      .eq('email', user?.email)
+      .select()
+
+    if (error) {
+      console.error("Unable to update your profile")
+      toast.error("Unable to update profile", {richColors: true, duration: 4000});
+    }
+
+    if (data) {
+      toast.success("Profile updated successfully", {richColors: true, duration: 4000});
+
+      // close the profile modal
+      onClose()
+    }
   };
 
   useEffect(() => {
@@ -92,8 +137,8 @@ export function CreateProfileModal({ buttonText = "Create Profile" }) {
             // pinata_api_key: `${process.env.REACT_APP_PINATA_API_KEY}`,
             // pinata_secret_api_key: `${process.env.REACT_APP_PINATA_API_SECRET}`,
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`,
-          },
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`
+          }
         });
 
         // const ImgHash = `ipfs://${resFile.data.IpfsHash}`;
@@ -122,6 +167,7 @@ export function CreateProfileModal({ buttonText = "Create Profile" }) {
     setDp(selectedImage);
     setDpPreview(URL.createObjectURL(selectedImage));
     setImageUploadPending(true);
+    setImageUploadSuccessful(false);
   };
 
   const removeProfileUpload = () => {
@@ -129,18 +175,21 @@ export function CreateProfileModal({ buttonText = "Create Profile" }) {
     setDpPreview("");
     setImageHash("");
     setImageUploadPending(false);
+    setImageUploadSuccessful(false);
   };
 
   return (
     <>
-      <Button
-        onPress={onOpen}
-        color="success"
-        variant="shadow"
-        startContent={<LucidePlus size={16} strokeWidth={4} />}
-      >
-        {buttonText}
-      </Button>
+
+        <Button
+          onPress={onOpen}
+          color="success"
+          variant="shadow"
+          // endContent={<LucideUserPlus2 size={16} strokeWidth={2} />}
+          {...buttonProps}
+        >
+          {buttonText}
+        </Button>
       <Modal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
@@ -149,7 +198,7 @@ export function CreateProfileModal({ buttonText = "Create Profile" }) {
         classNames={{
           base: "px-3 py-4 shadow-none",
           backdrop:
-            "bg-gradient-to-t from-zinc-900 to-zinc-900/95 backdrop-opacity-90",
+            "bg-gradient-to-t from-zinc-900 to-zinc-900/95 backdrop-opacity-90"
         }}
         hideCloseButton={false}
         isDismissable={false}
@@ -158,7 +207,7 @@ export function CreateProfileModal({ buttonText = "Create Profile" }) {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                Create Profile
+                {action === E_ProfileAction.create ? "Create Profile" : "Update Profile"}
               </ModalHeader>
               <ModalBody className="space-y-4">
                 <Card>
@@ -169,13 +218,13 @@ export function CreateProfileModal({ buttonText = "Create Profile" }) {
                       onSelectionChange={setSelected}
                       variant="light"
                       classNames={{
-                        tab: "hidden",
+                        tab: "hidden"
                       }}
                     >
                       <Tab key="profileImage" title="Profile Picture">
-                        <div className="card items-center shrink-0 my-4 w-full">
+                        <div className="flex flex-col items-center shrink-0 my-4 w-full">
                           <div className={"relative inline-block"}>
-                            <Card>
+                            <Card fullWidth>
                               <Image
                                 width={360}
                                 height={160}
@@ -250,7 +299,7 @@ export function CreateProfileModal({ buttonText = "Create Profile" }) {
                               {!imageUploadSuccessful ? (
                                 <Button
                                   color="success"
-                                  onClick={sendFileToIPFS}
+                                  onClick={handleImageUpload}
                                   isLoading={isDpUploading}
                                   className="mt-8 font-bold"
                                   startContent={
@@ -294,15 +343,17 @@ export function CreateProfileModal({ buttonText = "Create Profile" }) {
                             </Chip>
                           )}
                           <Input
-                            isRequired
-                            autoFocus
+                            // isRequired
+                            // autoFocus
                             label="Username"
                             placeholder="What is your username?"
                             variant="flat"
-                            value={userName}
+                            value={user?.user_metadata.name || user?.user_metadata.user_name}
+                            disabled={!!user?.user_metadata}
+                            readOnly={!!user?.user_metadata}
                             onValueChange={setUserName}
                           />
-                          <Input
+                          {/*<Input
                             isClearable
                             type="email"
                             label="Email"
@@ -314,7 +365,7 @@ export function CreateProfileModal({ buttonText = "Create Profile" }) {
                             description={
                               "Your email is optional and we will never share your email"
                             }
-                          />
+                          />*/}
                           <Textarea
                             label="About you..."
                             placeholder="Tell the world something about yourself"
@@ -342,7 +393,7 @@ export function CreateProfileModal({ buttonText = "Create Profile" }) {
                   {selected === "profileInfo" ? (
                     <Button
                       color="primary"
-                      onPress={onCreateProfile}
+                      onPress={action === E_ProfileAction.create ? onCreateProfile : onUpdateProfile}
                       isLoading={isPending}
                       isDisabled={!userName && !bio}
                     >

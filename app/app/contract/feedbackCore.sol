@@ -104,6 +104,7 @@ contract BrandPlatform {
         string name;
         string rawName;
         address owner;
+        string description;
         uint256 createdAt;
         uint256 updatedAt;
         uint256 feedbackCount;
@@ -292,6 +293,7 @@ contract BrandPlatform {
      */
     function registerBrand(
         string memory _name,
+        string memory _description,
         string memory _category,
         string memory _imageHash
     ) public {
@@ -299,10 +301,9 @@ contract BrandPlatform {
             revert BrandAlreadyExist();
         }
 
-        string memory cleanedName;
+        string memory cleanedName = _name.toLowerCase();
         if (_name.includes(" ")) {
-            cleanedName = _name.split(" ").joinArray("_");
-            cleanedName.toLowerCase();
+            cleanedName = cleanedName.split(" ").joinArray("_");
         }
 
         Brand memory _newBrand = Brand({
@@ -310,6 +311,7 @@ contract BrandPlatform {
             name: cleanedName,
             rawName: _name,
             owner: msg.sender,
+            description: _description,
             createdAt: block.timestamp,
             updatedAt: block.timestamp,
             feedbackCount: 0,
@@ -342,13 +344,89 @@ contract BrandPlatform {
      */
     function updateBrand(
         uint256 _brandId,
-        string memory _name
+        string memory _name,
+        string memory _description
     ) public onlyBrandOwner(_brandId) {
         brands[_brandId].name = _name;
+        brands[_brandId].description = _description;
         // Brand storage brand = brands[_brandId];
         // brand.name = _name;
         // Profile storage profile = profiles[msg.sender];
     }
+
+    /**
+     * @dev This function updates an existing brand's details dynamically.
+     * The function will only update fields that are provided (non-empty strings).
+     * @param _brandId The ID of the brand to update.
+     * @param _name The new name of the brand (leave empty if no change).
+     * @param _category The new category of the brand (leave empty if no change).
+     * @param _imageHash The new image hash of the brand (leave empty if no change).
+     */
+    function updateBrand(
+        uint256 _brandId,
+        string memory _name,
+        string memory _description,
+        string memory _category,
+        string memory _imageHash
+    ) public {
+        // Check if the brand exists
+        Brand storage brand = brands[_brandId];
+        if (brand.owner == address(0)) {
+            revert BrandDoesNotExist("Brand does not exist");
+        }
+
+        // Check if the caller is the owner of the brand
+        if (msg.sender != brand.owner) {
+            revert NotBrandOwner("This is not your brand");
+        }
+
+        // Update the name if provided
+        if (bytes(_name).length > 0) {
+            string memory cleanedName = _name.toLowerCase();
+            if (_name.includes(" ")) {
+                cleanedName = cleanedName.split(" ").joinArray("_");
+            }
+
+            brand.name = cleanedName;
+            brand.rawName = _name;
+        }
+
+        // Update the description if provided
+        if (bytes(_description).length > 0) {
+            brand.description = _description;
+        }
+
+        // Update the category if provided
+        if (bytes(_category).length > 0) {
+            brand.category = _category;
+        }
+
+        // Update the imageHash if provided
+        if (bytes(_imageHash).length > 0) {
+            brand.imageHash = _imageHash;
+        }
+
+        // Update the updatedAt timestamp
+        brand.updatedAt = block.timestamp;
+
+        // Emit an event for the brand update
+        emit BrandUpdated(
+            _brandId,
+            brand.name,
+            brand.category,
+            brand.imageHash,
+            block.timestamp
+        );
+    }
+
+    // Event for brand update
+    event BrandUpdated(
+        uint256 indexed brandId,
+        string name,
+        string category,
+        string imageHash,
+        uint256 updatedAt
+    );
 
     /**
      * @dev This function retrieves a brand.
@@ -361,19 +439,80 @@ contract BrandPlatform {
 
     /**
      * @dev This function retrieves multiple feedbacks.
-     * @param _feedbackIds An array of identifiers of the feedbacks to be retrieved.
+     * @param _brandIds An array of identifiers of the feedbacks to be retrieved.
      * @return An array of feedbacks corresponding to the specified identifiers.
      */
     function getMultipleBrands(
-        uint256[] memory _feedbackIds
+        uint256[] memory _brandIds
     ) public view returns (Brand[] memory) {
-        Brand[] memory multipleBrands = new Brand[](_feedbackIds.length);
+        Brand[] memory multipleBrands = new Brand[](_brandIds.length);
 
-        for (uint256 i = 0; i < _feedbackIds.length; i++) {
-            multipleBrands[i] = brands[_feedbackIds[i]];
+        for (uint256 i = 0; i < _brandIds.length; i++) {
+            multipleBrands[i] = brands[_brandIds[i]];
         }
 
         return multipleBrands;
+    }
+
+    /**
+     * @notice Get all brands owned by the caller (msg.sender)
+     * @return An array of Brand structs owned by the caller
+     */
+    function getMyBrands() public view returns (Brand[] memory) {
+        // Count how many brands are owned by the caller
+        uint256 brandCountForOwner = 0;
+        // i starts from 1 because brandId starts from 1
+        for (uint256 i = 1; i < brandCounter + 1; i++) {
+            if (brands[i].owner == msg.sender) {
+                brandCountForOwner++;
+            }
+        }
+
+        // Create an array of the appropriate size
+        Brand[] memory myBrands = new Brand[](brandCountForOwner);
+        uint256 currentIndex = 0;
+
+        // Populate the array with brands owned by the caller
+        // i starts from 1 because brandId starts from 1
+        for (uint256 i = 1; i < brandCounter + 1; i++) {
+            if (brands[i].owner == msg.sender) {
+                myBrands[currentIndex] = brands[i];
+                currentIndex++;
+            }
+        }
+
+        return myBrands;
+    }
+
+    /**
+     * @notice Get all brands owned by a specified user
+     * @param _user The address of the user whose brands you want to fetch
+     * @return An array of Brand structs owned by the specified user
+     */
+    function getUserBrands(address _user) public view returns (Brand[] memory) {
+        // Count how many brands are owned by the given user
+        uint256 brandCountForUser = 0;
+        // i starts from 1 because brandId starts from 1
+        for (uint256 i = 1; i < brandCounter + 1; i++) {
+            if (brands[i].owner == _user) {
+                brandCountForUser++;
+            }
+        }
+
+        // Create an array of the appropriate size
+        Brand[] memory userBrands = new Brand[](brandCountForUser);
+        uint256 currentIndex = 0;
+
+        // Populate the array with brands owned by the given user
+        // i starts from 1 because brandId starts from 1
+        for (uint256 i = 1; i < brandCounter + 1; i++) {
+            if (brands[i].owner == _user) {
+                userBrands[currentIndex] = brands[i];
+                currentIndex++;
+            }
+        }
+
+        return userBrands;
     }
 
     function getAllBrands(
@@ -605,6 +744,7 @@ contract FeedbackPlatform {
      */
     struct Feedback {
         uint256 feedbackId;
+        string feedbackTitle;
         string feedbackText;
         uint256 timestamp;
         address sender;
@@ -624,6 +764,7 @@ contract FeedbackPlatform {
 
     event FeedbackSubmitted(
         uint256 indexed feedbackId,
+        string feedbackTitle,
         string feedbackText,
         uint256 timestamp,
         address sender,
@@ -632,6 +773,7 @@ contract FeedbackPlatform {
     );
     event FeedbackUpdated(
         uint256 indexed feedbackId,
+        string feedbackTitle,
         string feedbackText,
         uint256 timestamp,
         address sender,
@@ -651,6 +793,7 @@ contract FeedbackPlatform {
      */
     function submitFeedback(
         uint256 _recipientId,
+        string memory _feedbackTitle,
         string memory _feedbackText,
         uint256 _eventId,
         uint256 _productId,
@@ -670,6 +813,7 @@ contract FeedbackPlatform {
 
         Feedback memory _newFeedback = Feedback({
             feedbackId: feedbackCounter,
+            feedbackTitle: _feedbackTitle,
             feedbackText: _feedbackText,
             timestamp: block.timestamp,
             sender: msg.sender,
@@ -696,6 +840,7 @@ contract FeedbackPlatform {
         }
         emit FeedbackSubmitted(
             feedbackCounter,
+            _feedbackTitle,
             _feedbackText,
             block.timestamp,
             msg.sender,
@@ -714,6 +859,7 @@ contract FeedbackPlatform {
      */
     function updateFeedback(
         uint256 _feedbackId,
+        string memory _feedbackTitle,
         string memory _feedbackText,
         uint256 _eventId,
         uint256 _productId,
@@ -729,6 +875,11 @@ contract FeedbackPlatform {
             _feedbackId != 0 && _feedbackId <= feedbackCounter,
             "Invalid feedback ID"
         );
+
+        // Update feedback title if provided
+        if (bytes(_feedbackTitle).length > 0) {
+            feedback.feedbackTitle = _feedbackTitle;
+        }
 
         // Update feedback text if provided
         if (bytes(_feedbackText).length > 0) {
@@ -794,6 +945,7 @@ contract FeedbackPlatform {
 
         emit FeedbackUpdated(
             _feedbackId,
+            feedback.feedbackTitle,
             feedback.feedbackText,
             feedback.timestamp,
             feedback.sender,
@@ -839,7 +991,8 @@ contract FeedbackPlatform {
     function getMyFeedbacks() public view returns (Feedback[] memory) {
         uint256 count = 0;
         // First, count the number of feedbacks by msg.sender to determine the array size
-        for (uint256 i = 0; i < feedbackCounter; i++) {
+        // i starts from 1 because brandId starts from 1
+        for (uint256 i = 1; i < feedbackCounter + 1; i++) {
             if (feedbacks[i].sender == msg.sender) {
                 count++;
             }
@@ -849,7 +1002,8 @@ contract FeedbackPlatform {
         uint256 index = 0;
 
         // Then, populate the array with feedbacks from msg.sender
-        for (uint256 i = 0; i < feedbackCounter; i++) {
+        // i starts from 1 because brandId starts from 1
+        for (uint256 i = 1; i < feedbackCounter + 1; i++) {
             if (feedbacks[i].sender == msg.sender) {
                 myFeedbacks[index] = feedbacks[i];
                 index++;
@@ -1875,7 +2029,8 @@ contract FeedbacksPlatform {
     function getMyFeedbacks() public view returns (Feedback[] memory) {
         uint256 count = 0;
         // First, count the number of feedbacks by msg.sender to determine the array size
-        for (uint256 i = 0; i < feedbackCounter; i++) {
+        // i starts from 1 because feedbackId starts from 1
+        for (uint256 i = 0; i < feedbackCounter + 1; i++) {
             if (feedbacks[i].sender == msg.sender) {
                 count++;
             }
@@ -1885,7 +2040,8 @@ contract FeedbacksPlatform {
         uint256 index = 0;
 
         // Then, populate the array with feedbacks from msg.sender
-        for (uint256 i = 0; i < feedbackCounter; i++) {
+        // i starts from 1 because feedbackId starts from 1
+        for (uint256 i = 0; i < feedbackCounter + 1; i++) {
             if (feedbacks[i].sender == msg.sender) {
                 myFeedbacks[index] = feedbacks[i];
                 index++;
@@ -1905,7 +2061,8 @@ contract FeedbacksPlatform {
     ) public view returns (Feedback[] memory) {
         uint256 count = 0;
         // First, count the number of feedbacks by the sender to determine the array size
-        for (uint256 i = 0; i < feedbackCounter; i++) {
+        // i starts from 1 because feedbackId starts from 1
+        for (uint256 i = 0; i < feedbackCounter + 1; i++) {
             if (feedbacks[i].sender == _sender) {
                 count++;
             }
@@ -1915,7 +2072,8 @@ contract FeedbacksPlatform {
         uint256 index = 0;
 
         // Then, populate the array with feedbacks from the sender
-        for (uint256 i = 0; i < feedbackCounter; i++) {
+        // i starts from 1 because feedbackId starts from 1
+        for (uint256 i = 0; i < feedbackCounter + 1; i++) {
             if (feedbacks[i].sender == _sender) {
                 _userFeedbacks[index] = feedbacks[i];
                 index++;
@@ -2093,6 +2251,12 @@ contract EventsPlatform {
      */
     struct EventBasicInfo {
         uint256 eventId;
+        CreateEventBasicInfo createEventBasicInfo;
+        uint256 createdAt;
+        uint256 updatedAt;
+    }
+
+    struct CreateEventBasicInfo {
         address owner;
         uint256 brandId;
         string name;
@@ -2103,12 +2267,14 @@ contract EventsPlatform {
         string eventWebsite;
         string eventRegistrationLink;
         uint256[] brandIds;
-        uint256 createdAt;
-        uint256 updatedAt;
     }
 
     struct EventOtherInfo {
         uint256 eventId;
+        CreateEventOtherInfo createEventOtherInfo;
+    }
+
+    struct CreateEventOtherInfo {
         string eventImageHash;
         string tags;
     }
@@ -2118,9 +2284,14 @@ contract EventsPlatform {
         EventOtherInfo eventOtherInfo;
     }
 
+    struct CreateEvent {
+        CreateEventBasicInfo createEventBasicInfo;
+        CreateEventOtherInfo createEventOtherInfo;
+    }
+
     uint256 public eventCounter = 0;
 
-    mapping(uint256 => Event) public events;
+    mapping(uint256 => Event) private events;
     // mapping(uint256 => EventOtherInfo) public eventsOtherInfo; // EventId to EventOtherInfo
     mapping(address => uint256[]) private eventBrandInvites; // map address of Invited owner (i.e., the brand) to List of events invited to.
 
@@ -2234,61 +2405,75 @@ contract EventsPlatform {
     //     }
     // }
 
-    function createEvent(Event memory _event) public {
+    function createEvent(CreateEvent memory _event) public {
         validateEventData(_event);
         cleanUpBrandIds(_event);
         storeNewEvent(_event);
     }
 
-    function validateEventData(Event memory _event) internal view {
+    function validateEventData(CreateEvent memory _event) internal view {
+        CreateEventBasicInfo memory _createEventBasicInfo = _event
+            .createEventBasicInfo;
         if (
-            _brandPlatform.getBrand(_event.eventBasicInfo.brandId).owner !=
+            _brandPlatform.getBrand(_createEventBasicInfo.brandId).owner !=
             msg.sender
         ) {
             revert NotBrandOwner("Not Brand owner");
         }
 
-        if (bytes(_event.eventBasicInfo.name).length == 0) {
+        if (bytes(_createEventBasicInfo.name).length == 0) {
             revert NoEventName("Event name needed");
         }
-        if (bytes(_event.eventBasicInfo.description).length == 0) {
+        if (bytes(_createEventBasicInfo.description).length == 0) {
             revert NoEventDescription("Event description needed");
         }
-        if (bytes(_event.eventBasicInfo.eventStartDate).length == 0) {
+        if (bytes(_createEventBasicInfo.eventStartDate).length == 0) {
             revert NoEventDate("Event start date needed");
         }
-        if (bytes(_event.eventBasicInfo.eventEndDate).length == 0) {
+        if (bytes(_createEventBasicInfo.eventEndDate).length == 0) {
             revert NoEventDate("Event end date needed");
         }
     }
 
-    function cleanUpBrandIds(Event memory _event) internal pure {
-        for (uint256 i = 0; i < _event.eventBasicInfo.brandIds.length; i++) {
+    function cleanUpBrandIds(CreateEvent memory _event) internal pure {
+        CreateEventBasicInfo memory _createEventBasicInfo = _event
+            .createEventBasicInfo;
+        for (uint256 i = 0; i < _createEventBasicInfo.brandIds.length; i++) {
             if (
-                _event.eventBasicInfo.brandIds[i] ==
-                _event.eventBasicInfo.brandId
+                _createEventBasicInfo.brandIds[i] ==
+                _createEventBasicInfo.brandId
             ) {
                 // remove the creating brandId from brandIds if it exists in it
-                _event.eventBasicInfo.brandIds.removeFromIndex(i);
+                _createEventBasicInfo.brandIds.removeFromIndex(i);
             }
         }
     }
 
-    function storeNewEvent(Event memory _event) internal {
-        uint256[] memory _initialBrandIds = new uint256[](0);
+    function storeNewEvent(CreateEvent memory _event) internal {
+        // uint256[] memory _initialBrandIds = new uint256[](0);
+        CreateEventBasicInfo memory _createEventBasicInfo = _event
+            .createEventBasicInfo;
+        CreateEventOtherInfo memory _createEventOtherInfo = _event
+            .createEventOtherInfo;
+        // Get the brandIds sent when creating the account.
+        uint256[] memory _eventBrandIds = _createEventBasicInfo.brandIds;
+
+        // Set the new Event Data's brandId for the new event to an empty array.
+        _createEventBasicInfo.brandIds = new uint256[](0);
 
         EventBasicInfo memory newEvent = EventBasicInfo({
             eventId: eventCounter,
-            owner: msg.sender,
-            brandId: _event.eventBasicInfo.brandId,
-            name: _event.eventBasicInfo.name,
-            description: _event.eventBasicInfo.description,
-            eventLocation: _event.eventBasicInfo.eventLocation,
-            eventStartDate: _event.eventBasicInfo.eventStartDate,
-            eventEndDate: _event.eventBasicInfo.eventEndDate,
-            eventWebsite: _event.eventBasicInfo.eventWebsite,
-            eventRegistrationLink: _event.eventBasicInfo.eventRegistrationLink,
-            brandIds: _initialBrandIds,
+            createEventBasicInfo: _createEventBasicInfo,
+            // owner: msg.sender,
+            // brandId: _event.eventBasicInfo.brandId,
+            // name: _event.eventBasicInfo.name,
+            // description: _event.eventBasicInfo.description,
+            // eventLocation: _event.eventBasicInfo.eventLocation,
+            // eventStartDate: _event.eventBasicInfo.eventStartDate,
+            // eventEndDate: _event.eventBasicInfo.eventEndDate,
+            // eventWebsite: _event.eventBasicInfo.eventWebsite,
+            // eventRegistrationLink: _event.eventBasicInfo.eventRegistrationLink,
+            // brandIds: _initialBrandIds,
             createdAt: block.timestamp,
             updatedAt: block.timestamp
         });
@@ -2296,8 +2481,9 @@ contract EventsPlatform {
         // Create the EventOtherInfo
         EventOtherInfo memory newEventOtherInfo = EventOtherInfo({
             eventId: eventCounter,
-            tags: _event.eventOtherInfo.tags,
-            eventImageHash: _event.eventOtherInfo.eventImageHash
+            createEventOtherInfo: _createEventOtherInfo
+            // tags: _event.eventOtherInfo.tags,
+            // eventImageHash: _event.eventOtherInfo.eventImageHash
         });
 
         eventCounter++;
@@ -2307,22 +2493,22 @@ contract EventsPlatform {
         events[eventCounter] = Event(newEvent, newEventOtherInfo);
         // eventsOtherInfo[eventCounter] = newEventOtherInfo;
 
-        if (_event.eventBasicInfo.brandIds.length > 0) {
-            for (
-                uint256 i = 0;
-                i < _event.eventBasicInfo.brandIds.length;
-                i++
-            ) {
+        if (_eventBrandIds.length > 0) {
+            for (uint256 i = 0; i < _eventBrandIds.length; i++) {
                 sendJoinBrandEventInvite(
-                    _event.eventBasicInfo.brandId,
-                    _event.eventBasicInfo.brandIds[i],
+                    _createEventBasicInfo.brandId,
+                    _eventBrandIds[i],
                     eventCounter
                 );
             }
         }
     }
 
-    function updateEvent(uint256 _eventId, Event memory _event) public {
+    function updateEvent(uint256 _eventId, CreateEvent memory _event) public {
+        CreateEventBasicInfo memory _createEventBasicInfo = _event
+            .createEventBasicInfo;
+        CreateEventOtherInfo memory _createEventOtherInfo = _event
+            .createEventOtherInfo;
         Event storage existingEvent = events[_eventId];
         // EventOtherInfo storage existingEventOtherInfo = eventsOtherInfo[
         //     _eventId
@@ -2330,9 +2516,12 @@ contract EventsPlatform {
 
         // Ensure that only the Event owner or Brand owner can call this function
         if (
-            existingEvent.eventBasicInfo.owner != msg.sender &&
+            existingEvent.eventBasicInfo.createEventBasicInfo.owner !=
+            msg.sender &&
             _brandPlatform
-                .getBrand(existingEvent.eventBasicInfo.brandId)
+                .getBrand(
+                    existingEvent.eventBasicInfo.createEventBasicInfo.brandId
+                )
                 .owner !=
             msg.sender
         ) {
@@ -2340,88 +2529,105 @@ contract EventsPlatform {
         }
 
         // Validate and update each field if provided, otherwise keep the existing value
-        if (bytes(_event.eventBasicInfo.name).length > 0) {
-            existingEvent.eventBasicInfo.name = _event.eventBasicInfo.name;
+        if (bytes(_createEventBasicInfo.name).length > 0) {
+            existingEvent
+                .eventBasicInfo
+                .createEventBasicInfo
+                .name = _createEventBasicInfo.name;
         }
 
-        if (bytes(_event.eventBasicInfo.description).length > 0) {
-            existingEvent.eventBasicInfo.description = _event
+        if (bytes(_createEventBasicInfo.description).length > 0) {
+            existingEvent
                 .eventBasicInfo
-                .description;
+                .createEventBasicInfo
+                .description = _createEventBasicInfo.description;
         }
 
-        if (bytes(_event.eventBasicInfo.eventLocation).length > 0) {
-            existingEvent.eventBasicInfo.eventLocation = _event
+        if (bytes(_createEventBasicInfo.eventLocation).length > 0) {
+            existingEvent
                 .eventBasicInfo
-                .eventLocation;
+                .createEventBasicInfo
+                .eventLocation = _createEventBasicInfo.eventLocation;
         }
 
-        if (bytes(_event.eventBasicInfo.eventStartDate).length > 0) {
-            existingEvent.eventBasicInfo.eventStartDate = _event
+        if (bytes(_createEventBasicInfo.eventStartDate).length > 0) {
+            existingEvent
                 .eventBasicInfo
-                .eventStartDate;
+                .createEventBasicInfo
+                .eventStartDate = _createEventBasicInfo.eventStartDate;
         }
 
-        if (bytes(_event.eventBasicInfo.eventEndDate).length > 0) {
-            existingEvent.eventBasicInfo.eventEndDate = _event
+        if (bytes(_createEventBasicInfo.eventEndDate).length > 0) {
+            existingEvent
                 .eventBasicInfo
-                .eventEndDate;
+                .createEventBasicInfo
+                .eventEndDate = _createEventBasicInfo.eventEndDate;
         }
 
-        if (bytes(_event.eventBasicInfo.eventWebsite).length > 0) {
-            existingEvent.eventBasicInfo.eventWebsite = _event
+        if (bytes(_createEventBasicInfo.eventWebsite).length > 0) {
+            existingEvent
                 .eventBasicInfo
-                .eventWebsite;
+                .createEventBasicInfo
+                .eventWebsite = _createEventBasicInfo.eventWebsite;
         }
 
-        if (bytes(_event.eventBasicInfo.eventRegistrationLink).length > 0) {
-            existingEvent.eventBasicInfo.eventRegistrationLink = _event
+        if (bytes(_createEventBasicInfo.eventRegistrationLink).length > 0) {
+            existingEvent
                 .eventBasicInfo
+                .createEventBasicInfo
+                .eventRegistrationLink = _createEventBasicInfo
                 .eventRegistrationLink;
         }
 
-        if (bytes(_event.eventOtherInfo.eventImageHash).length > 0) {
-            existingEvent.eventOtherInfo.eventImageHash = _event
+        if (bytes(_createEventOtherInfo.eventImageHash).length > 0) {
+            existingEvent
                 .eventOtherInfo
-                .eventImageHash;
+                .createEventOtherInfo
+                .eventImageHash = _createEventOtherInfo.eventImageHash;
         }
 
-        if (bytes(_event.eventOtherInfo.tags).length > 0) {
-            existingEvent.eventOtherInfo.tags = _event.eventOtherInfo.tags;
+        if (bytes(_createEventOtherInfo.tags).length > 0) {
+            existingEvent
+                .eventOtherInfo
+                .createEventOtherInfo
+                .tags = _createEventOtherInfo.tags;
         }
 
         // Update the brandIds array, ensuring the event owner cannot invite themselves
-        if (_event.eventBasicInfo.brandIds.length > 0) {
+        if (_createEventBasicInfo.brandIds.length > 0) {
             uint256[] memory updatedBrandIds = new uint256[](
-                _event.eventBasicInfo.brandIds.length
+                _createEventBasicInfo.brandIds.length
             );
             uint256 count = 0;
             for (
                 uint256 i = 0;
-                i < _event.eventBasicInfo.brandIds.length;
+                i < _createEventBasicInfo.brandIds.length;
                 i++
             ) {
                 if (
-                    _event.eventBasicInfo.brandIds[i] !=
-                    existingEvent.eventBasicInfo.brandId
+                    _createEventBasicInfo.brandIds[i] !=
+                    existingEvent.eventBasicInfo.createEventBasicInfo.brandId
                 ) {
-                    updatedBrandIds[count] = _event.eventBasicInfo.brandIds[i];
+                    updatedBrandIds[count] = _createEventBasicInfo.brandIds[i];
                     count++;
                 }
             }
-            existingEvent.eventBasicInfo.brandIds = updatedBrandIds;
+            existingEvent
+                .eventBasicInfo
+                .createEventBasicInfo
+                .brandIds = updatedBrandIds;
         }
 
         // Re-send invites if brandIds are updated
-        if (_event.eventBasicInfo.brandIds.length > 0) {
+        if (_createEventBasicInfo.brandIds.length > 0) {
             for (
                 uint256 i = 0;
-                i < _event.eventBasicInfo.brandIds.length;
+                i < _createEventBasicInfo.brandIds.length;
                 i++
             ) {
                 sendJoinBrandEventInvite(
-                    existingEvent.eventBasicInfo.brandId,
-                    _event.eventBasicInfo.brandIds[i],
+                    existingEvent.eventBasicInfo.createEventBasicInfo.brandId,
+                    _createEventBasicInfo.brandIds[i],
                     _eventId
                 );
             }
@@ -2465,8 +2671,12 @@ contract EventsPlatform {
         uint256 count = 0;
 
         // First, count how many events belong to msg.sender
-        for (uint256 i = 0; i < eventCounter; i++) {
-            if (events[i].eventBasicInfo.owner == msg.sender) {
+        // i starts from 1 because eventId starts from 1
+        for (uint256 i = 0; i < eventCounter + 1; i++) {
+            if (
+                events[i].eventBasicInfo.createEventBasicInfo.owner ==
+                msg.sender
+            ) {
                 count++;
             }
         }
@@ -2476,8 +2686,12 @@ contract EventsPlatform {
         uint256 index = 0;
 
         // Now, add the events owned by msg.sender to the array
-        for (uint256 i = 0; i < eventCounter; i++) {
-            if (events[i].eventBasicInfo.owner == msg.sender) {
+        // i starts from 1 because eventId starts from 1
+        for (uint256 i = 0; i < eventCounter + 1; i++) {
+            if (
+                events[i].eventBasicInfo.createEventBasicInfo.owner ==
+                msg.sender
+            ) {
                 myEvents[index] = events[i];
                 index++;
             }
@@ -2497,8 +2711,9 @@ contract EventsPlatform {
         uint256 count = 0;
 
         // First, count how many events belong to _owner
-        for (uint256 i = 0; i < eventCounter; i++) {
-            if (events[i].eventBasicInfo.owner == _owner) {
+        // i starts from 1 because eventId starts from 1
+        for (uint256 i = 0; i < eventCounter + 1; i++) {
+            if (events[i].eventBasicInfo.createEventBasicInfo.owner == _owner) {
                 count++;
             }
         }
@@ -2508,8 +2723,9 @@ contract EventsPlatform {
         uint256 index = 0;
 
         // Now, add the events owned by _owner to the array
-        for (uint256 i = 0; i < eventCounter; i++) {
-            if (events[i].eventBasicInfo.owner == _owner) {
+        // i starts from 1 because eventId starts from 1
+        for (uint256 i = 0; i < eventCounter + 1; i++) {
+            if (events[i].eventBasicInfo.createEventBasicInfo.owner == _owner) {
                 myEvents[index] = events[i];
                 index++;
             }
@@ -2544,11 +2760,18 @@ contract EventsPlatform {
                 // Check if any brandId in the event matches the brand filter
                 for (
                     uint256 j = 0;
-                    j < events[i].eventBasicInfo.brandIds.length;
+                    j <
+                    events[i]
+                        .eventBasicInfo
+                        .createEventBasicInfo
+                        .brandIds
+                        .length;
                     j++
                 ) {
                     if (
-                        events[i].eventBasicInfo.brandIds[j] == _brandIdFilter
+                        events[i].eventBasicInfo.createEventBasicInfo.brandIds[
+                            j
+                        ] == _brandIdFilter
                     ) {
                         brandMatches = true;
                         break;
@@ -2560,7 +2783,10 @@ contract EventsPlatform {
             if (bytes(_tagFilter).length == 0) {
                 tagMatches = true; // No tag filter, so it's a match
             } else {
-                string memory eventTags = events[i].eventOtherInfo.tags;
+                string memory eventTags = events[i]
+                    .eventOtherInfo
+                    .createEventOtherInfo
+                    .tags;
                 // if (keccak256(bytes(eventTags)) == keccak256(bytes(_tagFilter))) {
                 //     tagMatches = true;
                 // }
@@ -2575,7 +2801,11 @@ contract EventsPlatform {
                 brandMatches &&
                 tagMatches &&
                 (bytes(_nameFilter).length == 0 ||
-                    keccak256(bytes(events[i].eventBasicInfo.name)) ==
+                    keccak256(
+                        bytes(
+                            events[i].eventBasicInfo.createEventBasicInfo.name
+                        )
+                    ) ==
                     keccak256(bytes(_nameFilter)))
             ) {
                 count++;
@@ -2596,11 +2826,18 @@ contract EventsPlatform {
             } else {
                 for (
                     uint256 j = 0;
-                    j < events[i].eventBasicInfo.brandIds.length;
+                    j <
+                    events[i]
+                        .eventBasicInfo
+                        .createEventBasicInfo
+                        .brandIds
+                        .length;
                     j++
                 ) {
                     if (
-                        events[i].eventBasicInfo.brandIds[j] == _brandIdFilter
+                        events[i].eventBasicInfo.createEventBasicInfo.brandIds[
+                            j
+                        ] == _brandIdFilter
                     ) {
                         brandMatches = true;
                         break;
@@ -2612,7 +2849,10 @@ contract EventsPlatform {
             if (bytes(_tagFilter).length == 0) {
                 tagMatches = true; // No tag filter, so it's a match
             } else {
-                string memory eventTags = events[i].eventOtherInfo.tags;
+                string memory eventTags = events[i]
+                    .eventOtherInfo
+                    .createEventOtherInfo
+                    .tags;
                 // if (keccak256(bytes(eventTags)) == keccak256(bytes(_tagFilter))) {
                 //     tagMatches = true;
                 // }
@@ -2626,7 +2866,11 @@ contract EventsPlatform {
                 brandMatches &&
                 tagMatches &&
                 (bytes(_nameFilter).length == 0 ||
-                    keccak256(bytes(events[i].eventBasicInfo.name)) ==
+                    keccak256(
+                        bytes(
+                            events[i].eventBasicInfo.createEventBasicInfo.name
+                        )
+                    ) ==
                     keccak256(bytes(_nameFilter)))
             ) {
                 filteredEvents[index] = events[i];
@@ -2703,13 +2947,8 @@ contract EventsPlatform {
      * @dev This function updates the event brandId if the brand accepts the event invite.
      * @param _eventId The identifier of the event to be updated.
      * @param _brandId The identifier of the brand to be confirmed.
-     * @param _indexInArray The index of the brand in the event's brandIds array.
      */
-    function confirmJointBrandEvent(
-        uint256 _eventId,
-        uint256 _brandId,
-        uint256 _indexInArray
-    ) public {
+    function confirmJointBrandEvent(uint256 _eventId, uint256 _brandId) public {
         // Ensure that only Brand owner can call this function
         if (_brandPlatform.getBrand(_brandId).owner != msg.sender) {
             revert NotBrandOwner("Not brand owner");
@@ -2723,8 +2962,10 @@ contract EventsPlatform {
         // Update an event brandId if that brand accepts the event invite.
         // if (!reject) {
         // }
-        events[_eventId].eventBasicInfo.brandIds.push(_brandId);
-        removeJointBrandEvent(_eventId, _brandId, _indexInArray);
+        events[_eventId].eventBasicInfo.createEventBasicInfo.brandIds.push(
+            _brandId
+        );
+        removeJointBrandEvent(_eventId, _brandId);
 
         emit EventBrandConfirmed(_eventId, _brandId);
     }
@@ -2734,15 +2975,22 @@ contract EventsPlatform {
      * @dev This function updates the event brandId if the brand rejects the event invite.
      * @param _eventId The identifier of the event to be updated.
      * @param _brandId The identifier of the brand to be rejected.
-     * @param _indexInArray The index of the brand in the event's brandIds array.
      */
-    function removeJointBrandEvent(
-        uint256 _eventId,
-        uint256 _brandId,
-        uint256 _indexInArray
-    ) public {
+    function removeJointBrandEvent(uint256 _eventId, uint256 _brandId) public {
         address invitedBrandOwner = _brandPlatform.getBrand(_brandId).owner;
-        delete eventBrandInvites[invitedBrandOwner][_indexInArray];
+
+        CreateEventBasicInfo memory _createEventBasicInfo = events[_eventId]
+            .eventBasicInfo
+            .createEventBasicInfo;
+
+        for (uint256 i = 0; i < _createEventBasicInfo.brandIds.length; i++) {
+            if (_createEventBasicInfo.brandIds[i] == _brandId) {
+                // remove the creating brandId from brandIds if it exists in it
+                // _createEventBasicInfo.brandIds.removeFromIndex(i);
+                // delete eventBrandInvites[invitedBrandOwner][i];
+                eventBrandInvites[invitedBrandOwner].removeFromIndex(i);
+            }
+        }
 
         emit EventBrandRemove(_eventId, _brandId);
     }
@@ -2957,7 +3205,8 @@ contract ProductsPlatform {
         uint256 count = 0;
 
         // First, count how many products are owned by msg.sender
-        for (uint256 i = 0; i < productCounter; i++) {
+        // i starts from 1 because productId starts from 1
+        for (uint256 i = 0; i < productCounter + 1; i++) {
             if (products[i].owner == msg.sender) {
                 count++;
             }
@@ -2968,7 +3217,8 @@ contract ProductsPlatform {
         uint256 index = 0;
 
         // Populate the array with products owned by msg.sender
-        for (uint256 i = 0; i < productCounter; i++) {
+        // i starts from 1 because productId starts from 1
+        for (uint256 i = 0; i < productCounter + 1; i++) {
             if (products[i].owner == msg.sender) {
                 myProducts[index] = products[i];
                 index++;
@@ -2989,7 +3239,8 @@ contract ProductsPlatform {
         uint256 count = 0;
 
         // First, count how many products are owned by _owner
-        for (uint256 i = 0; i < productCounter; i++) {
+        // i starts from 1 because productId starts from 1
+        for (uint256 i = 0; i < productCounter + 1; i++) {
             if (products[i].owner == _owner) {
                 count++;
             }
@@ -3000,7 +3251,8 @@ contract ProductsPlatform {
         uint256 index = 0;
 
         // Populate the array with products owned by _owner
-        for (uint256 i = 0; i < productCounter; i++) {
+        // i starts from 1 because productId starts from 1
+        for (uint256 i = 0; i < productCounter + 1; i++) {
             if (products[i].owner == _owner) {
                 myProducts[index] = products[i];
                 index++;

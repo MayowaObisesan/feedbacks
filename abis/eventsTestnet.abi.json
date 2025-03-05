@@ -47,11 +47,6 @@
                     {
                         "components": [
                             {
-                                "internalType": "uint256",
-                                "name": "eventId",
-                                "type": "uint256"
-                            },
-                            {
                                 "internalType": "address",
                                 "name": "owner",
                                 "type": "address"
@@ -100,29 +95,14 @@
                                 "internalType": "uint256[]",
                                 "name": "brandIds",
                                 "type": "uint256[]"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "createdAt",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "updatedAt",
-                                "type": "uint256"
                             }
                         ],
-                        "internalType": "struct EventsPlatform.EventBasicInfo",
-                        "name": "eventBasicInfo",
+                        "internalType": "struct EventsPlatform.CreateEventBasicInfo",
+                        "name": "createEventBasicInfo",
                         "type": "tuple"
                     },
                     {
                         "components": [
-                            {
-                                "internalType": "uint256",
-                                "name": "eventId",
-                                "type": "uint256"
-                            },
                             {
                                 "internalType": "string",
                                 "name": "eventImageHash",
@@ -134,12 +114,12 @@
                                 "type": "string"
                             }
                         ],
-                        "internalType": "struct EventsPlatform.EventOtherInfo",
-                        "name": "eventOtherInfo",
+                        "internalType": "struct EventsPlatform.CreateEventOtherInfo",
+                        "name": "createEventOtherInfo",
                         "type": "tuple"
                     }
                 ],
-                "internalType": "struct EventsPlatform.Event",
+                "internalType": "struct EventsPlatform.CreateEvent",
                 "name": "_event",
                 "type": "tuple"
             }
@@ -373,11 +353,6 @@
                     {
                         "components": [
                             {
-                                "internalType": "uint256",
-                                "name": "eventId",
-                                "type": "uint256"
-                            },
-                            {
                                 "internalType": "address",
                                 "name": "owner",
                                 "type": "address"
@@ -426,29 +401,14 @@
                                 "internalType": "uint256[]",
                                 "name": "brandIds",
                                 "type": "uint256[]"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "createdAt",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "updatedAt",
-                                "type": "uint256"
                             }
                         ],
-                        "internalType": "struct EventsPlatform.EventBasicInfo",
-                        "name": "eventBasicInfo",
+                        "internalType": "struct EventsPlatform.CreateEventBasicInfo",
+                        "name": "createEventBasicInfo",
                         "type": "tuple"
                     },
                     {
                         "components": [
-                            {
-                                "internalType": "uint256",
-                                "name": "eventId",
-                                "type": "uint256"
-                            },
                             {
                                 "internalType": "string",
                                 "name": "eventImageHash",
@@ -460,12 +420,12 @@
                                 "type": "string"
                             }
                         ],
-                        "internalType": "struct EventsPlatform.EventOtherInfo",
-                        "name": "eventOtherInfo",
+                        "internalType": "struct EventsPlatform.CreateEventOtherInfo",
+                        "name": "createEventOtherInfo",
                         "type": "tuple"
                     }
                 ],
-                "internalType": "struct EventsPlatform.Event",
+                "internalType": "struct EventsPlatform.CreateEvent",
                 "name": "_event",
                 "type": "tuple"
             }
@@ -506,54 +466,61 @@
                         "type": "uint256"
                     },
                     {
-                        "internalType": "address",
-                        "name": "owner",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "brandId",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "name",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "description",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "eventLocation",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "eventStartDate",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "eventEndDate",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "eventWebsite",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "eventRegistrationLink",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "uint256[]",
-                        "name": "brandIds",
-                        "type": "uint256[]"
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "brandId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "name",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "description",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventLocation",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventStartDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventEndDate",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventWebsite",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "eventRegistrationLink",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "brandIds",
+                                "type": "uint256[]"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.CreateEventBasicInfo",
+                        "name": "createEventBasicInfo",
+                        "type": "tuple"
                     },
                     {
                         "internalType": "uint256",
@@ -578,14 +545,21 @@
                         "type": "uint256"
                     },
                     {
-                        "internalType": "string",
-                        "name": "eventImageHash",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "tags",
-                        "type": "string"
+                        "components": [
+                            {
+                                "internalType": "string",
+                                "name": "eventImageHash",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "tags",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct EventsPlatform.CreateEventOtherInfo",
+                        "name": "createEventOtherInfo",
+                        "type": "tuple"
                     }
                 ],
                 "internalType": "struct EventsPlatform.EventOtherInfo",
@@ -626,54 +600,61 @@
                                 "type": "uint256"
                             },
                             {
-                                "internalType": "address",
-                                "name": "owner",
-                                "type": "address"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "brandId",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "name",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "description",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventLocation",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventStartDate",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventEndDate",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventWebsite",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventRegistrationLink",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "uint256[]",
-                                "name": "brandIds",
-                                "type": "uint256[]"
+                                "components": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "owner",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "brandId",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "name",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "description",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventLocation",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventStartDate",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventEndDate",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventWebsite",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventRegistrationLink",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "uint256[]",
+                                        "name": "brandIds",
+                                        "type": "uint256[]"
+                                    }
+                                ],
+                                "internalType": "struct EventsPlatform.CreateEventBasicInfo",
+                                "name": "createEventBasicInfo",
+                                "type": "tuple"
                             },
                             {
                                 "internalType": "uint256",
@@ -698,14 +679,21 @@
                                 "type": "uint256"
                             },
                             {
-                                "internalType": "string",
-                                "name": "eventImageHash",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "tags",
-                                "type": "string"
+                                "components": [
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventImageHash",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "tags",
+                                        "type": "string"
+                                    }
+                                ],
+                                "internalType": "struct EventsPlatform.CreateEventOtherInfo",
+                                "name": "createEventOtherInfo",
+                                "type": "tuple"
                             }
                         ],
                         "internalType": "struct EventsPlatform.EventOtherInfo",
@@ -741,54 +729,61 @@
                                 "type": "uint256"
                             },
                             {
-                                "internalType": "address",
-                                "name": "owner",
-                                "type": "address"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "brandId",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "name",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "description",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventLocation",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventStartDate",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventEndDate",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventWebsite",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventRegistrationLink",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "uint256[]",
-                                "name": "brandIds",
-                                "type": "uint256[]"
+                                "components": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "owner",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "brandId",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "name",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "description",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventLocation",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventStartDate",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventEndDate",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventWebsite",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventRegistrationLink",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "uint256[]",
+                                        "name": "brandIds",
+                                        "type": "uint256[]"
+                                    }
+                                ],
+                                "internalType": "struct EventsPlatform.CreateEventBasicInfo",
+                                "name": "createEventBasicInfo",
+                                "type": "tuple"
                             },
                             {
                                 "internalType": "uint256",
@@ -813,14 +808,21 @@
                                 "type": "uint256"
                             },
                             {
-                                "internalType": "string",
-                                "name": "eventImageHash",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "tags",
-                                "type": "string"
+                                "components": [
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventImageHash",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "tags",
+                                        "type": "string"
+                                    }
+                                ],
+                                "internalType": "struct EventsPlatform.CreateEventOtherInfo",
+                                "name": "createEventOtherInfo",
+                                "type": "tuple"
                             }
                         ],
                         "internalType": "struct EventsPlatform.EventOtherInfo",
@@ -875,54 +877,61 @@
                                 "type": "uint256"
                             },
                             {
-                                "internalType": "address",
-                                "name": "owner",
-                                "type": "address"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "brandId",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "name",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "description",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventLocation",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventStartDate",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventEndDate",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventWebsite",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventRegistrationLink",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "uint256[]",
-                                "name": "brandIds",
-                                "type": "uint256[]"
+                                "components": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "owner",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "brandId",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "name",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "description",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventLocation",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventStartDate",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventEndDate",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventWebsite",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventRegistrationLink",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "uint256[]",
+                                        "name": "brandIds",
+                                        "type": "uint256[]"
+                                    }
+                                ],
+                                "internalType": "struct EventsPlatform.CreateEventBasicInfo",
+                                "name": "createEventBasicInfo",
+                                "type": "tuple"
                             },
                             {
                                 "internalType": "uint256",
@@ -947,14 +956,21 @@
                                 "type": "uint256"
                             },
                             {
-                                "internalType": "string",
-                                "name": "eventImageHash",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "tags",
-                                "type": "string"
+                                "components": [
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventImageHash",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "tags",
+                                        "type": "string"
+                                    }
+                                ],
+                                "internalType": "struct EventsPlatform.CreateEventOtherInfo",
+                                "name": "createEventOtherInfo",
+                                "type": "tuple"
                             }
                         ],
                         "internalType": "struct EventsPlatform.EventOtherInfo",
@@ -984,54 +1000,61 @@
                                 "type": "uint256"
                             },
                             {
-                                "internalType": "address",
-                                "name": "owner",
-                                "type": "address"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "brandId",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "name",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "description",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventLocation",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventStartDate",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventEndDate",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventWebsite",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventRegistrationLink",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "uint256[]",
-                                "name": "brandIds",
-                                "type": "uint256[]"
+                                "components": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "owner",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "brandId",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "name",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "description",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventLocation",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventStartDate",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventEndDate",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventWebsite",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventRegistrationLink",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "uint256[]",
+                                        "name": "brandIds",
+                                        "type": "uint256[]"
+                                    }
+                                ],
+                                "internalType": "struct EventsPlatform.CreateEventBasicInfo",
+                                "name": "createEventBasicInfo",
+                                "type": "tuple"
                             },
                             {
                                 "internalType": "uint256",
@@ -1056,14 +1079,21 @@
                                 "type": "uint256"
                             },
                             {
-                                "internalType": "string",
-                                "name": "eventImageHash",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "tags",
-                                "type": "string"
+                                "components": [
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventImageHash",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "tags",
+                                        "type": "string"
+                                    }
+                                ],
+                                "internalType": "struct EventsPlatform.CreateEventOtherInfo",
+                                "name": "createEventOtherInfo",
+                                "type": "tuple"
                             }
                         ],
                         "internalType": "struct EventsPlatform.EventOtherInfo",
@@ -1099,54 +1129,61 @@
                                 "type": "uint256"
                             },
                             {
-                                "internalType": "address",
-                                "name": "owner",
-                                "type": "address"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "brandId",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "name",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "description",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventLocation",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventStartDate",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventEndDate",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventWebsite",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "eventRegistrationLink",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "uint256[]",
-                                "name": "brandIds",
-                                "type": "uint256[]"
+                                "components": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "owner",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "brandId",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "name",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "description",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventLocation",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventStartDate",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventEndDate",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventWebsite",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventRegistrationLink",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "uint256[]",
+                                        "name": "brandIds",
+                                        "type": "uint256[]"
+                                    }
+                                ],
+                                "internalType": "struct EventsPlatform.CreateEventBasicInfo",
+                                "name": "createEventBasicInfo",
+                                "type": "tuple"
                             },
                             {
                                 "internalType": "uint256",
@@ -1171,14 +1208,21 @@
                                 "type": "uint256"
                             },
                             {
-                                "internalType": "string",
-                                "name": "eventImageHash",
-                                "type": "string"
-                            },
-                            {
-                                "internalType": "string",
-                                "name": "tags",
-                                "type": "string"
+                                "components": [
+                                    {
+                                        "internalType": "string",
+                                        "name": "eventImageHash",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "tags",
+                                        "type": "string"
+                                    }
+                                ],
+                                "internalType": "struct EventsPlatform.CreateEventOtherInfo",
+                                "name": "createEventOtherInfo",
+                                "type": "tuple"
                             }
                         ],
                         "internalType": "struct EventsPlatform.EventOtherInfo",

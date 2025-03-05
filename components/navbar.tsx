@@ -25,7 +25,7 @@ import {
   DiscordIcon,
   HeartFilledIcon,
   SearchIcon,
-  Logo,
+  Logo, DisconnectIcon
 } from "@/components/icons";
 import ConnectButton from "./ConnectButton";
 import { useFeedbacksContext } from "@/context";
@@ -33,9 +33,29 @@ import { User } from "@nextui-org/user";
 import { Skeleton } from "@nextui-org/skeleton";
 import { CreateProfileModal } from "./profileModal";
 import { parseImageHash } from "@/utils";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/dropdown";
+import { signOut, useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/utils/supabase/supabase";
+import { type User as I_User } from "@supabase/supabase-js";
+import { Power } from "lucide-react";
+import { useRouter } from "next/navigation";
+import SearchModal from "@/components/Modals/SearchModal";
+import { Divider } from "@nextui-org/divider";
 
 export const Navbar = () => {
-  const { profileExist } = useFeedbacksContext();
+  const router = useRouter()
+  const { profileExist, SetUser, user, userDB } = useFeedbacksContext();
+  const {data: sessionData} = useSession();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      SetUser(user!)
+    }
+    getUser()
+  }, []);
+
   const searchInput = (
     <Input
       aria-label="Search"
@@ -64,7 +84,7 @@ export const Navbar = () => {
       <Skeleton isLoaded={!isMyProfileDataFetching} className="rounded-full">
         <User
           name={myProfileData?.name}
-          description={<NextLink href="/me">@{myProfileData?.name}</NextLink>}
+          description={<NextLink href="/app/me">@{myProfileData?.name}</NextLink>}
           avatarProps={{
             src:
               parseImageHash(myProfileData?.profilePictureHash) ||
@@ -78,10 +98,11 @@ export const Navbar = () => {
   return (
     <NextUINavbar maxWidth="full" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
+        <NavbarMenuToggle className={"sm:hidden"} />
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
             <Logo />
-            <p className="font-bold text-inherit">Feedbacks</p>
+            <p className="max-sm:hidden font-bold text-inherit">Feedbacks</p>
           </NextLink>
         </NavbarBrand>
         <ul className="hidden lg:flex gap-4 justify-start ml-2">
@@ -107,7 +128,7 @@ export const Navbar = () => {
         justify="end"
       >
         <NavbarItem className="hidden sm:flex gap-2">
-          <Link isExternal aria-label="Twitter" href={siteConfig.links.twitter}>
+          {/*<Link isExternal aria-label="Twitter" href={siteConfig.links.twitter}>
             <TwitterIcon className="text-default-500" />
           </Link>
           <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
@@ -115,17 +136,23 @@ export const Navbar = () => {
           </Link>
           <Link isExternal aria-label="Github" href={siteConfig.links.github}>
             <GithubIcon className="text-default-500" />
-          </Link>
+          </Link>*/}
           <ThemeSwitch />
         </NavbarItem>
-        {profileExist ? (
+
+        {/*{profileExist ? (
           <NavbarItem className="flex">{<Profile />}</NavbarItem>
         ) : (
           <div>
             <CreateProfileModal buttonText="Create Profile" />
           </div>
-        )}
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
+        )}*/}
+
+        <NavbarItem className="hidden lg:flex">
+          {/*{searchInput}*/}
+          <SearchModal />
+        </NavbarItem>
+
         {/* <NavbarItem className="hidden md:flex">
           <Button
             isExternal
@@ -138,25 +165,116 @@ export const Navbar = () => {
             Sponsor
           </Button>
         </NavbarItem> */}
-        <NavbarItem className="">
+
+        {/*<NavbarItem className="">
           <div className="flex items-center">
-            {/* <w3m-button /> */}
-            {/* <w3m-button size="md" /> */}
+             <w3m-button />
+             <w3m-button size="md" />
             <ConnectButton />
           </div>
-        </NavbarItem>
+        </NavbarItem>*/}
+
+        {
+          !user &&
+          <NavbarItem>
+            <Button
+              // href={"/login"}
+              // className="text-sm font-normal text-default-600 bg-default-100"
+              onPress={() => router.push("app/login")}
+              startContent={<Power size={16} strokeWidth={4} />}
+              variant="shadow"
+              color={"success"}
+            >
+              Connect Account
+            </Button>
+        </NavbarItem>}
+
+        {
+          user &&
+          <NavbarItem>
+            <Dropdown placement="bottom-start">
+              <DropdownTrigger>
+                <User
+                  as="button"
+                  avatarProps={{
+                    isBordered: true,
+                    src: userDB?.dp || user?.user_metadata.avatar_url
+                  }}
+                  className="transition-transform"
+                  description={user?.email}
+                  name={user?.user_metadata.full_name}
+                />
+              </DropdownTrigger>
+              <DropdownMenu aria-label="User Actions" variant="flat">
+                <DropdownItem key="profile" className="h-14 gap-2">
+                  <p className="font-bold">Signed in as</p>
+                  <p className="font-bold">{user?.user_metadata.full_name}</p>
+                </DropdownItem>
+                <DropdownItem key="settings">My Settings</DropdownItem>
+                <DropdownItem key="team_settings">Team Settings</DropdownItem>
+                <DropdownItem key="analytics">Analytics</DropdownItem>
+                <DropdownItem key="system">System</DropdownItem>
+                <DropdownItem key="configurations">Configurations</DropdownItem>
+                <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
+                <DropdownItem key="logout" color="danger" onPress={async () => await supabase.auth.signOut()} endContent={<DisconnectIcon size={20} strokeWidth={4} />}>
+                  Log Out
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </NavbarItem>
+        }
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <Link isExternal aria-label="Github" href={siteConfig.links.github}>
+        {/*<Button variant={"flat"} isIconOnly radius={"lg"}>
+          <label htmlFor={"id-search-modal"}>
+            <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+          </label>
+        </Button>*/}
+
+        <SearchModal />
+        {/*<Link isExternal aria-label="Github" href={siteConfig.links.github}>
           <GithubIcon className="text-default-500" />
-        </Link>
+        </Link>*/}
         <ThemeSwitch />
-        <NavbarMenuToggle />
+        <Dropdown placement="bottom-start">
+          <DropdownTrigger>
+            <User
+              as="button"
+              avatarProps={{
+                isBordered: true,
+                src: userDB?.dp || user?.user_metadata.avatar_url,
+                size: "sm",
+              }}
+              className="transition-transform"
+              description={""}
+              name={""}
+            />
+          </DropdownTrigger>
+          <DropdownMenu aria-label="User Actions" variant="flat">
+            <DropdownItem key="profile" className="h-14 gap-2">
+              <p className="font-bold">Signed in as</p>
+              <p className="font-bold">{user?.user_metadata.full_name}</p>
+            </DropdownItem>
+            <DropdownItem key="settings">My Settings</DropdownItem>
+            <DropdownItem key="team_settings">Team Settings</DropdownItem>
+            <DropdownItem key="analytics">Analytics</DropdownItem>
+            <DropdownItem key="system">System</DropdownItem>
+            <DropdownItem key="configurations">Configurations</DropdownItem>
+            <DropdownItem showDivider key="help_and_feedback">Help & Feedback</DropdownItem>
+            <DropdownItem key="logout" color="danger" onPress={async () => await supabase.auth.signOut()} endContent={<DisconnectIcon size={20} strokeWidth={4} />}>
+              Log Out
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+        {/*
+          Has been moved to before the logo
+          <NavbarMenuToggle />
+        */}
       </NavbarContent>
 
       <NavbarMenu>
-        {searchInput}
+        {/*{searchInput}*/}
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig.navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
@@ -168,7 +286,7 @@ export const Navbar = () => {
                     ? "danger"
                     : "foreground"
                 }
-                href="#"
+                href={item.href}
                 size="lg"
               >
                 {item.label}

@@ -1,58 +1,33 @@
-"use client";
-
-import FeedbackCard from "@/components/FeedbackCard";
-import HomeNav from "@/components/homeNav";
-import { CameraIcon } from "@/components/icons/CameraIcon";
-import { CreateProfileModal } from "@/components/profileModal";
-import { TrendingBrandCard, TrendingCard } from "@/components/TrendingCard";
-import {
-  BRAND_ABI,
-  BRAND_ADDRESS,
-  BRAND_CATEGORIES,
-  FEEDBACK_ADDRESS,
-  FEEDBACKS_ABI,
-} from "@/constant";
 import { useFeedbacksContext } from "@/context";
-import useContractEvent from "@/hooks/useContractEvent";
-import useRead from "@/hooks/useRead";
-import useWrite from "@/hooks/useWrite";
-import { Avatar } from "@nextui-org/avatar";
-import { Button } from "@nextui-org/button";
-import { Card, CardBody } from "@nextui-org/card";
-import { Checkbox } from "@nextui-org/checkbox";
-import { Chip } from "@nextui-org/chip";
-import { Divider } from "@nextui-org/divider";
-import { Image } from "@nextui-org/image";
-import { Input } from "@nextui-org/input";
-import { Link } from "@nextui-org/link";
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  useDisclosure,
-} from "@nextui-org/modal";
-import { Select, SelectItem } from "@nextui-org/select";
-import axios from "axios";
-import {
-  LucideCheckCheck,
-  LucideLock,
-  LucideMail,
-  LucidePlus,
-  LucideUpload,
-  LucideX,
-} from "lucide-react";
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/modal";
+import { useWriteContract } from "wagmi";
 import { useEffect, useRef, useState } from "react";
+import { unkey } from "@/utils/unkey";
+import { cleanBrandRawName } from "@/utils";
+import { DBTables, E_BillingTier } from "@/types/enums";
+import { supabase } from "@/utils/supabase/supabase";
 import { toast } from "sonner";
-import { useReadContract, useWriteContract } from "wagmi";
+import axios from "axios";
+import { Button } from "@nextui-org/button";
+import { LucideCheckCheck, LucidePlus, LucideUpload, LucideX } from "lucide-react";
+import { Chip } from "@nextui-org/chip";
+import { Card } from "@nextui-org/card";
+import { Image } from "@nextui-org/image";
+import { Avatar } from "@nextui-org/avatar";
+import { CameraIcon } from "@/components/icons/CameraIcon";
+import { Input, Textarea } from "@nextui-org/input";
+import { Select, SelectItem } from "@nextui-org/select";
+import { formatCategoryKey, getBrandCategoriesKey } from "@/constant";
 
-export const CreateBrandModal = () => {
+export default function CreateBrandModal() {
+  const { user } = useFeedbacksContext();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const { writeContract, isPending, isSuccess, isError } = useWriteContract();
   const [brandName, setBrandName] = useState<string>("");
+  const [brandDescription, setBrandDescription] = useState<string>("");
   const { profileExist } = useFeedbacksContext();
   const [categoryValues, setCategoryValues] = useState<any>(new Set([]));
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   const [imageHash, setImageHash] = useState<string>("");
   const [imageUploadPending, setImageUploadPending] = useState<boolean>(false);
@@ -66,13 +41,108 @@ export const CreateBrandModal = () => {
   const profileImageRef = useRef(null);
   const imageHashRef = useRef("");
 
-  const onCreateBrand = () => {
-    writeContract({
+  const onCreateBrand = async () => {
+    /*writeContract({
       abi: BRAND_ABI,
       address: BRAND_ADDRESS,
       functionName: "registerBrand",
-      args: [brandName, Array.from(categoryValues).join(", "), imageHash],
+      args: [brandName, Array.from(categoryValues).join(", "), imageHash]
+    });*/
+
+    setIsSubmitting(true);
+
+    // Create an API for this brand
+    const createdAPI = await unkey.apis.create({ name: cleanBrandRawName(brandName) });
+
+    // Create an API key for this brand before inserting into the database
+    const createdKey = await unkey.keys.create({
+      apiId: createdAPI.result?.apiId!,
+      prefix: "fdb",
+      byteLength: 16,
+      ownerId: user?.email,
+      name: `${user?.user_metadata.userName}_key`,
+      meta: {
+        billingTier: E_BillingTier.FREE,
+        trialEnds: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 30).toISOString() // In 1 month
+      },
+      expires: new Date().getTime() + 1000 * 60 * 60 * 24 * 30, // unix milliseconds timestamp of 1 month
+      ratelimit: {
+        type: "consistent",
+        duration: 1000,
+        limit: 10
+      },
+      remaining: 1000,
+      refill: {
+        interval: "monthly",
+        amount: 1000,
+        refillDay: 1
+      },
+      enabled: true
     });
+
+    console.log(createdKey, categoryValues);
+
+    try {
+      const { data, error } = await supabase
+        .from(DBTables.Brand)
+        .insert([{
+          ownerEmail: user?.email,
+          name: cleanBrandRawName(brandName),
+          rawName: brandName,
+          description: brandDescription,
+          category: Array.from(categoryValues).join(", "),
+          followersCount: 0,
+          feedbackCount: 0,
+          brandImage: imageHash,
+          api: createdAPI.result?.apiId,
+          userApiKey: createdKey.result?.key,
+          followers: []
+        }])
+        .select();
+
+      if (data) {
+        onClose();
+        toast.success("Brand created successfully.");
+      }
+
+      if (error) {
+        console.error("error creating brand", error);
+        toast.error("Error creating brand. Kindly try again.");
+      }
+    } catch (error) {
+      console.error("Unable to create brand", error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!dp) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("file", dp);
+      formData.append("upload_preset", "feedbacks_preset");
+
+      const res = await fetch(process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_URL!, {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+      console.log("image uploaded data", data);
+      setImageHash(data.secure_url);
+      setImageUploadSuccessful(true);
+      toast.success("Dp uploaded successfully");
+    } catch (error) {
+      console.log("Error uploading file: ");
+      console.log(error);
+      toast.error("Error uploading display picture");
+      setImageUploadSuccessful(false);
+    } finally {
+      setisDpUploading(false);
+      setImageUploadPending(false);
+    }
   };
 
   useEffect(() => {
@@ -102,8 +172,8 @@ export const CreateBrandModal = () => {
             // pinata_api_key: `${process.env.REACT_APP_PINATA_API_KEY}`,
             // pinata_secret_api_key: `${process.env.REACT_APP_PINATA_API_SECRET}`,
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`,
-          },
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`
+          }
         });
 
         const ImgHash = `https://moccasin-many-grasshopper-363.mypinata.cloud/ipfs/${resFile.data.IpfsHash}`;
@@ -138,6 +208,7 @@ export const CreateBrandModal = () => {
     setDpPreview("");
     setImageHash("");
     setImageUploadPending(false);
+    setImageUploadSuccessful(false);
   };
 
   const handleClose = (categoryToRemove: string) => {
@@ -168,7 +239,7 @@ export const CreateBrandModal = () => {
           wrapper: "",
           base: "relative px-3 py-4",
           backdrop:
-            "bg-gradient-to-t from-zinc-900 to-zinc-900/80 backdrop-opacity-90",
+            "bg-gradient-to-t from-zinc-900 to-zinc-900/80 backdrop-opacity-90"
         }}
         hideCloseButton={false}
         isDismissable={false}
@@ -176,7 +247,7 @@ export const CreateBrandModal = () => {
         <ModalContent className="relative overflow-auto">
           {(onClose) => (
             <>
-              {!profileExist && (
+              {/*{!profileExist && (
                 <>
                   <Card className="inline-flex">
                     <CardBody>
@@ -187,12 +258,22 @@ export const CreateBrandModal = () => {
                     </CardBody>
                   </Card>
                 </>
-              )}
+              )}*/}
               <ModalHeader className="flex flex-col gap-1">
                 Create Brand
               </ModalHeader>
               <ModalBody>
-                <div className="card items-center gap-y-4 shrink-0 my-4 w-full">
+                {/*<CldImage
+                  alt={"Brand Image to upload"}
+                  src={dpPreview} // Use this sample image or upload your own via the Media Explorer
+                  width="500" // Transform the image: auto-crop to square aspect_ratio
+                  height="500"
+                  crop={{
+                    type: 'auto',
+                    source: true
+                  }}
+                />*/}
+                <div className="flex flex-col items-center gap-y-4 shrink-0 my-4 w-full">
                   {imageUploadPending && (
                     <Chip
                       color="warning"
@@ -277,7 +358,7 @@ export const CreateBrandModal = () => {
                       {!imageUploadSuccessful ? (
                         <Button
                           color="success"
-                          onClick={sendFileToIPFS}
+                          onClick={handleImageUpload}
                           isLoading={isDpUploading}
                           className="mt-8 font-bold"
                           startContent={
@@ -314,7 +395,16 @@ export const CreateBrandModal = () => {
                   value={brandName}
                   onValueChange={setBrandName}
                 />
-
+                <Textarea
+                  label="Description"
+                  placeholder={`Describe your brand`}
+                  className=""
+                  value={brandDescription}
+                  onValueChange={setBrandDescription}
+                  classNames={{
+                    input: "placeholder:text-default-300"
+                  }}
+                />
                 <Select
                   label="Category"
                   placeholder="Select a Brand category"
@@ -323,9 +413,9 @@ export const CreateBrandModal = () => {
                   selectedKeys={categoryValues}
                   onSelectionChange={setCategoryValues}
                 >
-                  {BRAND_CATEGORIES.map((eachBrandCategory, index) => (
+                  {getBrandCategoriesKey().map((eachBrandCategory, index) => (
                     <SelectItem key={eachBrandCategory}>
-                      {eachBrandCategory}
+                      {formatCategoryKey(eachBrandCategory)}
                     </SelectItem>
                   ))}
                 </Select>
@@ -350,13 +440,13 @@ export const CreateBrandModal = () => {
                 <Button
                   color="primary"
                   onPress={onCreateBrand}
-                  isLoading={isPending}
+                  isLoading={isSubmitting}
                   isDisabled={
                     brandName.length < 1 ||
                     (imageUploadPending && !imageUploadSuccessful)
                   }
                 >
-                  {isPending ? "Creating..." : "Create"}
+                  {isSubmitting ? "Creating..." : "Create"}
                 </Button>
               </ModalFooter>
             </>
@@ -366,99 +456,3 @@ export const CreateBrandModal = () => {
     </>
   );
 };
-
-const AllBrands = ({ _name = "", _owner = "" }) => {
-  const { data, isLoading, isFetched, isSuccess, isPlaceholderData } =
-    useReadContract({
-      abi: FEEDBACKS_ABI,
-      address: FEEDBACK_ADDRESS,
-      functionName: "getAllBrands",
-      args: [_name, _owner],
-    });
-
-  return { data, isLoading, isFetched, isSuccess, isPlaceholderData };
-};
-
-export default function Home() {
-  // useEffect(() => {
-  //   const { data, isLoading } = AllBrands({});
-  //   console.log(data, isLoading);
-  // }, []);
-  const { allBrandsData, profileExist } = useFeedbacksContext();
-  useContractEvent({ eventName: "BrandRegistered" });
-
-  const trendingBrands = [
-    {
-      name: "Samsung",
-      feedbackCount: 15000,
-    },
-    {
-      name: "AirBnB",
-      feedbackCount: 25000,
-    },
-    {
-      name: "Chivita",
-      feedbackCount: 16000,
-    },
-  ];
-  return (
-    <section className="flex flex-col lg:flex-row w-full h-full py-4">
-      <section className="h-full">
-        <HomeNav />
-      </section>
-      <section className="space-y-8 px-8 lg:overflow-y-hidden">
-        <div>
-          <CreateBrandModal />
-        </div>
-        {!profileExist && (
-          <Card className="inline-flex">
-            <CardBody>
-              <div className="flex flex-row items-center gap-x-4 text-center">
-                <span>Set your username for your account.</span>
-                <CreateProfileModal buttonText="Add username" />
-              </div>
-            </CardBody>
-          </Card>
-        )}
-        <section>
-          <header className="font-bold text-6xl leading-normal">
-            Trending Brands
-          </header>
-          {allBrandsData?.length > 0 ? (
-            <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
-              {allBrandsData?.map((eachTrendingBrand) => (
-                <TrendingBrandCard
-                  key={eachTrendingBrand.name}
-                  name={eachTrendingBrand.name}
-                  rawName={eachTrendingBrand.rawName}
-                  feedbackCount={Number(eachTrendingBrand.feedbackCount)}
-                />
-              ))}
-            </div>
-          ) : (
-            <Card className="bg-transparent shadow-none">
-              <CardBody className="flex items-center justify-center h-[200px]">
-                <div className="text-3xl text-gray-600 text-center leading-loose">
-                  No trending brands.
-                  <br />
-                  Strange...
-                </div>
-              </CardBody>
-            </Card>
-          )}
-        </section>
-
-        <section className="">
-          <header className="font-bold text-4xl leading-normal">
-            Trending Feedbacks
-          </header>
-          <div className="flex flex-row flex-nowrap gap-x-8 px-2 py-4 overflow-x-auto">
-            {trendingBrands.map((eachTrendingBrand) => (
-              <FeedbackCard key={eachTrendingBrand.name} />
-            ))}
-          </div>
-        </section>
-      </section>
-    </section>
-  );
-}

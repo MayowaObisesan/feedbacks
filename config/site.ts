@@ -6,7 +6,7 @@ export const siteConfig = {
   navItems: [
     {
       label: "Home",
-      href: "/home",
+      href: "/app",
     },
     // {
     //   label: "Docs",
@@ -25,12 +25,24 @@ export const siteConfig = {
     //   href: "/about",
     // },
     {
+      label: "Dashboard",
+      href: "/dashboard",
+    },
+    {
       label: "me",
-      href: "/me",
+      href: "/app/me",
     },
   ],
   navMenuItems: [
     {
+      label: "Home",
+      href: "/app"
+    },
+    {
+      label: "me",
+      href: "/app/me"
+    },
+    /*{
       label: "Profile",
       href: "/profile",
     },
@@ -61,7 +73,7 @@ export const siteConfig = {
     {
       label: "Logout",
       href: "/logout",
-    },
+    },*/
   ],
   links: {
     github: "https://github.com/nextui-org/nextui",

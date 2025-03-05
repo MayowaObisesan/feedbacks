@@ -1,12 +1,26 @@
-export const CameraIcon = ({
-  fill = "currentColor",
-  filled,
-  size,
-  height,
-  width,
-  label,
-  ...props
-}) => {
+import React from "react";
+
+interface CameraIconProps {
+  fill?: string;
+  filled?: boolean;
+  size?: number;
+  height?: number;
+  width?: number;
+  label?: string;
+
+  [key: string]: any;
+}
+
+export const CameraIcon: React.FC<CameraIconProps> = (
+  {
+    fill = "currentColor",
+    filled,
+    size,
+    height,
+    width,
+    label,
+    ...props
+  }) => {
   return (
     <svg
       width={size || width || 24}
