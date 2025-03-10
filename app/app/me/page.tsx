@@ -1,26 +1,27 @@
 "use client";
 
-import EmptyCard from "@/components/EmptyCard";
-import EventInviteCard from "@/components/EventInviteCard";
-import FeedbackCard from "@/components/FeedbackCard";
-import ProductCard from "@/components/ProductCard";
-import { TrendingBrandCard } from "@/components/TrendingCard";
-import { useFeedbacksContext } from "@/context";
-import { IBrands, IEvents, IUser } from "@/types";
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
 import { Avatar } from "@nextui-org/avatar";
-import { Button } from "@nextui-org/button";
 import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
 import { Skeleton } from "@nextui-org/skeleton";
-import { LucideBadgeMinus, LucideCheck, LucideInfo, LucideUserPlus2 } from "lucide-react";
+import {
+  LucideBadgeMinus,
+  LucideCheck,
+  LucideInfo,
+  LucideUserPlus2,
+} from "lucide-react";
 import React, { useEffect } from "react";
+import { Tooltip } from "@nextui-org/tooltip";
+
+import EmptyCard from "@/components/EmptyCard";
+import FeedbackCard from "@/components/FeedbackCard";
+import { TrendingBrandCard } from "@/components/TrendingCard";
+import { useFeedbacksContext } from "@/context";
+import { IBrands } from "@/types";
 import { DBTables, E_ProfileAction } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
 import { CreateProfileModal } from "@/components/profileModal";
-import { useDisclosure } from "@nextui-org/modal";
 import { DotSpacer } from "@/components/TextSkeleton";
-import { Tooltip } from "@nextui-org/tooltip";
-import CreateBrand from "@/app/app/brand/new/page";
 import CreateBrandModal from "@/components/Modals/CreateBrandModal";
 
 const accordionItemClasses = {
@@ -29,15 +30,19 @@ const accordionItemClasses = {
   trigger:
     "px-2 py-0 data-[hover=true]:bg-default-100 rounded-lg h-14 flex items-center",
   indicator: "text-medium",
-  content: "text-small px-2"
+  content: "text-small px-2",
 };
 
-const ProfileCard = ({ myBrands, followedBrands, isFollowed }: { myBrands: IBrands[], followedBrands: IBrands[], isFollowed: boolean }) => {
-  const [userData, setUserData] = React.useState<IUser>();
-  const {
-    user,
-    userDB
-  } = useFeedbacksContext();
+const ProfileCard = ({
+  myBrands,
+  followedBrands,
+}: {
+  myBrands: IBrands[];
+  followedBrands: IBrands[];
+  isFollowed: boolean;
+}) => {
+  // const [userData, setUserData] = React.useState<IUser>();
+  const { user, userDB } = useFeedbacksContext();
 
   return (
     <Card className="min-w-[340px] max-w-[340px]">
@@ -52,18 +57,15 @@ const ProfileCard = ({ myBrands, followedBrands, isFollowed }: { myBrands: IBran
           <div className="flex flex-col gap-1 items-start justify-center">
             {!user?.email ? (
               <Skeleton
-                isLoaded={!!user?.email}
                 className="w-5/6 h-6 rounded-full"
-              ></Skeleton>
+                isLoaded={!!user?.email}
+              />
             ) : (
               <h4 className="text-small font-semibold leading-none text-default-600">
                 {user?.user_metadata.full_name}
               </h4>
             )}
-            <Skeleton
-              isLoaded={!!user?.email}
-              className="rounded-full"
-            >
+            <Skeleton className="rounded-full" isLoaded={!!user?.email}>
               <h5 className="text-small tracking-tight text-default-400">
                 @{user?.email}
               </h5>
@@ -98,11 +100,12 @@ const ProfileCard = ({ myBrands, followedBrands, isFollowed }: { myBrands: IBran
       </CardBody>
       <CardFooter className="gap-1">
         <div className="flex gap-1 hover:underline hover:underline-offset-4 hover:decoration-content2-foreground">
-          <Skeleton
-            isLoaded={!!myBrands}
-            className="rounded-full"
-          >
-            <Tooltip content="The brands you've created" showArrow={true} placement={"bottom"}>
+          <Skeleton className="rounded-full" isLoaded={!!myBrands}>
+            <Tooltip
+              content="The brands you've created"
+              placement={"bottom"}
+              showArrow={true}
+            >
               <p className="font-semibold text-default-400 text-small">
                 {myBrands?.length ? Number(myBrands?.length) : 0}
               </p>
@@ -116,10 +119,7 @@ const ProfileCard = ({ myBrands, followedBrands, isFollowed }: { myBrands: IBran
         </div>
         <DotSpacer />
         <div className="flex gap-1">
-          <Skeleton
-            isLoaded={!!followedBrands}
-            className="rounded-full"
-          >
+          <Skeleton className="rounded-full" isLoaded={!!followedBrands}>
             <p className="font-semibold text-default-400 text-small">
               {followedBrands?.length > 0
                 ? Number(followedBrands?.length > 0)
@@ -138,23 +138,17 @@ const ProfileCard = ({ myBrands, followedBrands, isFollowed }: { myBrands: IBran
 };
 
 export default function Page() {
-  const { onOpen } = useDisclosure();
-  const {
-    // isMyBrandsDataFetching,
-    myEventInvites,
-    multipleEventsInvitesData,
-    myFeedbacksData,
-    isMyFeedbacksDataFetching,
-    myEventsData,
-    mySentFeedbacksData,
-    user,
-    userDB
-  } = useFeedbacksContext();
+  // const { onOpen } = useDisclosure();
+  const { myEventsData, mySentFeedbacksData, user, userDB } =
+    useFeedbacksContext();
   const [isFollowed, setIsFollowed] = React.useState(false);
   const [myBrandsData, setMyBrandsData] = React.useState<IBrands[]>([]);
-  const [followedBrandsData, setFollowedBrandsData] = React.useState<IBrands[]>([]);
+  const [followedBrandsData, setFollowedBrandsData] = React.useState<IBrands[]>(
+    [],
+  );
   // const [sentFeedbacks, setSentFeedbacks] = React.useState<IFeedbacks[]>([]);
-  const [isMyBrandsDataFetching, setIsMyBrandsDataFetching] = React.useState<boolean>(false);
+  const [isMyBrandsDataFetching, setIsMyBrandsDataFetching] =
+    React.useState<boolean>(false);
 
   useEffect(() => {
     async function getMyBrands() {
@@ -165,10 +159,10 @@ export default function Page() {
           .from(DBTables.Brand)
           .select("*")
           .eq("ownerEmail", user?.email)
-          .range(0,10);
+          .range(0, 10);
 
         if (error) {
-          console.error("Error fetching your brands", error);
+          // console.error("Error fetching your brands", error);
         }
 
         if (data && data.length > 0) {
@@ -176,7 +170,7 @@ export default function Page() {
           setIsMyBrandsDataFetching(false);
         }
       } catch (e) {
-        console.error("Error fetching your brands");
+        // console.error("Error fetching your brands");
       } finally {
         setIsMyBrandsDataFetching(false);
       }
@@ -192,12 +186,16 @@ export default function Page() {
         .range(0, 10);
 
       if (error) {
-        console.error("Error fetching followed brands", error);
+        // console.error("Error fetching followed brands", error);
       }
 
       if (data && data.length > 0) {
         setFollowedBrandsData(data);
-        setIsFollowed(data.filter((eachBrand: IBrands) => eachBrand.followers.includes(user?.email!)).length > 0);
+        setIsFollowed(
+          data.filter((eachBrand: IBrands) =>
+            eachBrand.followers.includes(user?.email!),
+          ).length > 0,
+        );
       }
     }
 
@@ -223,30 +221,47 @@ export default function Page() {
   return (
     <section className="flex flex-row flex-nowrap">
       <section className="sticky top-20 lg:top-4 h-full space-y-2">
-        <ProfileCard myBrands={myBrandsData} followedBrands={followedBrandsData} isFollowed={isFollowed} />
+        <ProfileCard
+          followedBrands={followedBrandsData}
+          isFollowed={isFollowed}
+          myBrands={myBrandsData}
+        />
 
         <Accordion
-          showDivider={false}
           className="p-2 flex flex-col gap-1 w-full"
-          variant="shadow"
           itemClasses={accordionItemClasses}
+          showDivider={false}
+          variant="shadow"
         >
           <AccordionItem
             key="1"
             aria-label="Pending tasks"
-            classNames={{ subtitle: userDB?.bio ? "text-success" : "text-warning" }}
-            startContent={userDB?.bio ? <LucideCheck strokeWidth={3} className="text-success" /> :
-              <LucideInfo strokeWidth={3} className="text-warning" />}
-            subtitle={userDB?.bio ? "Profile completed" : "Complete your profile"}
+            classNames={{
+              subtitle: userDB?.bio ? "text-success" : "text-warning",
+            }}
+            startContent={
+              userDB?.bio ? (
+                <LucideCheck className="text-success" strokeWidth={3} />
+              ) : (
+                <LucideInfo className="text-warning" strokeWidth={3} />
+              )
+            }
+            subtitle={
+              userDB?.bio ? "Profile completed" : "Complete your profile"
+            }
             // title="Pending tasks"
           >
             {/* TODO: Make this the update profile modal. */}
             {/*<Button fullWidth onPress={() => {onOpen();}}>Update your profile</Button>*/}
-            <CreateProfileModal buttonProps={{
-              color: "default",
-              fullWidth: true,
-              startContent: <LucideUserPlus2 size={16} strokeWidth={2} />
-            }} action={E_ProfileAction.update} buttonText="Update your Profile" />
+            <CreateProfileModal
+              action={E_ProfileAction.update}
+              buttonProps={{
+                color: "default",
+                fullWidth: true,
+                startContent: <LucideUserPlus2 size={16} strokeWidth={2} />,
+              }}
+              buttonText="Update your Profile"
+            />
           </AccordionItem>
         </Accordion>
 
@@ -269,16 +284,13 @@ export default function Page() {
             </div>
             <div className="flex flex-row items-center gap-x-2">
               <span>Joined at:</span>
-              <span>
-                {user?.created_at}
-              </span>
+              <span>{user?.created_at}</span>
             </div>
           </CardBody>
         </Card>
       </section>
       <section className="space-y-12 py-4 px-8 lg:overflow-y-hidden w-full">
         {
-
           <section>
             {
               <header className="font-bold text-4xl leading-normal">
@@ -292,11 +304,11 @@ export default function Page() {
                     (myBrandsData as IBrands[])?.map((eachBrand) => (
                       <TrendingBrandCard
                         key={eachBrand.name}
-                        name={eachBrand.name}
-                        feedbackCount={Number(eachBrand.feedbackCount)}
-                        rawName={eachBrand.rawName}
                         avatarUrl={eachBrand.brandImage}
                         description={eachBrand.description}
+                        feedbackCount={Number(eachBrand.feedbackCount)}
+                        name={eachBrand.name}
+                        rawName={eachBrand.rawName}
                       />
                     ))
                   ) : (
@@ -307,7 +319,7 @@ export default function Page() {
                         width={"100%"}
                       />
                       <div className={"text-2xl text-balance"}>
-                        You haven't listed any brand yet
+                        You haven&apos;t listed any brand yet
                       </div>
 
                       <CreateBrandModal />
@@ -315,29 +327,29 @@ export default function Page() {
                   )}
                 </>
               ) : (
-                [1, 2, 3, 4].map(() => (
+                [1, 2, 3, 4].map((_) => (
                   <Card
-                    className="min-w-[280px] lg:min-w-[360px] h-[200px]"
+                    key={_}
                     as={"button"}
+                    className="min-w-[280px] lg:min-w-[360px] h-[200px]"
                   >
                     <CardBody className="flex flex-col justify-center px-8">
                       <Skeleton
-                        isLoaded={false}
                         className={"w-5/6 h-12 mt-4 rounded-full"}
+                        isLoaded={false}
                       >
-                        <div
-                          className="font-normal text-5xl leading-normal text-ellipsis whitespace-nowrap overflow-hidden">
+                        <div className="font-normal text-5xl leading-normal text-ellipsis whitespace-nowrap overflow-hidden">
                           &nbsp;
                         </div>
                       </Skeleton>
                     </CardBody>
-                    <Skeleton
-                      className="absolute left-8 bottom-8 w-2/6 h-4 font-extrabold text-sm rounded-full"></Skeleton>
+                    <Skeleton className="absolute left-8 bottom-8 w-2/6 h-4 font-extrabold text-sm rounded-full" />
                   </Card>
                 ))
               )}
             </div>
-          </section>}
+          </section>
+        }
 
         <section>
           <header className="font-bold text-4xl leading-normal">
@@ -348,17 +360,17 @@ export default function Page() {
               (followedBrandsData as IBrands[])?.map((eachBrand) => (
                 <TrendingBrandCard
                   key={eachBrand.id}
-                  name={eachBrand.name}
-                  rawName={eachBrand.rawName}
-                  feedbackCount={eachBrand.feedbackCount}
                   avatarUrl={eachBrand.brandImage}
                   description={eachBrand.description}
+                  feedbackCount={eachBrand.feedbackCount}
+                  name={eachBrand.name}
+                  rawName={eachBrand.rawName}
                 />
               ))
             ) : (
               <EmptyCard>
                 <LucideBadgeMinus size={40} strokeWidth={1} width={"100%"} />
-                You haven't listed any brand yet
+                You haven&apos;t listed any brand yet
               </EmptyCard>
             )}
           </div>
@@ -369,28 +381,29 @@ export default function Page() {
             Your Feedbacks
           </header>
           <div className="flex flex-col gap-4 px-2 py-4">
-            {!!mySentFeedbacksData && (
-              <>
-                {mySentFeedbacksData?.length > 0 ? (
-                  mySentFeedbacksData?.map((eachFeedback) => (
-                    <FeedbackCard
-                      key={eachFeedback.id}
-                      isLoaded={!isMyBrandsDataFetching}
-                      {...eachFeedback}
-                    />
-                  ))
-                ) : (
-                  <EmptyCard>
-                    <LucideBadgeMinus
-                      size={80}
-                      strokeWidth={1}
-                      width={"100%"}
-                    />
-                    You haven't sent any feedback yet
-                  </EmptyCard>
-                )}
-              </>
-            )/* : (
+            {
+              !!mySentFeedbacksData && (
+                <>
+                  {mySentFeedbacksData?.length > 0 ? (
+                    mySentFeedbacksData?.map((eachFeedback) => (
+                      <FeedbackCard
+                        key={eachFeedback.id}
+                        isLoaded={!isMyBrandsDataFetching}
+                        {...eachFeedback}
+                      />
+                    ))
+                  ) : (
+                    <EmptyCard>
+                      <LucideBadgeMinus
+                        size={80}
+                        strokeWidth={1}
+                        width={"100%"}
+                      />
+                      You haven&apos;t sent any feedback yet
+                    </EmptyCard>
+                  )}
+                </>
+              ) /* : (
               [1, 2, 3, 4].map(() => (
                 <Skeleton isLoaded={isMyFeedbacksDataFetching}>
                   <FeedbackCard />
@@ -412,11 +425,12 @@ export default function Page() {
                 //   <Skeleton className="absolute left-8 bottom-8 w-2/6 h-4 font-extrabold text-sm rounded-full"></Skeleton>
                 // </Card>
               ))
-            )*/}
+            )*/
+            }
           </div>
         </section>
 
-        <section className="">
+        {/*<section className="">
           <header className="font-bold text-4xl leading-normal">
             Your Event Feedback Invitation
           </header>
@@ -425,7 +439,7 @@ export default function Page() {
               (multipleEventsInvitesData as IEvents[])?.map(
                 (eachEventInvite) => (
                   <EventInviteCard key={eachEventInvite} {...eachEventInvite} />
-                )
+                ),
               )}
           </div>
         </section>
@@ -436,12 +450,10 @@ export default function Page() {
           </header>
           <div className="flex flex-row flex-nowrap gap-x-8 px-2 py-4 overflow-x-auto">
             {(multipleEventsInvitesData as IEvents[])?.map(
-              (eachEventInvite) => (
-                <ProductCard />
-              )
+              (eachEventInvite) => <ProductCard />,
             )}
           </div>
-        </section>
+        </section>*/}
       </section>
     </section>
   );

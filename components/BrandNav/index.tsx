@@ -1,33 +1,27 @@
 "use client";
 
 import { Listbox, ListboxItem, ListboxSection } from "@nextui-org/listbox";
-import { cn } from "@nextui-org/theme";
-import { ListboxWrapper } from "../homeNav/ListboxWrapper";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { Image } from "@nextui-org/image";
-import useRead, { useBrandRead } from "@/hooks/useRead";
-import { CreateEventModal } from "../CreateEventModal";
-import { useFeedbacksContext } from "@/context";
-import { useCallback, useEffect, useState } from "react";
-import useMyEvents from "@/hooks/useMyEvents";
-import { CreateProductModal } from "../Modals/CreateProductModal";
-import { IBrands } from "@/types";
-import { CreateFeedbackModal } from "../Modals/CreateFeedbackModal";
-import { parseImageHash } from "@/utils";
-import UpdateBrandModal from "../Modals/UpdateBrandModal";
-import { Address } from "viem";
-import { Skeleton } from "@nextui-org/skeleton";
+import { useEffect, useState } from "react";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import { Divider } from "@nextui-org/divider";
 import { Spacer } from "@nextui-org/spacer";
 import { Button } from "@nextui-org/button";
-import { DotSpacer, DynamicText } from "../TextSkeleton";
-import { supabase } from "@/utils/supabase/supabase";
-import { DBTables, E_DeviceWidth } from "@/types/enums";
 import { toast } from "sonner";
-import { useWindowSize } from "usehooks-ts";
+
+import UpdateBrandModal from "../Modals/UpdateBrandModal";
+import { CreateFeedbackModal } from "../Modals/CreateFeedbackModal";
+import { DotSpacer, DynamicText } from "../TextSkeleton";
+import { ListboxWrapper } from "../homeNav/ListboxWrapper";
+
+import { DBTables } from "@/types/enums";
+import { supabase } from "@/utils/supabase/supabase";
+import { useFeedbacksContext } from "@/context";
+import { IBrands } from "@/types";
 import EmbedFeedbacksGenerator from "@/components/sdk/EmbedFeedbacksGenerator";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const iconClasses =
   "text-xl text-default-500 pointer-events-none flex-shrink-0";
 
@@ -54,34 +48,40 @@ const categoryList = [
   },
 ];
 
-export default function BrandNav({ brandName, brandData, isBrandDataSuccessful }: { brandName?: string, brandData: IBrands, isBrandDataSuccessful: boolean }) {
+export default function BrandNav({
+  brandData,
+  isBrandDataSuccessful,
+}: {
+  brandName?: string;
+  brandData: IBrands;
+  isBrandDataSuccessful: boolean;
+}) {
   const {
-    myAddress,
     myEventInvites,
     isMyEventInvitesFetching,
     isMyEventInvitesSuccessful,
-    user
+    user,
   } = useFeedbacksContext();
-  const size = useWindowSize();
   const isFollowingBrand = brandData?.followers?.includes(user?.email!);
   const [isFollowLoading, setIsFollowLoading] = useState<boolean>(false);
 
   // Subscribe to updates on Brand Table
-  const channels = supabase.channel('custom-update-channel')
+  /*const channels = supabase
+    .channel("custom-update-channel")
     .on(
-      'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: DBTables.Brand },
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: DBTables.Brand },
       (payload) => {
-        console.log('Change received!', payload)
-      }
+        console.log("Change received!", payload);
+      },
     )
-    .subscribe()
+    .subscribe();*/
 
   // const [thisBrandData, setThisBrandData] = useState<IBrands>();
   // const [isThisBrandDataFetching, setIsThisBrandDataFetching] = useState<boolean>(false);
   // const [isThisBrandDataSuccessful, setIsThisBrandDataSuccessful] = useState<boolean>(false);
 
-/*  const {
+  /*  const {
     data: _thisBrandData,
     isFetching: isThisBrandDataFetching,
     isSuccess: isThisBrandDataSuccessful,
@@ -137,93 +137,136 @@ export default function BrandNav({ brandName, brandData, isBrandDataSuccessful }
     setIsFollowLoading(true);
 
     if (isFollowingBrand) {
-      toast.info(`You are already following ${brandData?.rawName}`, {richColors: true, duration: 3000});
+      toast.info(`You are already following ${brandData?.rawName}`, {
+        richColors: true,
+        duration: 3000,
+      });
       setIsFollowLoading(false);
+
       return;
     }
 
     try {
       const brandFollowers = brandData?.followers ?? [];
-      console.log("brand Followers", brandFollowers);
+
+      // console.log("brand Followers", brandFollowers);
       const { data, error } = await supabase
         .from(DBTables.Brand)
-        .update({ followers: [...brandFollowers, user?.email], followersCount: brandFollowers.length + 1 })
-        .eq('id', brandData?.id)
+        .update({
+          followers: [...brandFollowers, user?.email],
+          followersCount: brandFollowers.length + 1,
+        })
+        .eq("id", brandData?.id)
         .select();
 
       if (error) {
-        console.error("Error following brand", error)
-        toast.error(`Unable to follow ${brandData?.rawName}`, {richColors: true, duration: 3000});
+        // console.error("Error following brand", error);
+        toast.error(`Unable to follow ${brandData?.rawName}`, {
+          richColors: true,
+          duration: 3000,
+        });
         setIsFollowLoading(false);
       }
 
       if (data) {
-        toast.success(`You are now following ${brandData?.rawName}`, {richColors: true, duration: 3000});
+        toast.success(`You are now following ${brandData?.rawName}`, {
+          richColors: true,
+          duration: 3000,
+        });
         setIsFollowLoading(false);
       }
     } catch (error) {
-      console.error("Error following brand", error)
-      toast.error(`Unable to follow ${brandData?.rawName}`, {richColors: true, duration: 3000});
-    } finally {
-      setIsFollowLoading(false);
-    }
-  }
-
-  const handleUnFollowBrand = async () => {
-    setIsFollowLoading(true);
-
-    if (!isFollowingBrand) {
-      toast.info(`You are not following ${brandData?.rawName}`, { richColors: true, duration: 3000 });
-      setIsFollowLoading(false);
-      return;
-    }
-
-    try {
-      const brandFollowers = brandData?.followers ?? [];
-      const updatedBrandFollowers = brandFollowers.filter(email => email !== user?.email);
-
-      const { data, error } = await supabase
-        .from(DBTables.Brand)
-        .update({ followers: updatedBrandFollowers, followersCount: updatedBrandFollowers.length })
-        .eq('id', brandData?.id)
-        .select();
-
-      if (error) {
-        console.error("Error unfollowing brand", error);
-        toast.error(`Unable to unfollow ${brandData?.rawName}`, { richColors: true, duration: 3000 });
-        setIsFollowLoading(false);
-      }
-
-      if (data) {
-        toast.success(`You have unfollowed ${brandData?.rawName}`, { richColors: true, duration: 3000 });
-        setIsFollowLoading(false);
-      }
-    } catch (error) {
-      console.error("Error unfollowing brand", error);
-      toast.error(`Unable to unfollow ${brandData?.rawName}`, { richColors: true, duration: 3000 });
+      // console.error("Error following brand", error);
+      toast.error(`Unable to follow ${brandData?.rawName}`, {
+        richColors: true,
+        duration: 3000,
+      });
     } finally {
       setIsFollowLoading(false);
     }
   };
 
-  const actionsList = brandData?.ownerEmail === user?.email ? [
-     {
-      text: "Update Brand",
-      description: "",
-      modal: (
-        <UpdateBrandModal
-          brandId={brandData ? brandData?.id : null}
-          fullWidth={true}
-        />
-      ),
-    },
-      {
-        text: "Embed Feedback",
-        description: "Embed Feedbacks to your App",
-        modal: <EmbedFeedbacksGenerator apiKey={brandData?.userApiKey!} fullWidth={true} />
-      }]
-    : [
-      /*{
+  const handleUnFollowBrand = async () => {
+    setIsFollowLoading(true);
+
+    if (!isFollowingBrand) {
+      toast.info(`You are not following ${brandData?.rawName}`, {
+        richColors: true,
+        duration: 3000,
+      });
+      setIsFollowLoading(false);
+
+      return;
+    }
+
+    try {
+      const brandFollowers = brandData?.followers ?? [];
+      const updatedBrandFollowers = brandFollowers.filter(
+        (email) => email !== user?.email,
+      );
+
+      const { data, error } = await supabase
+        .from(DBTables.Brand)
+        .update({
+          followers: updatedBrandFollowers,
+          followersCount: updatedBrandFollowers.length,
+        })
+        .eq("id", brandData?.id)
+        .select();
+
+      if (error) {
+        // console.error("Error unfollowing brand", error);
+        toast.error(`Unable to unfollow ${brandData?.rawName}`, {
+          richColors: true,
+          duration: 3000,
+        });
+        setIsFollowLoading(false);
+      }
+
+      if (data) {
+        toast.success(`You have unfollowed ${brandData?.rawName}`, {
+          richColors: true,
+          duration: 3000,
+        });
+        setIsFollowLoading(false);
+      }
+    } catch (error) {
+      // console.error("Error unfollowing brand", error);
+      toast.error(`Unable to unfollow ${brandData?.rawName}`, {
+        richColors: true,
+        duration: 3000,
+      });
+    } finally {
+      setIsFollowLoading(false);
+    }
+  };
+
+  const actionsList =
+    brandData?.ownerEmail === user?.email
+      ? [
+          {
+            text: "Update Brand",
+            description: "",
+            modal: (
+              <UpdateBrandModal
+                brandId={brandData ? brandData?.id : null}
+                fullWidth={true}
+              />
+            ),
+          },
+          {
+            text: "Embed Feedback",
+            description: "Embed Feedbacks to your App",
+            modal: (
+              <EmbedFeedbacksGenerator
+                apiKey={brandData?.userApiKey!}
+                fullWidth={true}
+              />
+            ),
+          },
+        ]
+      : [
+          /*{
       text: "Add Event",
       description: "Add event modal",
       modal: (
@@ -242,17 +285,17 @@ export default function BrandNav({ brandName, brandData, isBrandDataSuccessful }
         />
       ),
     },*/
-    {
-      text: "Add Feedback",
-      description: "Add Feedback modal",
-      modal: (
-        <CreateFeedbackModal
-          brandId={brandData ? brandData?.id : null}
-          fullWidth={true}
-        />
-      ),
-    }
-    ];
+          {
+            text: "Add Feedback",
+            description: "Add Feedback modal",
+            modal: (
+              <CreateFeedbackModal
+                brandId={brandData ? brandData?.id : null}
+                fullWidth={true}
+              />
+            ),
+          },
+        ];
 
   useEffect(() => {
     if (!isMyEventInvitesFetching) {
@@ -263,22 +306,21 @@ export default function BrandNav({ brandName, brandData, isBrandDataSuccessful }
     <ListboxWrapper>
       <ScrollShadow hideScrollBar>
         <Listbox
-          variant="flat"
           aria-label="Listbox menu with sections"
           className="flex flex-row flex-nowrap"
           emptyContent="No Categories"
+          variant="flat"
         >
           <ListboxItem key={"brandProfile"} textValue="brandProfile">
-            <Card isPressable={false} className="max-sm:grid max-sm:grid-cols-3 lg:grid-cols-none py-0 bg-default-200 dark:bg-default-50 shadow-none">
+            <Card
+              className="max-sm:grid max-sm:grid-cols-3 lg:grid-cols-none py-0 bg-default-200 dark:bg-default-50 shadow-none"
+              isPressable={false}
+            >
               <CardBody className="overflow-visible px-2">
                 <Image
                   alt="Card background"
                   className="object-cover rounded-xl size-32 lg:size-72"
-                  src={
-                    (brandData &&
-                      brandData?.brandImage) ||
-                    ""
-                  }
+                  src={(brandData && brandData?.brandImage) || ""}
                   // width={size.width <= E_DeviceWidth.phone ? 120 : 270}
                   // height={size.width <= E_DeviceWidth.phone ? 120 : 270}
                 />
@@ -289,29 +331,50 @@ export default function BrandNav({ brandName, brandData, isBrandDataSuccessful }
                 <h4 className="font-bold text-3xl leading-normal">
                   {brandData && brandData?.rawName}
                 </h4>
-                 {/*{brandData?.ownerEmail}*/}
+                {/*{brandData?.ownerEmail}*/}
                 <div className="flex items-center gap-1">
                   <DynamicText
-                    isLoaded={isBrandDataSuccessful}
                     data={brandData?.followersCount}
-                    textSingular="Follower"
+                    isLoaded={isBrandDataSuccessful}
                     textPlural="Followers"
+                    textSingular="Follower"
                   />
                   <DotSpacer />
                   <DynamicText
-                    isLoaded={isBrandDataSuccessful}
                     data={brandData?.feedbackCount}
-                    textSingular="Feedback"
+                    isLoaded={isBrandDataSuccessful}
                     textPlural="Feedbacks"
+                    textSingular="Feedback"
                   />
                 </div>
                 <Spacer y={2} />
-                <div onClick={!user?.email ? () => toast("You need to login to follow a brand") : () => {}}>
-                  {isFollowingBrand
-                    ? <Button color={"danger"} variant={"solid"} onPress={handleUnFollowBrand} isLoading={isFollowLoading}>Unfollow</Button>
-                    : <Button color={"primary"} onPress={handleFollowBrand} isLoading={isFollowLoading} isDisabled={!user?.email}>Follow</Button>
+                <Button
+                  onClick={
+                    !user?.email
+                      ? () => toast("You need to login to follow a brand")
+                      : () => {}
                   }
-                </div>
+                >
+                  {isFollowingBrand ? (
+                    <Button
+                      color={"danger"}
+                      isLoading={isFollowLoading}
+                      variant={"solid"}
+                      onPress={handleUnFollowBrand}
+                    >
+                      Unfollow
+                    </Button>
+                  ) : (
+                    <Button
+                      color={"primary"}
+                      isDisabled={!user?.email}
+                      isLoading={isFollowLoading}
+                      onPress={handleFollowBrand}
+                    >
+                      Follow
+                    </Button>
+                  )}
+                </Button>
                 {myEventInvites?.length > 0 && (
                   <section className="space-y-3 w-full">
                     <Spacer y={4} />
@@ -320,12 +383,12 @@ export default function BrandNav({ brandName, brandData, isBrandDataSuccessful }
                     <Button
                       fullWidth
                       color="danger"
-                      variant="shadow"
                       startContent={
                         <span className="font-bold">
                           {myEventInvites?.length}
                         </span>
                       }
+                      variant="shadow"
                     >
                       {myEventInvites?.length > 1
                         ? "Pending Invites"
@@ -346,27 +409,28 @@ export default function BrandNav({ brandName, brandData, isBrandDataSuccessful }
             </Card>
           </ListboxItem>
           <ListboxSection
-            title="Actions"
-            // showDivider
             className="grow shrink-0 lg:space-y-4 px-2 lg:px-4"
-            items={actionsList}
+            classNames={{
+              base: "",
+              group:
+                "lg:space-y-4 max-sm:flex max-sm:flex-row max-sm:items-center",
+              heading: "max-sm:hidden text-2xl font-bold lg:py-4",
+            }}
             itemClasses={{
               base: "",
               wrapper: "",
             }}
-            classNames={{
-              base: "",
-              group: "lg:space-y-4 max-sm:flex max-sm:flex-row max-sm:items-center",
-              heading: "max-sm:hidden text-2xl font-bold lg:py-4",
-            }}
+            items={actionsList}
+            title="Actions"
+            // showDivider
           >
             {(eachAction) => (
               <ListboxItem
                 key={eachAction.text.toLocaleLowerCase()}
+                className={""}
+                classNames={{ base: "max-sm:grow" }}
                 // description={eachAction.description}
                 textValue={eachAction.text}
-                className={""}
-                classNames={{base: "max-sm:grow"}}
               >
                 {eachAction.modal}
               </ListboxItem>
@@ -374,31 +438,31 @@ export default function BrandNav({ brandName, brandData, isBrandDataSuccessful }
           </ListboxSection>
           <ListboxSection
             hidden
-            title="Categories"
             showDivider
             className="grow shrink-0 space-y-4 px-4"
-            items={categoryList}
-            itemClasses={{
-              base: "",
-              wrapper: "",
-            }}
             classNames={{
               base: "",
               group: "space-y-4",
               heading: "text-base py-4",
             }}
+            itemClasses={{
+              base: "",
+              wrapper: "",
+            }}
+            items={categoryList}
+            title="Categories"
           >
             {(eachCategory) => (
               <ListboxItem
                 key={eachCategory.name.toLowerCase()}
-                description={eachCategory.description}
                 className=""
+                description={eachCategory.description}
               >
                 {eachCategory.name}
               </ListboxItem>
             )}
           </ListboxSection>
-          <ListboxSection hidden title="Danger zone" className="grow-0 shrink">
+          <ListboxSection hidden className="grow-0 shrink" title="Danger zone">
             <ListboxItem
               key="delete"
               className="text-danger"

@@ -1,5 +1,3 @@
-import EmbedFeedbacksGenerator from "@/components/sdk/EmbedFeedbacksGenerator";
-
 export default function EmbedGeneratorPage() {
   return (
     <main className="min-h-screen flex items-center justify-center p-6">

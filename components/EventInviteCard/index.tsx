@@ -1,5 +1,3 @@
-import { useBrandRead } from "@/hooks/useRead";
-import { IBrands, IEvents } from "@/types";
 import { parseZonedDateTime } from "@internationalized/date";
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
 import { Button } from "@nextui-org/button";
@@ -8,25 +6,22 @@ import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
 import { Divider } from "@nextui-org/divider";
 import { Image } from "@nextui-org/image";
 import { Link } from "@nextui-org/link";
-import { Tooltip } from "@nextui-org/tooltip";
 import {
   LucideCalendarRange,
   LucideCheck,
   LucideGlobe,
   LucideMapPin,
 } from "lucide-react";
-import { UserPopupCard } from "../UserCard/UserPopupCard";
-import { BrandPopupCard } from "../BrandCard/BrandPopupCard";
-import { useWriteContract } from "wagmi";
-import { EVENT_ABI, EVENT_ADDRESS } from "@/constant";
+
+import { IEvents } from "@/types";
 
 export default function EventInviteCard(eventProps: IEvents) {
-  const { data: brandData } = useBrandRead({
+  /*const { data: brandData } = useBrandRead({
     functionName: "getBrand",
     args: [Number(eventProps?.eventBasicInfo.createEventBasicInfo.brandId)],
   });
 
-  const { writeContract, isPending, isSuccess, isError } = useWriteContract();
+  const { writeContract } = useWriteContract();
 
   const handleAcceptEventInvite = () => {
     writeContract({
@@ -50,7 +45,7 @@ export default function EventInviteCard(eventProps: IEvents) {
         (brandData as IBrands)?.brandId,
       ],
     });
-  };
+  };*/
 
   return (
     <Card className="w-[320px]">
@@ -67,24 +62,24 @@ export default function EventInviteCard(eventProps: IEvents) {
             {eventProps?.eventBasicInfo.createEventBasicInfo?.name}
           </p>
 
-          <Tooltip
-            placement="bottom"
-            content={
-              <BrandPopupCard
-                imageHash={(brandData as IBrands)?.imageHash}
-                rawName={(brandData as IBrands)?.rawName}
-                userName={(brandData as IBrands)?.name}
-                followersCount={(brandData as IBrands)?.followersCount}
-                feedbackCount={(brandData as IBrands)?.feedbackCount}
-                brandId={(brandData as IBrands)?.brandId}
-              />
-            }
-          >
-            {/* <Button variant="bordered">Hover me</Button> */}
-            <p className="text-small text-default-500">
-              by {(brandData as IBrands)?.name}
-            </p>
-          </Tooltip>
+          {/*<Tooltip*/}
+          {/*  content={*/}
+          {/*    <BrandPopupCard*/}
+          {/*      brandId={(brandData as IBrands)?.brandId!}*/}
+          {/*      feedbackCount={(brandData as IBrands)?.feedbackCount}*/}
+          {/*      followersCount={(brandData as IBrands)?.followersCount}*/}
+          {/*      imageHash={(brandData as IBrands)?.imageHash!}*/}
+          {/*      rawName={(brandData as IBrands)?.rawName}*/}
+          {/*      userName={(brandData as IBrands)?.name}*/}
+          {/*    />*/}
+          {/*  }*/}
+          {/*  placement="bottom"*/}
+          {/*>*/}
+          {/*  /!* <Button variant="bordered">Hover me</Button> *!/*/}
+          {/*  <p className="text-small text-default-500">*/}
+          {/*    by {(brandData as IBrands)?.name}*/}
+          {/*  </p>*/}
+          {/*</Tooltip>*/}
         </div>
       </CardHeader>
       <CardBody className="gap-y-3">
@@ -97,7 +92,7 @@ export default function EventInviteCard(eventProps: IEvents) {
 
           <Card className="text-sm mt-2" isHoverable={true}>
             <CardBody className="flex flex-row items-center gap-x-3">
-              <LucideMapPin size={14} color="tomato" />
+              <LucideMapPin color="tomato" size={14} />
               <span>
                 {eventProps?.eventBasicInfo.createEventBasicInfo?.eventLocation}
               </span>
@@ -123,11 +118,11 @@ export default function EventInviteCard(eventProps: IEvents) {
           <AccordionItem
             key="1"
             aria-label="Event Dates"
-            startContent={<LucideCalendarRange size={16} />}
-            title="See Event Dates"
             classNames={{
               title: "text-sm",
             }}
+            startContent={<LucideCalendarRange size={16} />}
+            title="See Event Dates"
           >
             <Calendar
               // classNames={{
@@ -141,18 +136,18 @@ export default function EventInviteCard(eventProps: IEvents) {
               //   gridHeaderCell: "text-[8px]",
               //   cellButton: "bg-orange-500 text-[8px] w-4 h-4",
               // }}
+              isReadOnly
               aria-label="Date (Read Only)"
-              minValue={parseZonedDateTime(
-                eventProps?.eventBasicInfo.createEventBasicInfo?.eventStartDate
+              focusedValue={parseZonedDateTime(
+                eventProps?.eventBasicInfo.createEventBasicInfo?.eventEndDate,
               )}
               maxValue={parseZonedDateTime(
-                eventProps?.eventBasicInfo.createEventBasicInfo?.eventEndDate
+                eventProps?.eventBasicInfo.createEventBasicInfo?.eventEndDate,
               )}
-              focusedValue={parseZonedDateTime(
-                eventProps?.eventBasicInfo.createEventBasicInfo?.eventEndDate
+              minValue={parseZonedDateTime(
+                eventProps?.eventBasicInfo.createEventBasicInfo?.eventStartDate,
               )}
               weekdayStyle="short"
-              isReadOnly
             />
           </AccordionItem>
         </Accordion>
@@ -161,18 +156,18 @@ export default function EventInviteCard(eventProps: IEvents) {
       {/* <Divider /> */}
       <CardFooter className="gap-x-4">
         <Button
-          variant="solid"
-          color="success"
           className="flex-auto"
-          onClick={handleAcceptEventInvite}
+          color="success"
           startContent={<LucideCheck size={16} strokeWidth={4} />}
+          variant="solid"
+          // onClick={handleAcceptEventInvite}
         >
           Accept Invite
         </Button>
         <Button
-          variant="solid"
           color="danger"
-          onClick={handleRejectEventInvite}
+          variant="solid"
+          // onClick={handleRejectEventInvite}
         >
           Reject
         </Button>

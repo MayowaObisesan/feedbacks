@@ -1,6 +1,6 @@
 export default async function handler(req: any, res: any) {
   if (req.method === "POST") {
-    const { method, params } = req.body;
+    const { method } = req.body;
 
     switch (method) {
       case "eth_accounts":
@@ -14,8 +14,10 @@ export default async function handler(req: any, res: any) {
   res.status(405).json({ error: "Method not allowed" });
 }
 
-
-export async function POST(request, {params}) {
+/*
+export async function POST(request, { params }) {
   const id = params.id;
-  return Response.json({ status: "ok" })
+
+  return Response.json({ status: "ok" });
 }
+*/

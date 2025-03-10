@@ -11,7 +11,12 @@ interface CameraIconProps {
   [key: string]: any;
 }
 
-export const CheckIcon: React.FC<CameraIconProps> = ({ size, height, width, ...props }) => {
+export const CheckIcon: React.FC<CameraIconProps> = ({
+  size,
+  height,
+  width,
+  ...props
+}) => {
   return (
     <svg
       fill="none"

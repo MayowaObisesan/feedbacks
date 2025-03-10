@@ -3,12 +3,6 @@
 import { Link } from "@nextui-org/link";
 import { Snippet } from "@nextui-org/snippet";
 import { Code } from "@nextui-org/code";
-import { button as buttonStyles } from "@nextui-org/theme";
-
-import { siteConfig } from "@/config/site";
-import { title, subtitle } from "@/components/primitives";
-import { GithubIcon } from "@/components/icons";
-import HomeNav from "@/components/homeNav";
 
 export default function Page() {
   return (
@@ -18,16 +12,15 @@ export default function Page() {
       </section>*/}
       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
         <section className={"text-left w-full px-3 space-y-2"}>
-          <div className={"font-bold text-2xl"}>
-            All your
-          </div>
+          <div className={"font-bold text-2xl"}>All your</div>
           <div
-            className={"font-extrabold text-7xl lg:text-9xl tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-[#000000] to-[#4b4b4b] dark:from-[#FFFFFF] dark:to-[#4B4B4B]"}>
+            className={
+              "font-extrabold text-7xl lg:text-9xl tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-[#000000] to-[#4b4b4b] dark:from-[#FFFFFF] dark:to-[#4B4B4B]"
+            }
+          >
             Feedbacks
           </div>
-          <div className={"font-bold text-5xl"}>
-            in one place
-          </div>
+          <div className={"font-bold text-5xl"}>in one place</div>
         </section>
 
         {/*<div className={title({ color: "foreground", size: "3xl" })}>

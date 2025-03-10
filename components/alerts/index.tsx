@@ -8,7 +8,7 @@ interface IAlertProps {
 export const DefaultAlert = ({ header, body }: IAlertProps) => {
   return (
     <Card>
-      {header !== "" && <CardHeader></CardHeader>}
+      {header !== "" && <CardHeader />}
       <CardBody>{body}</CardBody>
     </Card>
   );

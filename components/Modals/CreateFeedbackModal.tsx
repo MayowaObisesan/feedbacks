@@ -1,6 +1,5 @@
 "use client";
 
-import { FEEDBACK_ADDRESS, FEEDBACKS_ABI } from "@/constant";
 import { Button } from "@nextui-org/button";
 import { Textarea } from "@nextui-org/input";
 import {
@@ -12,11 +11,12 @@ import {
   useDisclosure,
 } from "@nextui-org/modal";
 import { LucidePlus } from "lucide-react";
-import { memo, useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { useWriteContract } from "wagmi";
-import Rating from "../RatingStars/Rating";
+// import { useWriteContract } from "wagmi";
+
 import RatingComponent from "../RatingStars/RatingComponent";
+
 import { RatingTag } from "@/utils";
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";
@@ -43,23 +43,25 @@ const feedbackSampleList = [
 
 function getRandomFeedback(feedbackList: string[]) {
   const randomIndex = Math.floor(Math.random() * feedbackList.length);
+
   return feedbackList[randomIndex];
 }
 
 export function CreateFeedbackModal({
   brandId,
   buttonText = "Create Feedback",
-  fullWidth = false
+  fullWidth = false,
 }: {
   brandId: number | null;
   buttonText?: string;
   fullWidth?: boolean;
 }) {
-  const {user} = useFeedbacksContext();
+  const { user } = useFeedbacksContext();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
-  const { writeContract, isPending, isSuccess, isError } = useWriteContract();
+  // const { writeContract, isPending, isSuccess, isError } = useWriteContract();
   const [feedbackContent, setFeedbackContent] = useState<string>("");
   const [rating, setRating] = useState<number | null>(2);
+  const [isSubmitPending, setIsSubmitPending] = useState(false);
 
   const onCreateFeedback = async () => {
     /*writeContract({
@@ -69,53 +71,63 @@ export function CreateFeedbackModal({
       args: [brandId, feedbackContent, 0, 0, rating], // 0, 0 because I am just creating this feedback for a brand and not for a product nor event
     });*/
 
-    const { data, error } = await supabase
-      .from(DBTables.Feedback)
-      .insert([{
-        recipientId: brandId,
-        title: "",
-        email: user?.email,
-        description: feedbackContent,
-        eventId: null,
-        productId: null,
-        starRating: rating
-      }])
-      .select();
+    setIsSubmitPending(true);
 
-    // const {data: brand, error: brandError} = await supabase
-    //   .from(DBTables.Brand)
-    //   .select("*")
-    //   .eq('id', brandId);
+    try {
+      const { data, error } = await supabase
+        .from(DBTables.Feedback)
+        .insert([
+          {
+            recipientId: brandId,
+            title: "",
+            email: user?.email,
+            description: feedbackContent,
+            eventId: null,
+            productId: null,
+            starRating: rating,
+          },
+        ])
+        .select();
 
-    const {data: feedbacks, count, error: feedbackError} = await supabase
-      .from(DBTables.Feedback)
-      .select('*', {count: 'exact', head: true})
-      .eq('recipientId', brandId)
+      // const {data: brand, error: brandError} = await supabase
+      //   .from(DBTables.Brand)
+      //   .select("*")
+      //   .eq('id', brandId);
 
-    console.log("Feedbacks data", feedbacks, count)
+      const { count } = await supabase
+        .from(DBTables.Feedback)
+        .select("*", { count: "exact", head: true })
+        .eq("recipientId", brandId);
 
-    // Update the brands parameters also.
-    if (count! > 0) {
-      await supabase
-        .from(DBTables.Brand)
-        .update({
-          feedbackCount: count
-        })
-        .eq('id', brandId)
-    }
+      // console.log("Feedbacks data", feedbacks, count);
 
-    if (data) {
-      onClose();
-      toast.success("Feedback created successfully.");
-    }
+      // Update the brands parameters also.
+      if (count! > 0) {
+        await supabase
+          .from(DBTables.Brand)
+          .update({
+            feedbackCount: count,
+          })
+          .eq("id", brandId);
+      }
 
-    if (error) {
-      console.error("error creating feedback", error);
+      if (data) {
+        onClose();
+        toast.success("Feedback created successfully.");
+      }
+
+      if (error) {
+        // console.error("error creating feedback", error);
+        toast.error("Error creating your feedback. Kindly try again.");
+      }
+    } catch (e) {
       toast.error("Error creating your feedback. Kindly try again.");
+    } finally {
+      setIsSubmitPending(false);
     }
   };
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (isSuccess) {
       onClose();
       toast.success("Feedback created successfully.");
@@ -124,24 +136,20 @@ export function CreateFeedbackModal({
     if (isError) {
       toast.error("Unable to create Feedback");
     }
-  }, [isSuccess, isError]);
+  }, [isSuccess, isError]);*/
 
   return (
     <>
       <Button
-        onPress={onOpen}
         color="success"
-        variant="shadow"
-        startContent={<LucidePlus size={16} strokeWidth={4} />}
         fullWidth={fullWidth}
+        startContent={<LucidePlus size={16} strokeWidth={4} />}
+        variant="shadow"
+        onPress={onOpen}
       >
         {buttonText}
       </Button>
       <Modal
-        isOpen={isOpen}
-        isDismissable={false}
-        onOpenChange={onOpenChange}
-        placement="auto"
         backdrop="opaque"
         classNames={{
           base: "px-3 py-4",
@@ -149,8 +157,13 @@ export function CreateFeedbackModal({
             "bg-gradient-to-t from-zinc-900 to-zinc-900/80 backdrop-opacity-90",
         }}
         hideCloseButton={false}
+        isDismissable={false}
+        isOpen={isOpen}
+        placement="auto"
+        onOpenChange={onOpenChange}
       >
         <ModalContent>
+          {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1 font-bold">
@@ -159,15 +172,15 @@ export function CreateFeedbackModal({
               <ModalBody className="space-y-2">
                 <Textarea
                   isRequired
-                  label="Your Feedback"
-                  labelPlacement="outside"
-                  placeholder={`e.g., ${getRandomFeedback(feedbackSampleList)}`}
                   className=""
-                  value={feedbackContent}
-                  onValueChange={setFeedbackContent}
                   classNames={{
                     input: "placeholder:text-default-300",
                   }}
+                  label="Your Feedback"
+                  labelPlacement="outside"
+                  placeholder={`e.g., ${getRandomFeedback(feedbackSampleList)}`}
+                  value={feedbackContent}
+                  onValueChange={setFeedbackContent}
                 />
                 <div className="space-y-2">
                   <div className="text-small">Set a Rating</div>
@@ -188,11 +201,11 @@ export function CreateFeedbackModal({
               <ModalFooter>
                 <Button
                   color="primary"
-                  onPress={onCreateFeedback}
-                  isLoading={isPending}
                   isDisabled={feedbackContent === ""}
+                  isLoading={isSubmitPending}
+                  onPress={onCreateFeedback}
                 >
-                  {isPending ? "Submit..." : "Submit"}
+                  Submit
                 </Button>
               </ModalFooter>
             </>

@@ -8,4 +8,4 @@ export default function EmbedPage() {
       <FeedbacksForm isPreview={false} />
     </div>
   );
-};
+}

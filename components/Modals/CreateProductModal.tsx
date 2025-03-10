@@ -1,15 +1,8 @@
 "use client";
 
-import {
-  FEEDBACK_ADDRESS,
-  FEEDBACKS_ABI,
-  PRODUCT_ABI,
-  PRODUCT_ADDRESS,
-} from "@/constant";
-import { useFeedbacksContext } from "@/context";
 import { Avatar } from "@nextui-org/avatar";
 import { Button } from "@nextui-org/button";
-import { Card, CardBody } from "@nextui-org/card";
+import { Card } from "@nextui-org/card";
 import { Image } from "@nextui-org/image";
 import { Input, Textarea } from "@nextui-org/input";
 import {
@@ -22,7 +15,6 @@ import {
 } from "@nextui-org/modal";
 import axios from "axios";
 import {
-  LucideCamera,
   LucideCheckCheck,
   LucidePlus,
   LucideUpload,
@@ -31,8 +23,12 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useWriteContract } from "wagmi";
-import { CameraIcon } from "../icons/CameraIcon";
 import { Chip } from "@nextui-org/chip";
+
+import { CameraIcon } from "../icons/CameraIcon";
+
+// import { useFeedbacksContext } from "@/context";
+import { PRODUCT_ABI, PRODUCT_ADDRESS } from "@/constant";
 
 export function CreateProductModal({
   brandId,
@@ -41,7 +37,7 @@ export function CreateProductModal({
   brandId: number | null;
   buttonText?: string;
 }) {
-  const { myProfileData } = useFeedbacksContext();
+  // const { myProfileData } = useFeedbacksContext();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const { writeContract, isPending, isSuccess, isError } = useWriteContract();
   const [productName, setProductName] = useState<string>("");
@@ -81,10 +77,11 @@ export function CreateProductModal({
   }, [isSuccess, isError]);
 
   const sendFileToIPFS = async () => {
-    console.log(dp, process.env.NEXT_PUBLIC_PINATA_JWT);
+    // console.log(dp, process.env.NEXT_PUBLIC_PINATA_JWT);
     if (dp) {
       try {
         const formData = new FormData();
+
         formData.append("file", dp);
 
         setisDpUploading(true);
@@ -100,8 +97,9 @@ export function CreateProductModal({
           },
         });
 
-        const ImgHash = `https://moccasin-many-grasshopper-363.mypinata.cloud/ipfs/${resFile.data.IpfsHash}`;
-        console.log(ImgHash);
+        // const ImgHash = `https://moccasin-many-grasshopper-363.mypinata.cloud/ipfs/${resFile.data.IpfsHash}`;
+
+        // console.log(ImgHash);
         imageHashRef.current = resFile?.data?.IpfsHash;
         setImageHash(resFile?.data?.IpfsHash);
         setImageUploadSuccessful(true);
@@ -109,8 +107,8 @@ export function CreateProductModal({
         //Take a look at your Pinata Pinned section, you will see a new file added to you list.
         toast.success("Dp uploaded successfully");
       } catch (error) {
-        console.log("Error sending File to IPFS: ");
-        console.log(error);
+        // console.log("Error sending File to IPFS: ");
+        // console.log(error);
         toast.error("Error uploading display picture");
         setImageUploadSuccessful(false);
       } finally {
@@ -122,6 +120,7 @@ export function CreateProductModal({
 
   const handleTriggerDpChange = (event: any) => {
     const selectedImage = event.target.files[0];
+
     setDp(selectedImage);
     setDpPreview(URL.createObjectURL(selectedImage));
     setImageUploadPending(true);
@@ -137,18 +136,14 @@ export function CreateProductModal({
   return (
     <>
       <Button
-        onPress={onOpen}
         color="success"
-        variant="shadow"
         startContent={<LucidePlus size={16} strokeWidth={4} />}
+        variant="shadow"
+        onPress={onOpen}
       >
         {buttonText}
       </Button>
       <Modal
-        isOpen={isOpen}
-        isDismissable={false}
-        onOpenChange={onOpenChange}
-        placement="auto"
         backdrop="opaque"
         classNames={{
           base: "px-3 py-4",
@@ -156,8 +151,13 @@ export function CreateProductModal({
             "bg-gradient-to-t from-zinc-900 to-zinc-900/80 backdrop-opacity-90",
         }}
         hideCloseButton={false}
+        isDismissable={false}
+        isOpen={isOpen}
+        placement="auto"
+        onOpenChange={onOpenChange}
       >
         <ModalContent>
+          {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
@@ -167,33 +167,33 @@ export function CreateProductModal({
                 <div className="flex flex-col items-center gap-y-4 shrink-0 my-4 w-full">
                   {imageUploadPending && (
                     <Chip
-                      color="warning"
-                      variant="flat"
-                      radius="sm"
                       className="w-full text-sm"
+                      color="warning"
+                      radius="sm"
+                      variant="flat"
                     >
-                      You haven't uploaded the profile image
+                      You haven&apos;t uploaded the profile image
                     </Chip>
                   )}
                   <div className={"relative inline-block"}>
                     <Card>
                       <Image
-                        width={360}
-                        height={160}
-                        alt=""
-                        src={dpPreview}
-                        className="object-cover"
                         isZoomed
+                        alt=""
+                        className="object-cover"
+                        height={160}
+                        src={dpPreview}
+                        width={360}
                       />
                     </Card>
                     <div className="">
                       {dpPreview && (
                         <Avatar
+                          isBordered
+                          className="z-10 absolute -bottom-2 -left-2"
+                          color="success"
                           size="lg"
                           src={dpPreview}
-                          isBordered
-                          color="success"
-                          className="z-10 absolute -bottom-2 -left-2"
                         />
                       )}
                       {/* <div
@@ -216,8 +216,8 @@ export function CreateProductModal({
                     {dpPreview && (
                       <Button
                         isIconOnly
-                        color="danger"
                         className={"absolute -top-2 -right-2 z-10 btn-error"}
+                        color="danger"
                         radius="full"
                         onClick={removeProfileUpload}
                       >
@@ -228,47 +228,47 @@ export function CreateProductModal({
                   {!dpPreview ? (
                     <Button
                       as={"label"}
-                      htmlFor={"id-avatar-dp"}
-                      title="Select dp"
                       className="mt-4"
+                      htmlFor={"id-avatar-dp"}
                       startContent={<CameraIcon />}
+                      title="Select dp"
                     >
                       {/* <LucideCamera /> */}
                       Select Product Image
                       <Input
-                        type="file"
-                        name=""
-                        id="id-avatar-dp"
-                        className="hidden"
-                        onChange={handleTriggerDpChange}
                         ref={profileImageRef}
+                        className="hidden"
+                        id="id-avatar-dp"
+                        name=""
+                        type="file"
+                        onChange={handleTriggerDpChange}
                       />
                     </Button>
                   ) : (
                     <>
                       {!imageUploadSuccessful ? (
                         <Button
-                          color="success"
-                          onClick={sendFileToIPFS}
-                          isLoading={isDpUploading}
                           className="mt-8 font-bold"
+                          color="success"
+                          isLoading={isDpUploading}
                           startContent={
                             !isDpUploading && (
                               <LucideUpload size={16} strokeWidth={4} />
                             )
                           }
+                          onClick={sendFileToIPFS}
                         >
                           {!isDpUploading ? "Upload Image" : ""}
                         </Button>
                       ) : (
                         <Button
+                          isDisabled
+                          className="mt-8 font-bold"
                           color="success"
                           isLoading={isDpUploading}
-                          className="mt-8 font-bold"
                           startContent={
                             <LucideCheckCheck size={16} strokeWidth={4} />
                           }
-                          isDisabled
                         >
                           Image Uploaded
                         </Button>
@@ -277,18 +277,18 @@ export function CreateProductModal({
                   )}
                 </div>
                 <Input
+                  // autoFocus
                   isRequired
-                  autoFocus
                   label="Username"
                   placeholder="e.g., Samsung S25"
-                  variant="flat"
                   value={productName}
+                  variant="flat"
                   onValueChange={setProductName}
                 />
                 <Textarea
+                  className=""
                   label="Description"
                   placeholder="The latest flagship of the Samsung Galaxy lineups"
-                  className=""
                   value={description}
                   onValueChange={setDescription}
                 />
@@ -296,8 +296,8 @@ export function CreateProductModal({
               <ModalFooter>
                 <Button
                   color="primary"
-                  onPress={onCreateProduct}
                   isLoading={isPending}
+                  onPress={onCreateProduct}
                 >
                   {isPending ? "Creating..." : "Create"}
                 </Button>

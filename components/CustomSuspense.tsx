@@ -8,12 +8,17 @@ interface CustomSuspenseProps {
   children: React.ReactNode;
 }
 
-const CustomSuspense: React.FC<CustomSuspenseProps> = ({ delay = 0, fallback, children }) => {
+const CustomSuspense: React.FC<CustomSuspenseProps> = ({
+  delay = 0,
+  fallback,
+  children,
+}) => {
   const [showFallback, setShowFallback] = React.useState(delay === 0);
 
   React.useEffect(() => {
     if (delay > 0) {
       const timer = setTimeout(() => setShowFallback(true), delay);
+
       return () => clearTimeout(timer);
     }
   }, [delay]);

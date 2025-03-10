@@ -1,7 +1,7 @@
-import { formatDate, parseImageHash } from "@/utils";
-import { parseDateTime } from "@internationalized/date";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { Image } from "@nextui-org/image";
+
+import { parseImageHash } from "@/utils";
 
 interface IProductCard {
   productId: number;

@@ -1,34 +1,20 @@
 "use client";
 
+import { Card, CardBody } from "@nextui-org/card";
+import { ScrollShadow } from "@nextui-org/scroll-shadow";
+
 import { supabase } from "@/utils/supabase/supabase";
 import FeedbackCard from "@/components/FeedbackCard";
 import HomeNav from "@/components/homeNav";
 import { TrendingBrandCard } from "@/components/TrendingCard";
-import { FEEDBACK_ADDRESS, FEEDBACKS_ABI } from "@/constant";
 import { useFeedbacksContext } from "@/context";
-import useContractEvent from "@/hooks/useContractEvent";
-import { Card, CardBody } from "@nextui-org/card";
-import { useReadContract } from "wagmi";
 import { DBTables } from "@/types/enums";
 import SearchModal from "@/components/Modals/SearchModal";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import CreateBrandModal from "@/components/Modals/CreateBrandModal";
 
-
-const AllBrands = ({ _name = "", _owner = "" }) => {
-  const { data, isLoading, isFetched, isSuccess, isPlaceholderData } =
-    useReadContract({
-      abi: FEEDBACKS_ABI,
-      address: FEEDBACK_ADDRESS,
-      functionName: "getAllBrands",
-      args: [_name, _owner]
-    });
-
-  return { data, isLoading, isFetched, isSuccess, isPlaceholderData };
-};
-
 export default function Home() {
-  const { allBrandsData, mySentFeedbacksData, profileExist, trendingBrandsData, userDB } = useFeedbacksContext();
+  const { allBrandsData, mySentFeedbacksData, trendingBrandsData, userDB } =
+    useFeedbacksContext();
 
   // Listen for user SIGNIN event
   supabase.auth.onAuthStateChange(async (event, session) => {
@@ -41,7 +27,7 @@ export default function Home() {
         .eq("userId", session?.user.id);
 
       if (error) {
-        console.error("listen to signin event", error);
+        // console.error("listen to signin event", error);
       }
 
       if (data && data.length === 0) {
@@ -50,29 +36,14 @@ export default function Home() {
             bio: "",
             email: session?.user.email,
             userId: session?.user.id,
-            userData: session?.user
-          }
+            userData: session?.user,
+          },
         ]);
       }
     }
   });
 
-  useContractEvent({ eventName: "BrandRegistered" });
-
-  const trendingBrands = [
-    {
-      name: "Samsung",
-      feedbackCount: 15000
-    },
-    {
-      name: "AirBnB",
-      feedbackCount: 25000
-    },
-    {
-      name: "Chivita",
-      feedbackCount: 16000
-    }
-  ];
+  // useContractEvent({ eventName: "BrandRegistered" });
 
   return (
     <section className="flex flex-col lg:flex-row w-full h-full gap-y-8 py-4">
@@ -84,12 +55,11 @@ export default function Home() {
       </div>
       <section className="space-y-12 px-2 lg:px-8 lg:overflow-y-hidden">
         {/* Only show create brand modal for signed-in users */}
-        {
-          userDB?.email
-          && <div className={""}>
+        {userDB?.email && (
+          <div className={""}>
             <CreateBrandModal />
           </div>
-        }
+        )}
 
         {/*{!profileExist && (
           <Card className="inline-flex">
@@ -110,11 +80,11 @@ export default function Home() {
               {allBrandsData?.map((eachTrendingBrand) => (
                 <TrendingBrandCard
                   key={eachTrendingBrand.name}
+                  avatarUrl={eachTrendingBrand.brandImage}
+                  description={eachTrendingBrand.description}
+                  feedbackCount={Number(eachTrendingBrand.feedbackCount)}
                   name={eachTrendingBrand.name}
                   rawName={eachTrendingBrand.rawName}
-                  feedbackCount={Number(eachTrendingBrand.feedbackCount)}
-                  description={eachTrendingBrand.description}
-                  avatarUrl={eachTrendingBrand.brandImage}
                 />
               ))}
             </div>

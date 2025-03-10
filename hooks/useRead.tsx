@@ -1,5 +1,8 @@
 // HOOKS FOR READING THE CONTRACT
 
+import { Address } from "viem";
+import { useReadContract } from "wagmi";
+
 import {
   BRAND_ABI,
   BRAND_ADDRESS,
@@ -10,9 +13,6 @@ import {
   PRODUCT_ABI,
   PRODUCT_ADDRESS,
 } from "@/constant";
-import { useCallback } from "react";
-import { Address } from "viem";
-import { useReadContract } from "wagmi";
 
 //[x] - you can change the name of the props here
 export interface readProps {
@@ -51,7 +51,7 @@ export const useEventRead = ({ functionName, args, account }: readProps) => {
     address: EVENT_ADDRESS,
     functionName,
     args,
-    account: account
+    account: account,
   });
 
   return data || [];
@@ -75,7 +75,7 @@ export const useProductRead = ({ functionName, args, account }: readProps) => {
     address: PRODUCT_ADDRESS,
     functionName,
     args,
-    account: account
+    account: account,
   });
 
   return data || [];
