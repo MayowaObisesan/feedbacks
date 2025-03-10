@@ -16,46 +16,43 @@ import { Input } from "@nextui-org/input";
 import { link as linkStyles } from "@nextui-org/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
-
-import { siteConfig } from "@/config/site";
-import { ThemeSwitch } from "@/components/theme-switch";
-import {
-  TwitterIcon,
-  GithubIcon,
-  DiscordIcon,
-  HeartFilledIcon,
-  SearchIcon,
-  Logo, DisconnectIcon
-} from "@/components/icons";
-import ConnectButton from "./ConnectButton";
-import { useFeedbacksContext } from "@/context";
 import { User } from "@nextui-org/user";
 import { Skeleton } from "@nextui-org/skeleton";
-import { CreateProfileModal } from "./profileModal";
-import { parseImageHash } from "@/utils";
-import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/dropdown";
-import { signOut, useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/utils/supabase/supabase";
-import { type User as I_User } from "@supabase/supabase-js";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+} from "@nextui-org/dropdown";
+import { useEffect } from "react";
 import { Power } from "lucide-react";
 import { useRouter } from "next/navigation";
+
 import SearchModal from "@/components/Modals/SearchModal";
-import { Divider } from "@nextui-org/divider";
+import { parseImageHash } from "@/utils";
+import { useFeedbacksContext } from "@/context";
+import { supabase } from "@/utils/supabase/supabase";
+import { SearchIcon, Logo, DisconnectIcon } from "@/components/icons";
+import { ThemeSwitch } from "@/components/theme-switch";
+import { siteConfig } from "@/config/site";
 
 export const Navbar = () => {
-  const router = useRouter()
-  const { profileExist, SetUser, user, userDB } = useFeedbacksContext();
-  const {data: sessionData} = useSession();
+  const router = useRouter();
+  const { SetUser, user, userDB } = useFeedbacksContext();
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      SetUser(user!)
-    }
-    getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      SetUser(user!);
+    };
+
+    getUser();
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const searchInput = (
     <Input
       aria-label="Search"
@@ -77,19 +74,22 @@ export const Navbar = () => {
     />
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const Profile = () => {
     const { myProfileData, isMyProfileDataFetching } = useFeedbacksContext();
 
     return (
-      <Skeleton isLoaded={!isMyProfileDataFetching} className="rounded-full">
+      <Skeleton className="rounded-full" isLoaded={!isMyProfileDataFetching}>
         <User
-          name={myProfileData?.name}
-          description={<NextLink href="/app/me">@{myProfileData?.name}</NextLink>}
           avatarProps={{
             src:
               parseImageHash(myProfileData?.profilePictureHash) ||
               "https://avatars.githubusercontent.com/u/30373425?v=4",
           }}
+          description={
+            <NextLink href="/app/me">@{myProfileData?.name}</NextLink>
+          }
+          name={myProfileData?.name}
         />
       </Skeleton>
     );
@@ -111,7 +111,7 @@ export const Navbar = () => {
               <NextLink
                 className={clsx(
                   linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium"
+                  "data-[active=true]:text-primary data-[active=true]:font-medium",
                 )}
                 color="foreground"
                 href={item.href}
@@ -174,23 +174,22 @@ export const Navbar = () => {
           </div>
         </NavbarItem>*/}
 
-        {
-          !user &&
+        {!user && (
           <NavbarItem>
             <Button
               // href={"/login"}
               // className="text-sm font-normal text-default-600 bg-default-100"
-              onPress={() => router.push("app/login")}
+              color={"success"}
               startContent={<Power size={16} strokeWidth={4} />}
               variant="shadow"
-              color={"success"}
+              onPress={() => router.push("app/login")}
             >
               Connect Account
             </Button>
-        </NavbarItem>}
+          </NavbarItem>
+        )}
 
-        {
-          user &&
+        {user && (
           <NavbarItem>
             <Dropdown placement="bottom-start">
               <DropdownTrigger>
@@ -198,7 +197,7 @@ export const Navbar = () => {
                   as="button"
                   avatarProps={{
                     isBordered: true,
-                    src: userDB?.dp || user?.user_metadata.avatar_url
+                    src: userDB?.dp || user?.user_metadata.avatar_url,
                   }}
                   className="transition-transform"
                   description={user?.email}
@@ -215,14 +214,21 @@ export const Navbar = () => {
                 <DropdownItem key="analytics">Analytics</DropdownItem>
                 <DropdownItem key="system">System</DropdownItem>
                 <DropdownItem key="configurations">Configurations</DropdownItem>
-                <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
-                <DropdownItem key="logout" color="danger" onPress={async () => await supabase.auth.signOut()} endContent={<DisconnectIcon size={20} strokeWidth={4} />}>
+                <DropdownItem key="help_and_feedback">
+                  Help & Feedback
+                </DropdownItem>
+                <DropdownItem
+                  key="logout"
+                  color="danger"
+                  endContent={<DisconnectIcon size={20} strokeWidth={4} />}
+                  onPress={async () => await supabase.auth.signOut()}
+                >
                   Log Out
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>
           </NavbarItem>
-        }
+        )}
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
@@ -261,8 +267,15 @@ export const Navbar = () => {
             <DropdownItem key="analytics">Analytics</DropdownItem>
             <DropdownItem key="system">System</DropdownItem>
             <DropdownItem key="configurations">Configurations</DropdownItem>
-            <DropdownItem showDivider key="help_and_feedback">Help & Feedback</DropdownItem>
-            <DropdownItem key="logout" color="danger" onPress={async () => await supabase.auth.signOut()} endContent={<DisconnectIcon size={20} strokeWidth={4} />}>
+            <DropdownItem key="help_and_feedback" showDivider>
+              Help & Feedback
+            </DropdownItem>
+            <DropdownItem
+              key="logout"
+              color="danger"
+              endContent={<DisconnectIcon size={20} strokeWidth={4} />}
+              onPress={async () => await supabase.auth.signOut()}
+            >
               Log Out
             </DropdownItem>
           </DropdownMenu>
@@ -283,8 +296,8 @@ export const Navbar = () => {
                   index === 2
                     ? "primary"
                     : index === siteConfig.navMenuItems.length - 1
-                    ? "danger"
-                    : "foreground"
+                      ? "danger"
+                      : "foreground"
                 }
                 href={item.href}
                 size="lg"

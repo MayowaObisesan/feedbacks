@@ -1,11 +1,5 @@
 "use client";
 
-import {
-  EVENT_ABI,
-  EVENT_ADDRESS,
-  FEEDBACK_ADDRESS,
-  FEEDBACKS_ABI,
-} from "@/constant";
 import { Button } from "@nextui-org/button";
 import { Input, Textarea } from "@nextui-org/input";
 import {
@@ -16,33 +10,25 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/modal";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownSection,
-  DropdownItem,
-} from "@nextui-org/dropdown";
-import { LucideMail, LucideMapPin, LucidePlus } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import { LucidePlus } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useReadContract, useWriteContract } from "wagmi";
-import {
-  DateValue,
-  now,
-  parseAbsoluteToLocal,
-  parseZonedDateTime,
-} from "@internationalized/date";
+import { useWriteContract } from "wagmi";
+import { DateValue, parseAbsoluteToLocal } from "@internationalized/date";
 import { I18nProvider } from "@react-aria/i18n";
 import { DateRangePicker } from "@nextui-org/date-picker";
 import { RangeValue } from "@react-types/shared";
-import { SearchIcon } from "./icons";
-import useRead, { useBrandRead } from "@/hooks/useRead";
 import { zeroAddress } from "viem";
 import { Listbox, ListboxItem } from "@nextui-org/listbox";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import { Chip } from "@nextui-org/chip";
+
+import { SearchIcon } from "./icons";
+
+import { useBrandRead } from "@/hooks/useRead";
+import { EVENT_ABI, EVENT_ADDRESS } from "@/constant";
 import { useFeedbacksContext } from "@/context";
+import { IBrands } from "@/types";
 
 export function CreateEventModal({
   brandId,
@@ -58,22 +44,24 @@ export function CreateEventModal({
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [eventLocation, setEventLocation] = useState<string>("");
-  const [eventDate, setEventDate] = useState<string>("");
+  // const [eventDate, setEventDate] = useState<string>("");
   const [eventWebsite, setEventWebsite] = useState<string>("");
   const [eventRegistrationLink, setEventRegistrationLink] =
     useState<string>("");
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [brandIds, setBrandIds] = useState<number[]>([]);
   let [eventDuration, setEventDuration] = React.useState<RangeValue<DateValue>>(
     {
       start: parseAbsoluteToLocal(new Date().toISOString()), // parseZonedDateTime("2024-04-09T00:45[America/Los_Angeles]"), ,
       end: parseAbsoluteToLocal(new Date().toISOString()), // parseAbsoluteToLocal("2021-04-14T19:15:22Z"),
-    }
+    },
   );
   const [brandSearch, setBrandSearch] = useState<string>("");
-  const [brandSearchResults, setBrandSearchResults] = useState<any>([]);
+  const [brandSearchResults, setBrandSearchResults] = useState<IBrands[]>([]);
   //   const readCallback = useReadCallback();
   const [brandSelected, setBrandSelected] = React.useState<Set<string>>(
-    new Set([""])
+    new Set([""]),
   );
 
   const brandArrayValues = Array.from(brandSelected);
@@ -110,8 +98,8 @@ export function CreateEventModal({
 
   const searchBrands = () => {
     // Fetch all the brands
-    console.log(data);
-    setBrandSearchResults(data);
+    // console.log(data);
+    setBrandSearchResults(data as unknown as IBrands[]);
   };
 
   useEffect(() => {
@@ -130,12 +118,12 @@ export function CreateEventModal({
       return null;
     }
 
-    console.log(
-      brandId,
-      brandArrayValues,
-      brandIds,
-      brandArrayValues.map(Number)
-    );
+    // console.log(
+    //   brandId,
+    //   brandArrayValues,
+    //   brandIds,
+    //   brandArrayValues.map(Number),
+    // );
 
     return (
       <ScrollShadow
@@ -158,18 +146,14 @@ export function CreateEventModal({
   return (
     <>
       <Button
-        onPress={onOpen}
         color="success"
-        variant="shadow"
         startContent={<LucidePlus size={16} strokeWidth={4} />}
+        variant="shadow"
+        onPress={onOpen}
       >
         {buttonText}
       </Button>
       <Modal
-        isDismissable={false}
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        placement="auto"
         backdrop="opaque"
         classNames={{
           base: "px-3 py-4 max-w-xl",
@@ -177,8 +161,13 @@ export function CreateEventModal({
             "bg-gradient-to-t from-zinc-900 to-zinc-900/80 backdrop-opacity-90",
         }}
         hideCloseButton={false}
+        isDismissable={false}
+        isOpen={isOpen}
+        placement="auto"
+        onOpenChange={onOpenChange}
       >
         <ModalContent>
+          {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
@@ -196,39 +185,35 @@ export function CreateEventModal({
                  */}
                 <div>
                   <Input
+                    // autoFocus
                     isRequired
-                    autoFocus
                     label="Name"
                     placeholder="The event name"
-                    variant="flat"
                     value={name}
+                    variant="flat"
                     onValueChange={setName}
                   />
                   <Textarea
+                    className=""
                     label="Event description"
                     placeholder="Desribe the Event"
-                    className=""
                     value={description}
                     onValueChange={setDescription}
                   />
                   <Textarea
-                    label="Location..."
-                    placeholder="Location of this event"
                     className=""
-                    value={eventLocation}
-                    onValueChange={setEventLocation}
                     description={
                       "The Location for this event. Google embed is allowed"
                     }
+                    label="Location..."
+                    placeholder="Location of this event"
+                    value={eventLocation}
+                    onValueChange={setEventLocation}
                   />
                   <Input
-                    type="url"
                     isRequired
                     label="Website"
                     placeholder="Website for the event or your website."
-                    variant="flat"
-                    value={eventWebsite}
-                    onValueChange={setEventWebsite}
                     startContent={
                       <div className="pointer-events-none flex items-center">
                         <span className="text-default-400 text-small">
@@ -236,15 +221,19 @@ export function CreateEventModal({
                         </span>
                       </div>
                     }
+                    type="url"
+                    value={eventWebsite}
+                    variant="flat"
+                    onValueChange={setEventWebsite}
                   />
                   <Input
-                    type="text"
                     isRequired
+                    description="Enter the registration link for this event"
                     label="Registration Link"
                     placeholder="The registration link for the event"
-                    description="Enter the registration link for this event"
-                    variant="flat"
+                    type="text"
                     value={eventRegistrationLink}
+                    variant="flat"
                     onValueChange={setEventRegistrationLink}
                   />
                   <I18nProvider locale="en-us">
@@ -255,9 +244,7 @@ export function CreateEventModal({
                     />
                   </I18nProvider>
                   <Input
-                    label="Event Brands"
                     isClearable
-                    radius="lg"
                     classNames={{
                       label: "text-black/50 dark:text-white/90",
                       input: [
@@ -279,34 +266,40 @@ export function CreateEventModal({
                         "!cursor-text",
                       ],
                     }}
+                    label="Event Brands"
                     placeholder="Search brands"
+                    radius="lg"
                     startContent={
                       <SearchIcon className="text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0" />
                     }
-                    onValueChange={setBrandSearch}
                     onChange={(e) => {
-                      console.log("setbrandIds log target", e.target.value);
+                      // console.log("setbrandIds log target", e.target.value);
                       setBrandIds((prev) => [
                         prev.push(Number(e.target.value)),
                       ]);
                     }}
                     onKeyUp={searchBrands}
+                    onValueChange={setBrandSearch}
                   />
                   <Listbox
-                    topContent={topContent}
                     classNames={{
                       base: "w-full",
                       list: "max-h-[300px] overflow-scroll",
                     }}
-                    //   defaultSelectedKeys={["1"]}
                     items={brandSearchResults ?? []}
+                    //   defaultSelectedKeys={["1"]}
                     label="Assigned to"
                     selectionMode="multiple"
-                    onSelectionChange={setBrandSelected}
+                    topContent={topContent}
                     variant="flat"
+                    // @ts-ignore
+                    onSelectionChange={setBrandSelected}
                   >
                     {(item) => (
-                      <ListboxItem key={item?.brandId} textValue={item?.name}>
+                      <ListboxItem
+                        key={item?.brandId as number}
+                        textValue={item?.name}
+                      >
                         <div className="flex gap-2 items-center">
                           {/* <Avatar
                           alt={item.name}
@@ -342,8 +335,8 @@ export function CreateEventModal({
               <ModalFooter>
                 <Button
                   color="primary"
-                  onPress={onCreateEvent}
                   isLoading={isPending}
+                  onPress={onCreateEvent}
                 >
                   {isPending ? "Creating..." : "Create"}
                 </Button>

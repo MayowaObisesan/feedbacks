@@ -3,36 +3,30 @@ import { Metadata, Viewport } from "next";
 
 import { siteConfig } from "@/config/site";
 import { Navbar } from "@/components/navbar";
-import { cookieToInitialState } from "wagmi";
-import { headers } from "next/headers";
-import { config } from "@/config";
 
 export const metadata: Metadata = {
   title: {
     default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`
+    template: `%s - ${siteConfig.name}`,
   },
   description: siteConfig.description,
   icons: {
-    icon: "/favicon.ico"
-  }
+    icon: "/favicon.ico",
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" }
-  ]
+    { media: "(prefers-color-scheme: dark)", color: "black" },
+  ],
 };
 
-export default function RootLayout(
-  {
-    children
-  }: Readonly<{
-    children: React.ReactNode;
-  }>) {
-  const initialState = cookieToInitialState(config, headers().get("cookie"));
-
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <div className="relative flex flex-col h-screen">
       <Navbar />

@@ -1,4 +1,3 @@
-import { FEEDBACK_ADDRESS, FEEDBACKS_ABI } from "@/constant";
 import { Abi, Address } from "viem";
 import {
   useSimulateContract,

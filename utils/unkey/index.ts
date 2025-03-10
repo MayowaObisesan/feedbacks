@@ -4,7 +4,10 @@ import { toast } from "sonner";
 const unkeyRootKey = process.env.NEXT_PUBLIC_UNKEY_ROOT_KEY;
 
 if (!unkeyRootKey) {
-  toast.error("API KEY System is not functional.", { richColors: true, duration: 5000 });
+  toast.error("API KEY System is not functional.", {
+    richColors: true,
+    duration: 5000,
+  });
   throw new Error("API KEY System is not functional.");
 }
 
@@ -17,6 +20,7 @@ async function isRootKeyValid() {
     // a link to our docs will be in the `error.docs` field
     console.error(error.message);
     toast.error("ROOT Key is invalid.", { richColors: true, duration: 5000 });
+
     return;
   }
 
@@ -35,6 +39,6 @@ export const unkey = new Unkey({
   rootKey: unkeyRootKey,
   retry: {
     attempts: 5,
-    backoff: (retryCount) => retryCount * 1000
-  }
+    backoff: (retryCount) => retryCount * 1000,
+  },
 });

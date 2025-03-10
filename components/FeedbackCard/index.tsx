@@ -1,50 +1,52 @@
 "use client";
 
-import { useFeedbacksContext } from "@/context";
-import { IBrands, IFeedbacks, IUser } from "@/types";
 import { Avatar } from "@nextui-org/avatar";
 import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
 import { Skeleton } from "@nextui-org/skeleton";
 import React, { useEffect } from "react";
-import { StarItem } from "../RatingStars/RatingComponent";
-import { DBTables } from "@/types/enums";
-import { BrandService } from "@/services/brands";
-import { supabase } from "@/utils/supabase/supabase";
 import { useIsMounted } from "usehooks-ts";
 
+import { StarItem } from "../RatingStars/RatingComponent";
+
+import { useFeedbacksContext } from "@/context";
+import { IFeedbacks, IUser } from "@/types";
+import { DBTables } from "@/types/enums";
+import { supabase } from "@/utils/supabase/supabase";
+
 export default function FeedbackCard(props: IFeedbacks) {
-  const [brandData, setBrandData] = React.useState<IBrands>();
-  const isMounted = useIsMounted()
+  // const [brandData, setBrandData] = React.useState<IBrands>();
+  const isMounted = useIsMounted();
   const [userData, setUserData] = React.useState<IUser>();
-  const [isFollowed, setIsFollowed] = React.useState(false);
-  const { myProfileData, user, userDB } = useFeedbacksContext();
+  // const [isFollowed, setIsFollowed] = React.useState(false);
+  const { user, userDB } = useFeedbacksContext();
   // const user: IProfile = FetchUserProfile(props.sender);
-  const userAddress = props.sender;
-  const isLoaded = props.isLoaded;
+  // const userAddress = props.sender;
+  // const isLoaded = props.isLoaded;
 
   useEffect(() => {
-    async function getBrand(){
-      const {data} = await BrandService.getBrandById(props.id)
+    /*async function getBrand() {
+      const { data } = await BrandService.getBrandById(props.id);
+
       if (data && data.length > 0) {
-        setBrandData(data[0])
+        setBrandData(data[0]);
       }
     }
-    getBrand()
+    getBrand();*/
 
     async function getUser() {
       const { data, error } = await supabase
         .from(DBTables.User)
         .select("*")
-        .eq('email', props.email);
+        .eq("email", props.email);
 
       if (error) {
-        console.error("Error fetching user", error)
+        // console.error("Error fetching user", error);
       }
       if (data && data.length > 0) {
-        setUserData(data[0])
+        setUserData(data[0]);
       }
     }
-    getUser()
+    getUser();
   }, [isMounted]);
 
   return (
@@ -54,28 +56,39 @@ export default function FeedbackCard(props: IFeedbacks) {
         base: "p-4",
       }}
     >
-      <CardHeader as={"a"} href={props?.email === user?.email ? "me" : `user/${userData?.userData?.user_metadata.user_name}`} className="justify-between">
+      <CardHeader
+        as={"a"}
+        className="justify-between"
+        href={
+          props?.email === user?.email
+            ? "me"
+            : `user/${userData?.userData?.user_metadata.user_name}`
+        }
+      >
         <div className="flex gap-5">
           <Avatar
             isBordered
             radius="full"
             size="md"
-            src={props?.email === user?.email ? (userDB?.dp || user?.user_metadata.avatar_url) : (userData?.dp || userData?.userData?.user_metadata.avatar_url)}
+            src={
+              props?.email === user?.email
+                ? userDB?.dp || user?.user_metadata.avatar_url
+                : userData?.dp || userData?.userData?.user_metadata.avatar_url
+            }
           />
           <div className="flex flex-col gap-1 items-start justify-center">
             <Skeleton
               // isLoaded={!["", null, undefined].includes(user)}
-              isLoaded={!!userData}
               className="rounded-full"
+              isLoaded={!!userData}
             >
               <h4 className="text-small font-semibold leading-none text-default-600">
-                {props?.email === user?.email ? "You" : userData?.userData?.user_metadata.full_name}
+                {props?.email === user?.email
+                  ? "You"
+                  : userData?.userData?.user_metadata.full_name}
               </h4>
             </Skeleton>
-            <Skeleton
-              isLoaded={!!props.email}
-              className="rounded-full"
-            >
+            <Skeleton className="rounded-full" isLoaded={!!props.email}>
               <h5 className="text-small tracking-tight text-default-400">
                 {props.email}
               </h5>

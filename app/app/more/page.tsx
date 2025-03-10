@@ -1,6 +1,24 @@
 "use client";
 
+import React, { ReactElement, Suspense, useEffect, useState } from "react";
+import { Skeleton } from "@nextui-org/skeleton";
+import { ScrollShadow } from "@nextui-org/scroll-shadow";
+import { useSearchParams } from "next/navigation";
+import { LucideBadgeMinus } from "lucide-react";
+import { Card, CardBody } from "@nextui-org/card";
+import { Listbox } from "@nextui-org/listbox";
+import { Button } from "@nextui-org/button";
+
 import { supabase } from "@/utils/supabase/supabase";
+import { DBTables } from "@/types/enums";
+import { IBrands, IFeedbacks } from "@/types";
+import FeedbackCard from "@/components/FeedbackCard";
+import EmptyCard from "@/components/EmptyCard";
+import FeedbackCardSkeleton from "@/components/Skeletons/FeedbacksCardSkeleton";
+import { TrendingBrandCard } from "@/components/TrendingCard";
+import CreateBrandModal from "@/components/Modals/CreateBrandModal";
+import { useFeedbacksContext } from "@/context";
+
 /*
 // This is the page where all load-more are displayed.
 For example;
@@ -17,42 +35,28 @@ will take in a parameter, either the user whose feedbacks is to be fetched and i
 4. Create a component for certain brands, either a user's brands, trending brands, category of brands, each of these
 are parameters passed to the components.
 */
-import React, { ReactElement, useEffect, useState } from "react";
-import { DBTables } from "@/types/enums";
-import { IBrands, IFeedbacks } from "@/types";
-import FeedbackCard from "@/components/FeedbackCard";
-import EmptyCard from "@/components/EmptyCard";
-import { Skeleton } from "@nextui-org/skeleton";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
-import FeedbackCardSkeleton from "@/components/Skeletons/FeedbacksCardSkeleton";
-import { useSearchParams } from "next/navigation";
-import { TrendingBrandCard } from "@/components/TrendingCard";
-import { LucideBadgeMinus } from "lucide-react";
-import CreateBrandModal from "@/components/Modals/CreateBrandModal";
-import { Card, CardBody } from "@nextui-org/card";
-import { useFeedbacksContext } from "@/context";
-import { Listbox } from "@nextui-org/listbox";
-import { Button } from "@nextui-org/button";
 
-export default function LoadMorePage() {
+function MorePageContent() {
   const searchParams = useSearchParams();
+  // const searchParams = new URLSearchParams(window.location.search);
+
   const brandFeedbacks = searchParams.get("brandFeedbacks");
   const myBrands = searchParams.get("myBrands");
-  const brands = searchParams.get("brands");
+  // const brands = searchParams.get("brands");
   const DEFAULT_LOAD_COUNT = 5;
 
   /* Load More All Brands */
-  function loadMoreAllBrands() {
-    return (
-      <></>
-    );
-  }
+
+  /*function loadMoreAllBrands() {
+    return <></>;
+  }*/
 
   function LoadMoreMyBrands() {
     const { user } = useFeedbacksContext();
     const [myBrandsData, setMyBrandsData] = React.useState<IBrands[]>([]);
     // const [sentFeedbacks, setSentFeedbacks] = React.useState<IFeedbacks[]>([]);
-    const [isMyBrandsDataFetching, setIsMyBrandsDataFetching] = React.useState<boolean>(false);
+    const [isMyBrandsDataFetching, setIsMyBrandsDataFetching] =
+      React.useState<boolean>(false);
 
     useEffect(() => {
       getMyBrands();
@@ -69,7 +73,7 @@ export default function LoadMorePage() {
           .range(0, 99);
 
         if (error) {
-          console.error("Error fetching your brands", error);
+          // console.error("Error fetching your brands", error);
         }
 
         if (data && data.length > 0) {
@@ -77,7 +81,7 @@ export default function LoadMorePage() {
           setIsMyBrandsDataFetching(false);
         }
       } catch (e) {
-        console.error("Error fetching your brands");
+        // console.error("Error fetching your brands");
       } finally {
         setIsMyBrandsDataFetching(false);
       }
@@ -88,10 +92,10 @@ export default function LoadMorePage() {
         isVirtualized
         className="max-w-xs"
         label={"Select from 10000 items"}
-        placeholder="Select..."
-        virtualization={{
-          itemHeight: 80
-        }}
+        // placeholder="Select..."
+        // virtualization={{
+        //   itemHeight: 80,
+        // }}
       >
         {!isMyBrandsDataFetching ? (
           <>
@@ -99,22 +103,18 @@ export default function LoadMorePage() {
               (myBrandsData as IBrands[])?.map((eachBrand) => (
                 <TrendingBrandCard
                   key={eachBrand.name}
-                  name={eachBrand.name}
-                  feedbackCount={Number(eachBrand.feedbackCount)}
-                  rawName={eachBrand.rawName}
                   avatarUrl={eachBrand.brandImage}
                   description={eachBrand.description}
+                  feedbackCount={Number(eachBrand.feedbackCount)}
+                  name={eachBrand.name}
+                  rawName={eachBrand.rawName}
                 />
               ))
             ) : (
               <EmptyCard>
-                <LucideBadgeMinus
-                  size={40}
-                  strokeWidth={1}
-                  width={"100%"}
-                />
+                <LucideBadgeMinus size={40} strokeWidth={1} width={"100%"} />
                 <div className={"text-2xl text-balance"}>
-                  You haven't listed any brand yet
+                  You haven&apos;t listed any brand yet
                 </div>
 
                 <CreateBrandModal />
@@ -122,24 +122,23 @@ export default function LoadMorePage() {
             )}
           </>
         ) : (
-          [1, 2, 3, 4].map(() => (
+          [1, 2, 3, 4].map((_) => (
             <Card
-              className="min-w-[280px] lg:min-w-[360px] h-[200px]"
+              key={_}
               as={"button"}
+              className="min-w-[280px] lg:min-w-[360px] h-[200px]"
             >
               <CardBody className="flex flex-col justify-center px-8">
                 <Skeleton
-                  isLoaded={false}
                   className={"w-5/6 h-12 mt-4 rounded-full"}
+                  isLoaded={false}
                 >
-                  <div
-                    className="font-normal text-5xl leading-normal text-ellipsis whitespace-nowrap overflow-hidden">
+                  <div className="font-normal text-5xl leading-normal text-ellipsis whitespace-nowrap overflow-hidden">
                     &nbsp;
                   </div>
                 </Skeleton>
               </CardBody>
-              <Skeleton
-                className="absolute left-8 bottom-8 w-2/6 h-4 font-extrabold text-sm rounded-full"></Skeleton>
+              <Skeleton className="absolute left-8 bottom-8 w-2/6 h-4 font-extrabold text-sm rounded-full" />
             </Card>
           ))
         )}
@@ -147,14 +146,33 @@ export default function LoadMorePage() {
     );
   }
 
-  function LoadMoreBrandsFeedbacks({ brandName }: { brandName: string }): ReactElement {
-    const [isThisBrandFeedbacksDataFetching, setIsThisBrandFeedbacksDataFetching] = useState<boolean>(false);
-    const [isThisBrandFeedbacksDataSuccessful, setIsThisBrandFeedbacksDataSuccessful] = useState<boolean>(false);
-    const [brandFeedbacksData, setBrandFeedbacksData] = useState<IFeedbacks[]>([]);
-    const [moreBrandFeedbacksData, setMoreBrandFeedbacksData] = useState<IFeedbacks[]>([]);
+  function LoadMoreBrandsFeedbacks({
+    brandName,
+  }: {
+    brandName: string;
+  }): ReactElement {
+    const [
+      isThisBrandFeedbacksDataFetching,
+      setIsThisBrandFeedbacksDataFetching,
+    ] = useState<boolean>(false);
+    const [
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      isThisBrandFeedbacksDataSuccessful,
+      setIsThisBrandFeedbacksDataSuccessful,
+    ] = useState<boolean>(false);
+    const [brandFeedbacksData, setBrandFeedbacksData] = useState<IFeedbacks[]>(
+      [],
+    );
+    const [moreBrandFeedbacksData, setMoreBrandFeedbacksData] = useState<
+      IFeedbacks[]
+    >([]);
     const [brandData, setBrandData] = useState<IBrands>();
-    const [isThisBrandDataFetching, setIsThisBrandDataFetching] = useState<boolean>(false);
-    const [isThisBrandDataSuccessful, setIsThisBrandDataSuccessful] = useState<boolean>(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [isThisBrandDataFetching, setIsThisBrandDataFetching] =
+      useState<boolean>(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [isThisBrandDataSuccessful, setIsThisBrandDataSuccessful] =
+      useState<boolean>(false);
     const [totalBrandFeedbackCount, setTotalBrandFeedbackCount] = useState(0);
     const [isMoreFetching, setIsMoreFetching] = useState<boolean>(false);
 
@@ -188,7 +206,7 @@ export default function LoadMorePage() {
         setIsThisBrandDataFetching(false);
         setIsThisBrandDataSuccessful(false);
 
-        console.error("Error fetching brand data", error);
+        // console.error("Error fetching brand data", error);
       }
     }
 
@@ -198,13 +216,17 @@ export default function LoadMorePage() {
       setIsThisBrandFeedbacksDataFetching(true);
       setIsThisBrandFeedbacksDataSuccessful(false);
 
-      let { count, data: feedbacks, error } = await supabase
+      let {
+        count,
+        data: feedbacks,
+        error,
+      } = await supabase
         .from(DBTables.Feedback)
         .select("*", { count: "exact", head: false })
         .eq("recipientId", brandId)
         .range(0, 4);
 
-      console.log("feedbacks", feedbacks, count);
+      // console.log("feedbacks", feedbacks, count);
 
       if (feedbacks && feedbacks.length > 0) {
         setBrandFeedbacksData(feedbacks);
@@ -220,7 +242,7 @@ export default function LoadMorePage() {
         setIsThisBrandFeedbacksDataFetching(false);
         setIsThisBrandFeedbacksDataSuccessful(false);
 
-        console.error("Error fetching brand data", error);
+        // console.error("Error fetching brand data", error);
       }
     }
 
@@ -229,8 +251,9 @@ export default function LoadMorePage() {
       // Initialize loading states
       setIsMoreFetching(true);
 
-      const startRange = brandFeedbacksData?.length + moreBrandFeedbacksData.length;
-      const endRange = startRange + (DEFAULT_LOAD_COUNT-1);
+      const startRange =
+        brandFeedbacksData?.length + moreBrandFeedbacksData.length;
+      const endRange = startRange + (DEFAULT_LOAD_COUNT - 1);
       let { data: feedbacks, error } = await supabase
         .from(DBTables.Feedback)
         .select("*")
@@ -239,7 +262,7 @@ export default function LoadMorePage() {
 
       if (feedbacks && feedbacks.length > 0) {
         setMoreBrandFeedbacksData((prevState) => {
-          return [...prevState, ...feedbacks as IFeedbacks[]];
+          return [...prevState, ...(feedbacks as IFeedbacks[])];
         });
 
         // Finalize loading states
@@ -250,82 +273,90 @@ export default function LoadMorePage() {
         // Finalize loading states
         setIsMoreFetching(false);
 
-        console.error("Error fetching brand data", error);
+        // console.error("Error fetching brand data", error);
       }
     }
 
     return (
-      <section className={"flex flex-col justify-start gap-y-2 py-2 h-full"}>
-        <div className={"font-normal text-xl px-4"}>
-          <b>{brandData?.rawName}</b> Feedbacks
-        </div>
-        <ScrollShadow className="w-full" hideScrollBar orientation={"vertical"}>
-          <div
-            className="lg:grid lg:grid-cols-3 max-md:flex max-md:flex-col max-md:flex-nowrap gap-x-8 gap-y-2 px-2 py-4">
-            {!isThisBrandFeedbacksDataFetching ? (
-              <>
-                {(brandFeedbacksData as IFeedbacks[]) ? (
-                  (brandFeedbacksData as IFeedbacks[])?.map((_) => (
-                    <FeedbackCard
-                      key={_.id}
-                      // userName={fetchSender(_.sender)?.name}
-                      {..._}
-                      isLoaded={!["", null, undefined].includes(_.email)}
-                    />
-                  ))
-                ) : (
-                  <EmptyCard>
-                    You haven't received any feedback yet
-                  </EmptyCard>
-                )}
-              </>
-            ) : (
-              [1, 2, 3, 4, 5]?.map((_) => (
-                <Skeleton
-                  isLoaded={!isThisBrandFeedbacksDataFetching}
-                  className="rounded-lg"
-                >
-                  {/*  TODO: CREATE A FEEDBACKS CARD SKELETON*/}
-                  <FeedbackCardSkeleton />
-                </Skeleton>
-              ))
-            )}
-            {
-              !isMoreFetching && moreBrandFeedbacksData.length > 0 &&
-              moreBrandFeedbacksData.map((_) => (
-                <FeedbackCard
-                  key={_.id}
-                  {..._}
-                  isLoaded={!isMoreFetching}
-                />
-              ))
-            }
+      <Suspense fallback={<div>Loading...</div>}>
+        <section className={"flex flex-col justify-start gap-y-2 py-2 h-full"}>
+          <div className={"font-normal text-xl px-4"}>
+            <b>{brandData?.rawName}</b> Feedbacks
           </div>
-        </ScrollShadow>
-        {
-          brandFeedbacksData.length + moreBrandFeedbacksData.length < totalBrandFeedbackCount
-          &&
+          <ScrollShadow
+            hideScrollBar
+            className="w-full"
+            orientation={"vertical"}
+          >
+            <div className="lg:grid lg:grid-cols-3 max-md:flex max-md:flex-col max-md:flex-nowrap gap-x-8 gap-y-2 px-2 py-4">
+              {!isThisBrandFeedbacksDataFetching ? (
+                <>
+                  {(brandFeedbacksData as IFeedbacks[]) ? (
+                    (brandFeedbacksData as IFeedbacks[])?.map((_) => (
+                      <FeedbackCard
+                        key={_.id}
+                        // userName={fetchSender(_.sender)?.name}
+                        {..._}
+                        isLoaded={!["", null, undefined].includes(_.email)}
+                      />
+                    ))
+                  ) : (
+                    <EmptyCard>
+                      You haven&apos;t received any feedback yet
+                    </EmptyCard>
+                  )}
+                </>
+              ) : (
+                [1, 2, 3, 4, 5]?.map((_) => (
+                  <Skeleton
+                    key={_}
+                    className="rounded-lg"
+                    isLoaded={!isThisBrandFeedbacksDataFetching}
+                  >
+                    {/*  TODO: CREATE A FEEDBACKS CARD SKELETON*/}
+                    <FeedbackCardSkeleton />
+                  </Skeleton>
+                ))
+              )}
+              {!isMoreFetching &&
+                moreBrandFeedbacksData.length > 0 &&
+                moreBrandFeedbacksData.map((_) => (
+                  <FeedbackCard key={_.id} {..._} isLoaded={!isMoreFetching} />
+                ))}
+            </div>
+          </ScrollShadow>
+          {brandFeedbacksData.length + moreBrandFeedbacksData.length <
+            totalBrandFeedbackCount && (
             <Button
               isLoading={isMoreFetching}
               onPress={() => getMoreFeedbacks(brandData?.id!)}
             >
               Load more
             </Button>
-        }
-      </section>
+          )}
+        </section>
+      </Suspense>
     );
   }
 
   return (
-    <section>
-      {/*<div>Load More Page</div>*/}
-      {
-        brandFeedbacks && <LoadMoreBrandsFeedbacks brandName={brandFeedbacks} />
-      }
+    <Suspense fallback={<div>Loading...</div>}>
+      <section>
+        {/*<div>Load More Page</div>*/}
+        {brandFeedbacks && (
+          <LoadMoreBrandsFeedbacks brandName={brandFeedbacks} />
+        )}
 
-      {
-        myBrands && <LoadMoreMyBrands />
-      }
-    </section>
+        {myBrands && <LoadMoreMyBrands />}
+      </section>
+    </Suspense>
+  );
+}
+
+export default function LoadMorePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MorePageContent />
+    </Suspense>
   );
 }

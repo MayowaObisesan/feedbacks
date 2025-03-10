@@ -1,7 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import "./Rating.css"; // Ensure to include your provided CSS file
-import { Input } from "@nextui-org/input";
-import { Radio, RadioGroup } from "@nextui-org/radio";
 
 const Rating = ({
   setRating,
@@ -13,39 +11,41 @@ const Rating = ({
   const handleRating = (rate: number) => {
     setRating(rate);
     // Handle further actions, e.g., submitting the rating to a backend
-    console.log(`User rated: ${rate}`);
+    // console.log(`User rated: ${rate}`);
   };
 
   return (
     <div className="rating flex flex-row gap-x-4">
       {[1, 2, 3].map((star) => (
         <input
+          key={`star-${star}`}
           className={`hidden rating__input rating__input-${star}`}
-          type="radio"
-          name="rating"
           id={`rating${star}`}
+          name="rating"
+          type="radio"
           onClick={() => handleRating(star)}
         />
       ))}
       {[1, 2, 3].map((star) => (
         <React.Fragment key={star}>
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
           <label
             className={`relative size-10 p-0 rating__label rating__label--delay${star}`}
             htmlFor={`rating${star}`}
           >
             <input
               className={`bg-transparent -z-0 rating__input rating__input-${star}`}
-              type="radio"
-              name="rating"
               id={`rating${star}`}
+              name="rating"
+              type="radio"
               onClick={() => handleRating(star)}
             />
             <svg
+              aria-hidden="true"
               className="absolute left-0 -top-1.5 z-10 rating__star"
-              width="32"
               height="32"
               viewBox="0 0 32 32"
-              aria-hidden="true"
+              width="32"
             >
               <ellipse
                 className="rating__star-shadow"

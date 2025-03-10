@@ -1,11 +1,14 @@
+import { ReactNode } from "react";
+
 import brandsABI from "../abis/brandsTestnet.abi.json";
 import eventsABI from "../abis/eventsTestnet.abi.json";
 import feedbacksABI from "../abis/feedbacksTestnet.abi.json";
 import productsABI from "../abis/productsTestnet.abi.json";
-import { ReactNode } from "react";
 
 export const FEEDBACKS_URL =
-  process.env.NODE_ENV === "development" ? process.env.FEEDBACKS_DEV_URL : process.env.FEEDBACKS_PROD_URL;
+  process.env.NODE_ENV === "development"
+    ? process.env.FEEDBACKS_DEV_URL
+    : process.env.FEEDBACKS_PROD_URL;
 
 export const APIKEY_PREFIX = "fdb_";
 
@@ -49,7 +52,7 @@ export const BRAND_CATEGORIES = [
   "Luxury Goods",
   "Software & Apps",
   "Home Appliances",
-  "Furniture & Decor"
+  "Furniture & Decor",
 ];
 
 export const brandCategories: Record<string, string[]> = {
@@ -59,7 +62,7 @@ export const brandCategories: Record<string, string[]> = {
     "AI & Machine Learning",
     "Blockchain & Cryptocurrency",
     "Mobile & Telecommunications",
-    "Cybersecurity"
+    "Cybersecurity",
   ],
 
   finance: [
@@ -68,7 +71,7 @@ export const brandCategories: Record<string, string[]> = {
     "Investment & Wealth Management",
     "Insurance",
     "Accounting & Tax Services",
-    "Cryptocurrency & DeFi"
+    "Cryptocurrency & DeFi",
   ],
 
   retail: [
@@ -78,7 +81,7 @@ export const brandCategories: Record<string, string[]> = {
     "Home & Living",
     "Marketplace Platforms",
     "Subscription Services",
-    "Consumer Goods"
+    "Consumer Goods",
   ],
 
   food_beverage: [
@@ -87,7 +90,7 @@ export const brandCategories: Record<string, string[]> = {
     "Packaged Foods & Snacks",
     "Beverages (Alcoholic & Non-Alcoholic)",
     "Plant-Based & Organic Foods",
-    "Meal Delivery & Meal Kits"
+    "Meal Delivery & Meal Kits",
   ],
 
   health_wellness: [
@@ -96,7 +99,7 @@ export const brandCategories: Record<string, string[]> = {
     "Mental Health & Therapy",
     "Nutritional Supplements",
     "Personal Care & Hygiene",
-    "Medical Devices"
+    "Medical Devices",
   ],
 
   travel_hospitality: [
@@ -104,7 +107,7 @@ export const brandCategories: Record<string, string[]> = {
     "Airlines & Transportation",
     "Travel Agencies & Booking Platforms",
     "Cruises & Tours",
-    "Short-Term Rentals & Home Stays"
+    "Short-Term Rentals & Home Stays",
   ],
 
   automotive: [
@@ -112,7 +115,7 @@ export const brandCategories: Record<string, string[]> = {
     "Electric Vehicles & Clean Energy Mobility",
     "Car Rentals & Ridesharing",
     "Auto Parts & Accessories",
-    "Logistics & Delivery Services"
+    "Logistics & Delivery Services",
   ],
 
   media_entertainment: [
@@ -120,7 +123,7 @@ export const brandCategories: Record<string, string[]> = {
     "Film & TV Production",
     "Music & Podcasts",
     "Gaming & Esports",
-    "Publishing & Magazines"
+    "Publishing & Magazines",
   ],
 
   education: [
@@ -128,7 +131,7 @@ export const brandCategories: Record<string, string[]> = {
     "Online Learning Platforms",
     "EdTech & Learning Tools",
     "Test Prep & Tutoring",
-    "Research & Development"
+    "Research & Development",
   ],
 
   real_estate: [
@@ -136,7 +139,7 @@ export const brandCategories: Record<string, string[]> = {
     "PropTech (Property Technology)",
     "Home Improvement & Renovation",
     "Architecture & Interior Design",
-    "Smart Homes & IoT"
+    "Smart Homes & IoT",
   ],
 
   energy_sustainability: [
@@ -144,7 +147,7 @@ export const brandCategories: Record<string, string[]> = {
     "Oil & Gas",
     "Electric Vehicles & Battery Tech",
     "Recycling & Waste Management",
-    "Environmental Solutions"
+    "Environmental Solutions",
   ],
 
   b2b_services: [
@@ -152,130 +155,136 @@ export const brandCategories: Record<string, string[]> = {
     "Consulting & Strategy",
     "Legal & Compliance",
     "Human Resources & Recruitment",
-    "IT & Cloud Services"
+    "IT & Cloud Services",
   ],
 
   home_furniture: [
     "Home Décor & Furnishings",
     "Kitchen & Dining",
     "Bedding & Mattresses",
-    "Outdoor & Garden"
+    "Outdoor & Garden",
   ],
 
   social_media: [
     "Social Networks",
     "Content Creation & Creator Economy",
     "Influencer Marketing",
-    "Community & Forums"
+    "Community & Forums",
   ],
 
   pets_animals: [
     "Pet Food & Supplies",
     "Veterinary & Pet Health",
     "Pet Grooming & Services",
-    "Pet Tech & Wearables"
+    "Pet Tech & Wearables",
   ],
 
   nonprofit: [
     "NGOs & Charities",
     "Advocacy & Human Rights",
     "Environmental & Sustainability Causes",
-    "Education & Child Welfare"
+    "Education & Child Welfare",
   ],
 
   industrial_manufacturing: [
     "Heavy Machinery",
     "Aerospace & Defense",
     "Robotics & Automation",
-    "Supply Chain & Logistics"
+    "Supply Chain & Logistics",
   ],
 
   government: [
     "Public Administration",
     "Law Enforcement & Security",
     "Postal & Courier Services",
-    "Public Transport & Infrastructure"
+    "Public Transport & Infrastructure",
   ],
 
   events_experiences: [
     "Event Planning & Management",
     "Concerts & Festivals",
     "Trade Shows & Conferences",
-    "Weddings & Private Events"
+    "Weddings & Private Events",
   ],
 
   toys_hobbies: [
     "Board Games & Puzzles",
     "Collectibles & Memorabilia",
     "Action Figures & Dolls",
-    "Arts & Crafts Supplies"
+    "Arts & Crafts Supplies",
   ],
 
   military_defense: [
     "Defense Contractors",
     "Firearms & Tactical Gear",
     "Military Technology",
-    "Private Security Firms"
+    "Private Security Firms",
   ],
 
   agriculture: [
     "AgTech & Smart Farming",
     "Organic & Sustainable Farming",
     "Livestock & Dairy",
-    "Fishing & Aquaculture"
+    "Fishing & Aquaculture",
   ],
 
   religion_spirituality: [
     "Religious Institutions & Churches",
     "Spiritual & Wellness Retreats",
     "Meditation & Mindfulness",
-    "Faith-Based Nonprofits"
+    "Faith-Based Nonprofits",
   ],
 
   diy_maker: [
     "Tools & Hardware",
     "Home Improvement & Repair",
     "3D Printing & Prototyping",
-    "Hobbyist & DIY Kits"
+    "Hobbyist & DIY Kits",
   ],
 
   extreme_sports: [
     "Adventure Tourism",
     "Rock Climbing & Mountaineering",
     "Scuba Diving & Water Sports",
-    "Motorsports & Racing"
+    "Motorsports & Racing",
   ],
 
   paranormal_mystery: [
     "UFO & Conspiracy Research",
     "Ghost Hunting & Paranormal Investigation",
     "Cryptozoology",
-    "Mystery Subscription Boxes"
-  ]
+    "Mystery Subscription Boxes",
+  ],
 };
 
-export const getBrandCategoriesKey = (): string[] => Object.keys(brandCategories);
+export const getBrandCategoriesKey = (): string[] =>
+  Object.keys(brandCategories);
 
 export const formatCategoryKey = (category: string): string => {
   return category
     .split("_") // Split by underscore
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
     .join(" & "); // Join with " & "
 };
 
 export const formatCategoryKeys = (): string[] => {
-  return Object.keys(brandCategories).map(key =>
-    key
-      .split("_") // Split by underscore
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
-      .join(" & ") // Join with " & "
+  return Object.keys(brandCategories).map(
+    (key) =>
+      key
+        .split("_") // Split by underscore
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+        .join(" & "), // Join with " & "
   );
 };
 
 // Nine is a platform for developers to showcase the apps and products that they build without worrying about showcasing the apps that they build.
 
-export const categoryListObject = (): { name: string, startContent: ReactNode }[] => (
-  [...formatCategoryKeys().map((eachCategory) => (
-    { name: eachCategory, startContent: <></> }
-  ))]
-);
+export const categoryListObject = (): {
+  name: string;
+  startContent: ReactNode;
+}[] => [
+  ...formatCategoryKeys().map((eachCategory) => ({
+    name: eachCategory,
+    startContent: <></>,
+  })),
+];

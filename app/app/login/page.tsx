@@ -1,84 +1,82 @@
 "use client";
 
 import { Button } from "@nextui-org/button";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { Provider, SignInWithOAuthCredentials } from "@supabase/auth-js";
+
 import { LastUsed, useLastUsed } from "@/hooks/lastUsed";
 import { GithubIcon, Icons } from "@/components/icons";
 import { supabase } from "@/utils/supabase/supabase";
-import { Provider, SignInWithOAuthCredentials, type UserResponse } from "@supabase/auth-js";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 export default function UserAuthForm() {
-  const [dbUser, setDbUser] = useState<UserResponse['data']>();
-  const [oAuthResponse, setOAuthResponse] = useState<{url: string; provider: Provider}>();
+  /*const [_, setDbUser] = useState<UserResponse["data"]>();
+  const [oAuthResponse, setOAuthResponse] = useState<{
+    url: string;
+    provider: Provider;
+  }>();*/
   const [lastUsed, setLastUsed] = useLastUsed();
   const { data: sessionData } = useSession();
 
-  useEffect(() => {
+  /*useEffect(() => {
     async function fetchData() {
-        // const { data: userData, error } = await supabase.auth.getUser();
-        const { data: userData, error } = await supabase.auth.getSession();
+      // const { data: userData, error } = await supabase.auth.getUser();
+      const { data: userData, error } = await supabase.auth.getSession();
 
       if (error) {
-          console.error("Error fetching user data", error);
-          toast.error("Error fetching user data");
-        }
-        if (userData) {
-          setDbUser(userData);
-          console.log("User data", userData);
-        }
+        // console.error("Error fetching user data", error);
+        toast.error("Error fetching user data");
+      }
+      if (userData) {
+        setDbUser(userData);
+        // console.log("User data", userData);
+      }
     }
 
     if (oAuthResponse?.url) {
-      fetchData()
+      fetchData();
     }
-  }, [oAuthResponse]);
+  }, [oAuthResponse]);*/
 
-  const handleOauthSignIn = async (provider: string) => {
+  /*const handleOauthSignIn = async (provider: string) => {
     setLastUsed(provider === "google" ? "google" : "github");
     await signIn(provider, { callbackUrl: "/home" });
 
     // Create a user from the signin session data
-    const { data, error } = await supabase.auth.signUp(
-      {
-        email: sessionData?.user?.email!,
-        password: '',
-      }
-    )
+    const { data, error } = await supabase.auth.signUp({
+      email: sessionData?.user?.email!,
+      password: ""
+    });
 
     if (error) {
-      console.error("Error creating user", error)
+      // console.error("Error creating user", error);
       toast.error("Unable to create user from session data");
     }
 
     if (data) {
       setDbUser(data);
-      toast.success("User created successfully", {richColors: true});
-      console.log("User data", data);
+      toast.success("User created successfully", { richColors: true });
+      // console.log("User data", data);
     }
-  }
+  };*/
 
   const handleSupabaseOauthSignIn = async (provider: Provider) => {
     setLastUsed(provider === "google" ? "google" : "github");
 
-    let { data, error } = await supabase.auth.signInWithOAuth({
+    await supabase.auth.signInWithOAuth({
       provider: provider,
       options: {
-        redirectTo: "http://localhost:3000/home"
-      }
-    } as SignInWithOAuthCredentials)
-  }
+        redirectTo: "http://localhost:3000/home",
+      },
+    } as SignInWithOAuthCredentials);
+  };
 
   return (
-    <div className={"fixed top-0 left-0 right-0 flex flex-col justify-center items-center gap-8 h-dvh w-full"}>
-      <div>
-        {
-          sessionData && (
-            <div>Welcome {sessionData.user?.name}</div>
-          )
-        }
-      </div>
+    <div
+      className={
+        "fixed top-0 left-0 right-0 flex flex-col justify-center items-center gap-8 h-dvh w-full"
+      }
+    >
+      <div>{sessionData && <div>Welcome {sessionData.user?.name}</div>}</div>
       <div className={"text-xl font-bold"}>
         Continue with your Social Accounts
       </div>
@@ -117,8 +115,8 @@ export default function UserAuthForm() {
         </Button>*/}
 
         <Button
-          variant="solid"
           type="button"
+          variant="solid"
           // disabled={isLoading}
           onClick={() => handleSupabaseOauthSignIn("github")}
         >
@@ -126,8 +124,8 @@ export default function UserAuthForm() {
           GitHub {lastUsed === "github" ? <LastUsed /> : null}
         </Button>
         <Button
-          variant="solid"
           type="button"
+          variant="solid"
           // disabled={isLoading}
           onClick={() => handleSupabaseOauthSignIn("google")}
         >

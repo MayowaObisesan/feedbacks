@@ -1,6 +1,7 @@
-import { FEEDBACK_ADDRESS, FEEDBACKS_ABI } from "@/constant";
 import { useState } from "react";
 import { useWatchContractEvent } from "wagmi";
+
+import { FEEDBACK_ADDRESS, FEEDBACKS_ABI } from "@/constant";
 
 interface IContractEvent {
   eventName: string;

@@ -5,18 +5,18 @@ export class BrandService {
   static async getBrandById(brandId: number) {
     let { data, error } = await supabase
       .from(DBTables.Brand)
-      .select('*')
-      .eq('id', brandId);
+      .select("*")
+      .eq("id", brandId);
 
-    return { data, error }
+    return { data, error };
   }
 
   static async getBrandByUserEmail(email: number) {
     let { data, error } = await supabase
       .from(DBTables.Brand)
-      .select('*')
-      .eq('ownerEmail', email);
+      .select("*")
+      .eq("ownerEmail", email);
 
-    return { data, error }
+    return { data, error };
   }
 }

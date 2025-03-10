@@ -1,4 +1,8 @@
-export const AddNoteIcon = (props) => (
+import { SVGProps } from "react";
+
+interface AddNoteIconProps extends SVGProps<SVGSVGElement> {}
+
+export const AddNoteIcon = (props: AddNoteIconProps) => (
   <svg
     aria-hidden="true"
     fill="none"

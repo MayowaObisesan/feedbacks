@@ -36,11 +36,11 @@ export const siteConfig = {
   navMenuItems: [
     {
       label: "Home",
-      href: "/app"
+      href: "/app",
     },
     {
       label: "me",
-      href: "/app/me"
+      href: "/app/me",
     },
     /*{
       label: "Profile",

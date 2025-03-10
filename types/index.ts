@@ -15,7 +15,7 @@ export type IUser = {
   userId: string;
   userData: User;
   dp: string;
-}
+};
 
 export type IProfile = {
   name: string;
@@ -76,8 +76,8 @@ export interface IEventOtherInfo {
 }
 
 export interface IEvents {
-  eventBasicInfo: IEventBasicInfo
-  eventOtherInfo: IEventOtherInfo
+  eventBasicInfo: IEventBasicInfo;
+  eventOtherInfo: IEventOtherInfo;
 }
 
 export interface IFeedbacks {

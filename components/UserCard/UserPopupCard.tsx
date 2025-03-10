@@ -21,7 +21,7 @@ export const UserPopupCard = ({
   const [isFollowed, setIsFollowed] = React.useState(false);
 
   return (
-    <Card shadow="none" className="max-w-[300px] border-none bg-transparent">
+    <Card className="max-w-[300px] border-none bg-transparent" shadow="none">
       <CardHeader className="justify-between">
         <div className="flex gap-3">
           <Avatar

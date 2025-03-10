@@ -1,4 +1,8 @@
-export const EditDocumentIcon = (props) => (
+import { SVGProps } from "react";
+
+interface EditDocumentIconProps extends SVGProps<SVGSVGElement> {}
+
+export const EditDocumentIcon = (props: EditDocumentIconProps) => (
   <svg
     aria-hidden="true"
     fill="none"

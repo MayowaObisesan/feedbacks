@@ -7,12 +7,12 @@ export enum DBTables {
 export enum E_BillingTier {
   FREE = "FREE",
   PRO = "PRO",
-  ENTERPRISE = "ENTERPRISE"
+  ENTERPRISE = "ENTERPRISE",
 }
 
 export enum E_ProfileAction {
   create = "create",
-  update = "update"
+  update = "update",
 }
 
 export enum E_DeviceWidth {
@@ -21,5 +21,5 @@ export enum E_DeviceWidth {
   laptopLarge = 1024,
   laptop = 992,
   tablet = 768,
-  phone = 600
+  phone = 600,
 }

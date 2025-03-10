@@ -1,9 +1,7 @@
 "use client";
 
-import { BRAND_ABI, BRAND_ADDRESS, BRAND_CATEGORIES } from "@/constant";
-import { useFeedbacksContext } from "@/context";
 import { Button } from "@nextui-org/button";
-import { Card, CardBody } from "@nextui-org/card";
+import { Card } from "@nextui-org/card";
 import {
   Modal,
   ModalBody,
@@ -21,36 +19,44 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useWriteContract } from "wagmi";
+// import { useWriteContract } from "wagmi";
 import { Chip } from "@nextui-org/chip";
 import { Image } from "@nextui-org/image";
 import { Avatar } from "@nextui-org/avatar";
-import { CameraIcon } from "../icons/CameraIcon";
 import { Input, Textarea } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
-import { CreateProfileModal } from "../profileModal";
-import { useBrandRead } from "@/hooks/useRead";
+
+import { CameraIcon } from "../icons/CameraIcon";
+
+// import { useFeedbacksContext } from "@/context";
+import { BRAND_CATEGORIES } from "@/constant";
 import { IBrands } from "@/types";
-import { cleanBrandRawName, parseImageHash } from "@/utils";
+import { cleanBrandRawName } from "@/utils";
 import { BrandService } from "@/services/brands";
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";
 
-const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | null; fullWidth?: boolean }) => {
+const UpdateBrandModal = ({
+  brandId,
+  fullWidth = false,
+}: {
+  brandId: number | null;
+  fullWidth?: boolean;
+}) => {
   const [brandData, setBrandData] = useState<IBrands | null>(null);
 
   useEffect(() => {
     const _getBrand = async () => {
-      const {data, error} = await BrandService.getBrandById(brandId!);
+      const { data, error } = await BrandService.getBrandById(brandId!);
 
       if (data && data.length > 0) {
         setBrandData(data[0]);
       }
 
       if (error) {
-        console.error("Error fetching brand data", error);
+        // console.error("Error fetching brand data", error);
       }
-    }
+    };
 
     if (brandId !== null) _getBrand();
   }, [brandId]);
@@ -62,12 +68,14 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
   const brandData: IBrands = _brandData as IBrands;*/
 
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
-  const { writeContract, isPending, isSuccess, isError } = useWriteContract();
+  // const { writeContract, isPending, isSuccess, isError } = useWriteContract();
   const [brandName, setBrandName] = useState<string>(brandData?.name!);
-  const [brandDescription, setBrandDescription] = useState<string>(brandData?.description!);
-  const { profileExist } = useFeedbacksContext();
+  const [brandDescription, setBrandDescription] = useState<string>(
+    brandData?.description!,
+  );
+  // const { profileExist } = useFeedbacksContext();
   const [categoryValues, setCategoryValues] = useState<any>(
-    brandData ? brandData?.category.split(",") : new Set([])
+    brandData ? brandData?.category.split(",") : new Set([]),
   );
 
   const [imageHash, setImageHash] = useState<string>(brandData?.brandImage!);
@@ -81,6 +89,7 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
   const [isDpUploading, setisDpUploading] = useState<boolean>(false);
   const profileImageRef = useRef(null);
   const imageHashRef = useRef("");
+  const [isSubmitPending, setIsSubmitPending] = useState(false);
 
   useEffect(() => {
     setBrandName(brandData?.rawName!);
@@ -102,25 +111,33 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
       ],
     });*/
 
-    const { data, error } = await supabase
-      .from(DBTables.Brand)
-      .update([{
-        name: cleanBrandRawName(brandName),
-        rawName: brandName,
-        // description: brandDescription,
-        category: Array.from(categoryValues).join(", "),
-        brandImage: imageHash,
-      }])
+    setIsSubmitPending(true);
+
+    try {
+      const { data, error } = await supabase.from(DBTables.Brand).update([
+        {
+          name: cleanBrandRawName(brandName),
+          rawName: brandName,
+          description: brandDescription,
+          category: Array.from(categoryValues).join(", "),
+          brandImage: imageHash,
+        },
+      ]);
       // .select();
 
-    if (data) {
-      onClose();
-      toast.success("Brand created successfully.");
-    }
+      if (data) {
+        onClose();
+        toast.success("Brand updated successfully.");
+      }
 
-    if (error) {
-      console.error("error creating brand", error);
-      toast.error("Error creating brand. Kindly try again.");
+      if (error) {
+        // console.error("error creating brand", error);
+        toast.error("Error updating brand. Kindly try again.");
+      }
+    } catch (e) {
+      toast.error("Error updating brand. Kindly try again.");
+    } finally {
+      setIsSubmitPending(false);
     }
   };
 
@@ -129,22 +146,24 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
 
     try {
       const formData = new FormData();
+
       formData.append("file", dp);
       formData.append("upload_preset", "feedbacks_preset");
 
       const res = await fetch(process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_URL!, {
         method: "POST",
-        body: formData
+        body: formData,
       });
 
       const data = await res.json();
-      console.log("image uploaded data", data);
+
+      // console.log("image uploaded data", data);
       setImageHash(data.secure_url);
       setImageUploadSuccessful(true);
       toast.success("Dp uploaded successfully");
     } catch (error) {
-      console.log("Error uploading file: ");
-      console.log(error);
+      // console.log("Error uploading file: ");
+      // console.log(error);
       toast.error("Error uploading display picture");
       setImageUploadSuccessful(false);
     } finally {
@@ -153,7 +172,7 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
     }
   };
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (isSuccess) {
       onClose();
       toast.success("Brand Updated successfully.");
@@ -162,13 +181,15 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
     if (isError) {
       toast.error("Unable to Update Brand");
     }
-  }, [isSuccess, isError]);
+  }, [isSuccess, isError]);*/
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const sendFileToIPFS = async () => {
-    console.log(dp, process.env.NEXT_PUBLIC_PINATA_JWT);
+    // console.log(dp, process.env.NEXT_PUBLIC_PINATA_JWT);
     if (dp) {
       try {
         const formData = new FormData();
+
         formData.append("file", dp);
 
         setisDpUploading(true);
@@ -184,8 +205,9 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
           },
         });
 
-        const ImgHash = `https://moccasin-many-grasshopper-363.mypinata.cloud/ipfs/${resFile.data.IpfsHash}`;
-        console.log(ImgHash);
+        // const ImgHash = `https://moccasin-many-grasshopper-363.mypinata.cloud/ipfs/${resFile.data.IpfsHash}`;
+
+        // console.log(ImgHash);
         imageHashRef.current = resFile?.data?.IpfsHash;
         setImageHash(resFile?.data?.IpfsHash);
         setImageUploadSuccessful(true);
@@ -193,8 +215,8 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
         //Take a look at your Pinata Pinned section, you will see a new file added to you list.
         toast.success("Dp uploaded successfully");
       } catch (error) {
-        console.log("Error sending File to IPFS: ");
-        console.log(error);
+        // console.log("Error sending File to IPFS: ");
+        // console.log(error);
         toast.error("Error uploading display picture");
         setImageUploadSuccessful(false);
       } finally {
@@ -206,6 +228,7 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
 
   const handleTriggerDpChange = (event: any) => {
     const selectedImage = event.target.files[0];
+
     setDp(selectedImage);
     setDpPreview(URL.createObjectURL(selectedImage));
     setImageUploadPending(true);
@@ -220,7 +243,7 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
 
   const handleClose = (categoryToRemove: string) => {
     setCategoryValues(
-      Array.from(categoryValues).filter((it) => it !== categoryToRemove)
+      Array.from(categoryValues).filter((it) => it !== categoryToRemove),
     );
     if (categoryValues.length === 1) {
       setCategoryValues(new Set([]));
@@ -230,18 +253,15 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
   return (
     <>
       <Button
-        onPress={onOpen}
         color="success"
-        variant="shadow"
-        startContent={<LucidePlus size={16} strokeWidth={4} />}
         fullWidth={fullWidth}
+        startContent={<LucidePlus size={16} strokeWidth={4} />}
+        variant="shadow"
+        onPress={onOpen}
       >
         Update Brand
       </Button>
       <Modal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        placement="auto"
         backdrop="opaque"
         classNames={{
           wrapper: "",
@@ -251,8 +271,12 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
         }}
         hideCloseButton={false}
         isDismissable={false}
+        isOpen={isOpen}
+        placement="auto"
+        onOpenChange={onOpenChange}
       >
         <ModalContent className="relative overflow-auto">
+          {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
           {(onClose) => (
             <>
               {/*{!profileExist && (
@@ -274,33 +298,33 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
                 <div className="flex flex-col items-center gap-y-4 shrink-0 my-4 w-full">
                   {imageUploadPending && (
                     <Chip
-                      color="warning"
-                      variant="flat"
-                      radius="sm"
                       className="w-full text-sm"
+                      color="warning"
+                      radius="sm"
+                      variant="flat"
                     >
-                      You haven't uploaded the profile image
+                      You haven&apos;t uploaded the profile image
                     </Chip>
                   )}
                   <div className={"relative inline-block"}>
                     <Card>
                       <Image
-                        width={360}
-                        height={160}
-                        alt=""
-                        src={dpPreview}
-                        className="object-cover"
                         isZoomed
+                        alt=""
+                        className="object-cover"
+                        height={160}
+                        src={dpPreview}
+                        width={360}
                       />
                     </Card>
                     <div className="">
                       {dpPreview && (
                         <Avatar
+                          isBordered
+                          className="z-10 absolute -bottom-2 -left-2"
+                          color="success"
                           size="lg"
                           src={dpPreview}
-                          isBordered
-                          color="success"
-                          className="z-10 absolute -bottom-2 -left-2"
                         />
                       )}
                       {/* <div
@@ -323,8 +347,8 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
                     {dpPreview && (
                       <Button
                         isIconOnly
-                        color="danger"
                         className={"absolute -top-2 -right-2 z-10 btn-error"}
+                        color="danger"
                         radius="full"
                         onClick={removeProfileUpload}
                       >
@@ -335,47 +359,47 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
                   {!dpPreview ? (
                     <Button
                       as={"label"}
-                      htmlFor={"id-avatar-dp"}
-                      title="Select dp"
                       className="mt-4"
+                      htmlFor={"id-avatar-dp"}
                       startContent={<CameraIcon />}
+                      title="Select dp"
                     >
                       {/* <LucideCamera /> */}
                       Select Product Image
                       <Input
-                        type="file"
-                        name=""
-                        id="id-avatar-dp"
-                        className="hidden"
-                        onChange={handleTriggerDpChange}
                         ref={profileImageRef}
+                        className="hidden"
+                        id="id-avatar-dp"
+                        name=""
+                        type="file"
+                        onChange={handleTriggerDpChange}
                       />
                     </Button>
                   ) : (
                     <>
                       {!imageUploadSuccessful ? (
                         <Button
-                          color="success"
-                          onClick={handleImageUpload}
-                          isLoading={isDpUploading}
                           className="mt-8 font-bold"
+                          color="success"
+                          isLoading={isDpUploading}
                           startContent={
                             !isDpUploading && (
                               <LucideUpload size={16} strokeWidth={4} />
                             )
                           }
+                          onClick={handleImageUpload}
                         >
                           {!isDpUploading ? "Upload Image" : ""}
                         </Button>
                       ) : (
                         <Button
+                          isDisabled
+                          className="mt-8 font-bold"
                           color="success"
                           isLoading={isDpUploading}
-                          className="mt-8 font-bold"
                           startContent={
                             <LucideCheckCheck size={16} strokeWidth={4} />
                           }
-                          isDisabled
                         >
                           Image Uploaded
                         </Button>
@@ -384,35 +408,35 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
                   )}
                 </div>
                 <Input
-                  isRequired
+                  // autoFocus
                   isClearable
-                  autoFocus
+                  isRequired
+                  defaultValue={brandData?.rawName}
                   label="Name"
                   placeholder="Update your brand name"
-                  variant="flat"
-                  defaultValue={brandData?.rawName}
                   value={brandName}
+                  variant="flat"
                   onValueChange={setBrandName}
                 />
                 <Textarea
+                  className=""
+                  classNames={{
+                    input: "placeholder:text-default-300",
+                  }}
                   label="Description"
                   placeholder={`Describe your brand`}
-                  className=""
                   value={brandData?.description}
                   onValueChange={setBrandDescription}
-                  classNames={{
-                    input: "placeholder:text-default-300"
-                  }}
                 />
                 <Select
+                  className=""
                   label="Category"
                   placeholder="Select a Brand category"
-                  selectionMode="multiple"
-                  className=""
                   selectedKeys={categoryValues}
+                  selectionMode="multiple"
                   onSelectionChange={setCategoryValues}
                 >
-                  {BRAND_CATEGORIES.map((eachBrandCategory, index) => (
+                  {BRAND_CATEGORIES.map((eachBrandCategory) => (
                     <SelectItem key={eachBrandCategory}>
                       {eachBrandCategory}
                     </SelectItem>
@@ -424,12 +448,12 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
                       (eachCategoryValue, index) => (
                         <Chip
                           key={index}
-                          onClose={() => handleClose(eachCategoryValue)}
                           variant="flat"
+                          onClose={() => handleClose(eachCategoryValue)}
                         >
                           {eachCategoryValue}
                         </Chip>
-                      )
+                      ),
                     )}
                 </div>
               </ModalBody>
@@ -439,16 +463,16 @@ const UpdateBrandModal = ({ brandId, fullWidth = false }: { brandId: number | nu
                   </Button> */}
                 <Button
                   color="primary"
-                  onPress={onUpdateBrand}
-                  isLoading={isPending}
                   isDisabled={
                     brandName?.length < 1 ||
                     (categoryValues &&
                       Array.from(categoryValues)?.length < 1) ||
                     (imageUploadPending && !imageUploadSuccessful)
                   }
+                  isLoading={isSubmitPending}
+                  onPress={onUpdateBrand}
                 >
-                  {isPending ? "Creating..." : "Update"}
+                  Update
                 </Button>
               </ModalFooter>
             </>

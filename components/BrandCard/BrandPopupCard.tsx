@@ -1,13 +1,8 @@
-import { BRAND_ABI, BRAND_ADDRESS } from "@/constant";
-import { useFeedbacksContext } from "@/context";
-import { useBrandRead } from "@/hooks/useRead";
-import { parseImageHash } from "@/utils";
 import { Avatar } from "@nextui-org/avatar";
-import { Button } from "@nextui-org/button";
 import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
-import { Skeleton } from "@nextui-org/skeleton";
 import React from "react";
-import { useWriteContract } from "wagmi";
+
+import { parseImageHash } from "@/utils";
 
 type T_BrandPopupCard = {
   brandId: number;
@@ -30,7 +25,7 @@ export const BrandPopupCard = ({
   followersCount,
   feedbackCount,
 }: T_BrandPopupCard) => {
-  const { myAddress } = useFeedbacksContext();
+  /*const { myAddress } = useFeedbacksContext();
   //   const [isFollowed, setIsFollowed] = React.useState(false);
 
   const {
@@ -43,7 +38,7 @@ export const BrandPopupCard = ({
     args: [brandId, myAddress],
   });
 
-  const { writeContract, isPending, isSuccess, isError } = useWriteContract();
+  const { writeContract } = useWriteContract();
 
   const handleFollowBrand = () => {
     // setIsFollowed(!isFollowed);
@@ -63,10 +58,10 @@ export const BrandPopupCard = ({
       functionName: "unfollowBrand",
       args: [brandId],
     });
-  };
+  };*/
 
   return (
-    <Card shadow="none" className="w-[300px] border-none bg-transparent">
+    <Card className="w-[300px] border-none bg-transparent" shadow="none">
       <CardHeader className="justify-between">
         <div className="flex flex-auto gap-3 w-full">
           <Avatar
@@ -77,14 +72,14 @@ export const BrandPopupCard = ({
           />
           <div className="flex flex-col items-start justify-center">
             <h4 className="text-small font-semibold leading-none text-default-600">
-              {rawName}
+              {rawName} - {brandId}
             </h4>
             <h5 className="text-small tracking-tight text-default-500">
               @{userName}
             </h5>
           </div>
         </div>
-        <Skeleton isLoaded={!isFollowingDataFetching} className="rounded-full">
+        {/*<Skeleton className="rounded-full" isLoaded={!isFollowingDataFetching}>
           <Button
             className={followingData ? "" : ""}
             color={followingData ? "danger" : "primary"}
@@ -95,7 +90,7 @@ export const BrandPopupCard = ({
           >
             {followingData ? "Unfollow" : "Follow"}
           </Button>
-        </Skeleton>
+        </Skeleton>*/}
       </CardHeader>
       <CardBody className="px-3 py-0">
         <p className="text-small pl-px text-default-500">
@@ -118,6 +113,14 @@ export const BrandPopupCard = ({
           </p>
           <p className="text-default-500 text-small">
             {Number(followersCount) === 1 ? "Follower" : "Followers"}
+          </p>
+        </div>
+        <div className="flex gap-1">
+          <p className="font-semibold text-default-600 text-small">
+            {Number(feedbackCount)}
+          </p>
+          <p className="text-default-500 text-small">
+            {Number(feedbackCount) === 1 ? "Feedback" : "Feedbacks"}
           </p>
         </div>
       </CardFooter>

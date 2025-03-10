@@ -1,6 +1,7 @@
-import { capitalize } from "@/utils";
 import { Skeleton } from "@nextui-org/skeleton";
 import { Spacer } from "@nextui-org/spacer";
+
+import { capitalize } from "@/utils";
 
 interface I_FollowersText {
   isLoaded: boolean;
@@ -17,7 +18,7 @@ export function DynamicText({
 }: I_FollowersText) {
   return (
     <>
-      <Skeleton isLoaded={isLoaded} className="rounded-full">
+      <Skeleton className="rounded-full" isLoaded={isLoaded}>
         <p className="font-semibold text-default-400 text-small">
           {Number(data).toString()}
         </p>
@@ -33,7 +34,7 @@ export function DotSpacer() {
   return (
     <>
       <Spacer x={1} />
-      <div className="size-1.5 bg-foreground-400 rounded-full"></div>
+      <div className="size-1.5 bg-foreground-400 rounded-full" />
       <Spacer x={1} />
     </>
   );

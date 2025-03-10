@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
-import useRead from "./useRead";
+import { useState } from "react";
 
-const useMyEvents = (ids, dep) => {
+const useMyEvents = (ids: number[], dep: any[]) => {
   const [events, setEvents] = useState<any>([]);
 
-  const fetchEvents = useCallback(async () => {
+  /*const fetchEvents = useCallback(async () => {
     console.log("id & dep == ", ids, dep);
     ids?.map((eachId) => {
       const { data: singleEventData } = useRead({
         functionName: "getEvent",
         args: [eachId],
       });
+
       setEvents((prev) => prev?.push(singleEventData));
     });
 
@@ -32,7 +32,7 @@ const useMyEvents = (ids, dep) => {
 
   //   useEffect(() => {
   fetchEvents();
-  //   }, [fetchEvents, dep]);
+  //   }, [fetchEvents, dep]);*/
 
   return events;
 };

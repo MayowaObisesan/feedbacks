@@ -1,4 +1,8 @@
-export const CopyDocumentIcon = (props) => (
+import { SVGProps } from "react";
+
+interface CopyDocumentIconProps extends SVGProps<SVGSVGElement> {}
+
+export const CopyDocumentIcon = (props: CopyDocumentIconProps) => (
   <svg
     aria-hidden="true"
     fill="none"
