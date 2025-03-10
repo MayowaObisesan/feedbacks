@@ -64,9 +64,9 @@ export default function UserAuthForm() {
 
     await supabase.auth.signInWithOAuth({
       provider: provider,
-      options: {
-        redirectTo: "http://localhost:3000/home",
-      },
+      // options: {
+      //   redirectTo: "/app",
+      // },
     } as SignInWithOAuthCredentials);
   };
 
