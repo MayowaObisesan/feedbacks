@@ -1,8 +1,7 @@
 "use client";
 
 import { Link } from "@nextui-org/link";
-import { Snippet } from "@nextui-org/snippet";
-import { Code } from "@nextui-org/code";
+import { Button } from "@nextui-org/button";
 
 export default function Page() {
   return (
@@ -60,13 +59,17 @@ export default function Page() {
           </Link>
         </div>*/}
 
-        <div className="mt-8">
-          <Snippet hideCopyButton hideSymbol variant="bordered">
+        <Button as={Link} color={"danger"} href={"app"} variant={"shadow"}>
+          Get started
+        </Button>
+
+        {/*<div className="mt-8">
+          <Snippet hideCopyButton hideSymbol variant="shadow">
             <span>
               Get started by editing <Code color="primary">app/page.tsx</Code>
             </span>
           </Snippet>
-        </div>
+        </div>*/}
       </section>
 
       <footer className="w-full flex items-center justify-center py-3">
