@@ -19,11 +19,11 @@ export function DynamicText({
   return (
     <>
       <Skeleton className="rounded-full" isLoaded={isLoaded}>
-        <p className="font-semibold text-default-400 text-small">
+        <p className="font-semibold text-default-600 text-small">
           {Number(data).toString()}
         </p>
       </Skeleton>
-      <p className=" text-default-400 text-small">
+      <p className=" text-default-600 text-small">
         {Number(data) === 1 ? capitalize(textSingular) : capitalize(textPlural)}
       </p>
     </>

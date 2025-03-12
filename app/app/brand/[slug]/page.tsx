@@ -2,53 +2,62 @@
 
 import { Button } from "@nextui-org/button";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
-import { Skeleton } from "@nextui-org/skeleton";
 import {
   LucideArrowRight,
   LucideChevronRight,
-  LucideZoomOut,
+  LucideMessagesSquare,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Divider } from "@nextui-org/divider";
+import { Alert } from "@heroui/alert";
+import React from "react";
 
 import BrandNav from "@/components/BrandNav";
 import { CreateEventModal } from "@/components/CreateEventModal";
 import EmptyCard from "@/components/EmptyCard";
-import EventInviteCard from "@/components/EventInviteCard";
 import FeedbackCard from "@/components/FeedbackCard";
 import { CreateFeedbackModal } from "@/components/Modals/CreateFeedbackModal";
 import { CreateProductModal } from "@/components/Modals/CreateProductModal";
 import UpdateBrandModal from "@/components/Modals/UpdateBrandModal";
 import { useFeedbacksContext } from "@/context";
-import { IBrands, IEvents, IFeedbacks } from "@/types";
-import { supabase } from "@/utils/supabase/supabase";
-import { DBTables } from "@/types/enums";
+import { useBrandByName } from "@/hooks/useBrands";
+import { FeedbackCardListSkeleton } from "@/components/Skeletons/FeedbacksCardSkeleton";
+import { useBrandFeedbacks } from "@/hooks/useFeedbacks";
 
 function BrandPage({ params }: { params: any }) {
-  const { myAddress, myEventInvites, multipleEventsInvitesData, user } =
-    useFeedbacksContext();
-  const [brandData, setBrandData] = useState<IBrands>();
+  const { myAddress, myEventInvites, user } = useFeedbacksContext();
+  const {
+    data: brandData,
+    error: brandError,
+    isFetched: brandIsFetched,
+  } = useBrandByName(params.slug);
+  const {
+    data: brandFeedbacksData,
+    isFetching: brandFeedbacksIsFetching,
+    isFetched: brandFeedbacksIsFetched,
+  } = useBrandFeedbacks(brandData?.id!);
+
+  // const [brandData, setBrandData] = useState<IBrands>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isThisBrandDataFetching, setIsThisBrandDataFetching] =
-    useState<boolean>(false);
-  const [isThisBrandDataSuccessful, setIsThisBrandDataSuccessful] =
-    useState<boolean>(false);
+  // const [isThisBrandDataFetching, setIsThisBrandDataFetching] =
+  //   useState<boolean>(false);
+  // const [isThisBrandDataSuccessful, setIsThisBrandDataSuccessful] =
+  //   useState<boolean>(false);
 
-  const [brandFeedbacksData, setBrandFeedbacksData] = useState<IFeedbacks[]>(
-    [],
-  );
-  const [
-    isThisBrandFeedbacksDataFetching,
-    setIsThisBrandFeedbacksDataFetching,
-  ] = useState<boolean>(false);
-  const [
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    isThisBrandFeedbacksDataSuccessful,
-    setIsThisBrandFeedbacksDataSuccessful,
-  ] = useState<boolean>(false);
+  // const [brandFeedbacksData, setBrandFeedbacksData] = useState<IFeedbacks[]>(
+  //   []
+  // );
+  // const [
+  //   isThisBrandFeedbacksDataFetching,
+  //   setIsThisBrandFeedbacksDataFetching
+  // ] = useState<boolean>(false);
+  // const [
+  //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //   isThisBrandFeedbacksDataSuccessful,
+  //   setIsThisBrandFeedbacksDataSuccessful
+  // ] = useState<boolean>(false);
 
-  useEffect(() => {
+  /*useEffect(() => {
     async function getBrand() {
       // Initialize loading states
       setIsThisBrandDataFetching(true);
@@ -110,7 +119,7 @@ function BrandPage({ params }: { params: any }) {
         // console.error("Error fetching brand data", error);
       }
     }
-  }, []);
+  }, []);*/
 
   /*const { data } = useBrandRead({
     functionName: "getAllBrands",
@@ -157,7 +166,7 @@ function BrandPage({ params }: { params: any }) {
   // }, [data]);
 
   if (
-    (brandFeedbacksData as IFeedbacks[])?.length === 0 &&
+    brandFeedbacksData?.length === 0 &&
     myEventInvites?.length === 0
     // && (productData as IProduct[])?.length === 0
   ) {
@@ -167,10 +176,13 @@ function BrandPage({ params }: { params: any }) {
           <BrandNav
             brandData={brandData!}
             brandName={params.slug}
-            isBrandDataSuccessful={isThisBrandDataSuccessful}
+            isBrandDataSuccessful={brandIsFetched}
           />
         </div>
         <section className="flex flex-col justify-center items-center gap-y-24 w-full h-full overflow-hidden">
+          {brandError && (
+            <Alert>Error fetching brand. Pls check network Connection.</Alert>
+          )}
           <div className="text-center">
             <div>Your brand page is a bit empty.</div>
             <div>Start an engagement with some of this actions.</div>
@@ -207,13 +219,13 @@ function BrandPage({ params }: { params: any }) {
         <BrandNav
           brandData={brandData!}
           brandName={params.slug}
-          isBrandDataSuccessful={isThisBrandDataSuccessful}
+          isBrandDataSuccessful={brandIsFetched}
         />
       </div>
 
       <Divider className="md:hidden my-2" />
 
-      <section className="w-full h-full md:overflow-y-auto px-4 space-y-8">
+      <section className="w-full h-full md:overflow-y-auto lg:px-4 space-y-8">
         {/*<div className="sticky top-0 z-50 flex w-full items-center gap-x-3 border-divider bg-background/40 px-6 py-2 backdrop-blur-xl sm:px-3.5 sm:before:flex-1">
           <div className="w-full font-bold text-2xl">{brandData?.rawName}</div>
           {myEventInvites?.length > 0 && (
@@ -232,91 +244,121 @@ function BrandPage({ params }: { params: any }) {
           )}
         </div>*/}
 
-        {(brandFeedbacksData as IFeedbacks[])?.length > 0 ? (
-          <section>
-            <header className="flex flex-row justify-between items-center font-bold text-2xl md:text-3xl leading-normal">
-              <div>Your Feedbacks</div>
-              <div className={"flex flex-row items-center md:px-4"}>
-                {/*{(brandFeedbacksData as IFeedbacks[])?.length}*/}
-                <Button
-                  as={Link}
-                  className={"max-sm:hidden"}
-                  endContent={<LucideArrowRight size={16} />}
-                  href={`/app/more?brandFeedbacks=${params.slug}`}
-                  variant={"light"}
-                >
-                  View more
-                </Button>
-                <Button
-                  isIconOnly
-                  className={"md:hidden"}
-                  href={`/app/more?brandFeedbacks=${params.slug}`}
-                  variant={"light"}
-                >
-                  <LucideChevronRight size={20} strokeWidth={4} />
-                </Button>
-              </div>
-            </header>
-            <ScrollShadow
-              hideScrollBar
-              className="w-full"
-              orientation={"horizontal"}
-            >
-              <div className="flex flex-row flex-nowrap gap-x-8 px-2 py-4">
-                {!isThisBrandFeedbacksDataFetching ? (
-                  <>
-                    {(brandFeedbacksData as IFeedbacks[]) ? (
-                      (brandFeedbacksData as IFeedbacks[])?.map((_) => (
-                        <FeedbackCard
-                          key={_.id}
-                          // userName={fetchSender(_.sender)?.name}
-                          {..._}
-                          isLoaded={!["", null, undefined].includes(_.email)}
-                        />
-                      ))
-                    ) : (
-                      <EmptyCard>
-                        You haven&apos;t received any feedback yet
-                      </EmptyCard>
-                    )}
-                  </>
-                ) : (
-                  [1, 2, 3, 4, 5]?.map((_) => (
-                    <Skeleton
-                      key={_}
-                      className="rounded-lg"
-                      isLoaded={!isThisBrandFeedbacksDataFetching}
-                    >
-                      {/*<FeedbackCard
-                        isLoaded={!isThisBrandFeedbacksDataFetching}
+        <section>
+          <header className="flex flex-row justify-between items-center max-md:px-4 font-bold text-lg md:text-3xl leading-normal">
+            <div>Your Feedbacks</div>
+            <div className={"flex flex-row items-center md:px-4"}>
+              {/*{(brandFeedbacksData as IFeedbacks[])?.length}*/}
+              <Button
+                as={Link}
+                className={"max-sm:hidden"}
+                endContent={<LucideArrowRight size={16} />}
+                href={`/app/more?brandFeedbacks=${params.slug}`}
+                variant={"light"}
+              >
+                View more
+              </Button>
+              <Button
+                isIconOnly
+                className={"md:hidden"}
+                href={`/app/more?brandFeedbacks=${params.slug}`}
+                variant={"light"}
+              >
+                <LucideChevronRight size={20} strokeWidth={4} />
+              </Button>
+            </div>
+          </header>
+          <ScrollShadow
+            hideScrollBar
+            className="w-full px-4"
+            orientation={"vertical"}
+          >
+            <div className="flex flex-col flex-nowrap gap-x-8 gap-y-2 lg:px-2 py-4">
+              {brandFeedbacksIsFetching &&
+                Array.from({ length: 5 }).map((_, index: number) => (
+                  <FeedbackCardListSkeleton key={index} />
+                ))}
+              {brandFeedbacksIsFetched &&
+                brandFeedbacksData?.map((_) => (
+                  <FeedbackCard
+                    key={_.id}
+                    // userName={fetchSender(_.sender)?.name}
+                    {..._}
+                    asGrid={false}
+                    isLoaded={!["", null, undefined].includes(_.email)}
+                  />
+                ))}
+              {brandFeedbacksIsFetched && brandFeedbacksData?.length === 0 && (
+                <EmptyCard>
+                  <div className={"flex flex-col items-center gap-y-5"}>
+                    <LucideMessagesSquare
+                      size={40}
+                      strokeWidth={1}
+                      width={"100%"}
+                    />
+                    <div className={"text-lg lg:text-2xl text-balance"}>
+                      You haven&apos;t received any feedback yet
+                    </div>
+                  </div>
+                </EmptyCard>
+              )}
+
+              {/*{!isThisBrandFeedbacksDataFetching ? (
+                <>
+                  {(brandFeedbacksData as IFeedbacks[]) ? (
+                    (brandFeedbacksData as IFeedbacks[])?.map((_) => (
+                      <FeedbackCard
+                        key={_.id}
                         // userName={fetchSender(_.sender)?.name}
                         {..._}
-                      />*/}
-                    </Skeleton>
-                  ))
-                )}
-              </div>
-            </ScrollShadow>
-          </section>
+                        isLoaded={!["", null, undefined].includes(_.email)}
+                      />
+                    ))
+                  ) : (
+                    <EmptyCard>
+                      You haven&apos;t received any feedback yet
+                    </EmptyCard>
+                  )}
+                </>
+              ) : (
+                [1, 2, 3, 4, 5]?.map((_) => (
+                  <Skeleton
+                    key={_}
+                    className="rounded-lg"
+                    isLoaded={!isThisBrandFeedbacksDataFetching}
+                  >
+                    <FeedbackCard
+                      isLoaded={!isThisBrandFeedbacksDataFetching}
+                      // userName={fetchSender(_.sender)?.name}
+                      {..._}
+                    />
+                  </Skeleton>
+                ))
+              )}*/}
+            </div>
+          </ScrollShadow>
+        </section>
+
+        {/*{brandFeedbacksData && brandFeedbacksData?.length > 0 ? (
         ) : (
           <EmptyCard>
-            <div className={"flex flex-col justify-center align-center"}>
-              <div>
-                <LucideZoomOut
-                  className={"text-content4"}
-                  size={48}
-                  strokeWidth={2}
-                />
-              </div>
+            <div
+              className={"flex flex-col justify-center items-center gap-y-4"}
+            >
+              <LucideMessageSquareQuote
+                className={"text-content4"}
+                size={40}
+                strokeWidth={2}
+              />
               <div className={"text-xl text-foreground-400"}>
                 You haven&apos;t received any feedbacks yet
               </div>
             </div>
           </EmptyCard>
-        )}
+        )}*/}
 
-        <section className="md:px-6">
-          <header className="relative flex flex-row justify-between items-center font-bold text-2xl leading-normal">
+        {/*<section className="md:px-6">
+          <header className="relative flex flex-row justify-between items-center font-bold text-lg lg:text-2xl leading-normal">
             <div>Event Invitations</div>
             <div className={"flex flex-row items-center md:px-4"}>
               <Button
@@ -350,7 +392,7 @@ function BrandPage({ params }: { params: any }) {
                 )}
             </div>
           </ScrollShadow>
-        </section>
+        </section>*/}
 
         {/*<section className="space-y-3 md:px-6">
           <header className="relative flex flex-row justify-between items-center font-bold text-2xl leading-normal">

@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@nextui-org/button";
 import {
   Modal,
@@ -25,7 +27,12 @@ import EmptyCard from "@/components/EmptyCard";
 import { SearchIcon } from "@/components/icons";
 
 export default function SearchModal() {
-  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
+  const {
+    isOpen: isSearchOpen,
+    onOpen,
+    onClose,
+    onOpenChange,
+  } = useDisclosure();
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<IBrands[]>([]);
@@ -67,8 +74,8 @@ export default function SearchModal() {
 
   return (
     <div className={""}>
-      {error && <Alert />}
-      <div className="flex flex-wrap gap-3">
+      {error && <Alert content={error.message} title={error.name} />}
+      <div className="hidden flex-wrap gap-3">
         <Button
           isIconOnly
           id={"id-search-modal"}
@@ -86,7 +93,7 @@ export default function SearchModal() {
           body: "px-2 my-0",
           closeButton: "text-3xl font-bold my-0.5",
         }}
-        isOpen={isOpen}
+        isOpen={isSearchOpen}
         placement={"center"}
         scrollBehavior={"inside"}
         size={"full"}

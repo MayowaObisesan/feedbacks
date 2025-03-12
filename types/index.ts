@@ -82,6 +82,7 @@ export interface IEvents {
 
 export interface IFeedbacks {
   isLoaded?: any;
+  asGrid?: boolean;
   feedbackId?: number;
   id: number;
   feedbackText?: string;
@@ -114,6 +115,7 @@ export interface ITrendingBrandCard {
   feedbackCount: number;
   description: string;
   avatarUrl: string;
+  isLoading?: boolean;
 }
 
 export interface IBrandCard {

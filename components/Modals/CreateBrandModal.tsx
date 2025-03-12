@@ -285,7 +285,7 @@ export default function CreateBrandModal() {
                 </>
               )}*/}
               <ModalHeader className="flex flex-col gap-1">
-                Create Brand
+                Create your Brand
               </ModalHeader>
               <ModalBody>
                 {/*<CldImage

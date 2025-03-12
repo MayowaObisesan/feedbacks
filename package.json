@@ -12,7 +12,10 @@
 	},
 	"dependencies": {
 		"@heroui/alert": "^2.2.13",
+		"@heroui/drawer": "^2.2.13",
 		"@heroui/number-input": "^2.0.3",
+		"@heroui/system": "^2.4.12",
+		"@heroui/theme": "^2.4.12",
 		"@internationalized/date": "^3.5.5",
 		"@nextui-org/accordion": "^2.0.40",
 		"@nextui-org/avatar": "^2.0.32",

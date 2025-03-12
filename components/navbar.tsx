@@ -2,11 +2,10 @@
 
 import {
   Navbar as NextUINavbar,
-  NavbarContent,
-  NavbarMenu,
-  NavbarMenuToggle,
   NavbarBrand,
+  NavbarContent,
   NavbarItem,
+  NavbarMenu,
   NavbarMenuItem,
 } from "@nextui-org/navbar";
 import { Button } from "@nextui-org/button";
@@ -25,14 +24,14 @@ import {
   DropdownTrigger,
 } from "@nextui-org/dropdown";
 import { useEffect } from "react";
-import { Power } from "lucide-react";
+import { LucideChartNoAxesGantt, Power } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import SearchModal from "@/components/Modals/SearchModal";
 import { parseImageHash } from "@/utils";
 import { useFeedbacksContext } from "@/context";
 import { supabase } from "@/utils/supabase/supabase";
-import { SearchIcon, Logo, DisconnectIcon } from "@/components/icons";
+import { DisconnectIcon, Logo, SearchIcon } from "@/components/icons";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { siteConfig } from "@/config/site";
 
@@ -96,9 +95,25 @@ export const Navbar = () => {
   };
 
   return (
-    <NextUINavbar maxWidth="full" position="sticky">
+    <NextUINavbar
+      className={""}
+      classNames={{
+        base: "",
+        wrapper: "px-2",
+        content: "",
+        menu: "",
+      }}
+      maxWidth="full"
+      position={"sticky"}
+    >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-        <NavbarMenuToggle className={"sm:hidden"} />
+        <Button isIconOnly className={"hidden max-md:flex"} variant={"light"}>
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+          <label htmlFor={"id-mobile-drawer"}>
+            <LucideChartNoAxesGantt />
+          </label>
+        </Button>
+        {/*<NavbarMenuToggle className={"sm:hidden"} />*/}
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
             <Logo />
@@ -231,55 +246,97 @@ export const Navbar = () => {
         )}
       </NavbarContent>
 
-      <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
+      <NavbarContent
+        className="sm:hidden basis-1 items-center pl-4"
+        justify="end"
+      >
         {/*<Button variant={"flat"} isIconOnly radius={"lg"}>
           <label htmlFor={"id-search-modal"}>
             <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
           </label>
         </Button>*/}
 
-        <SearchModal />
+        <NavbarItem>
+          <div className="flex flex-wrap gap-3">
+            <Button isIconOnly radius={"full"} variant={"flat"}>
+              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+              <label htmlFor={"id-search-modal"}>
+                <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+              </label>
+            </Button>
+          </div>
+          {/*<SearchModal />*/}
+        </NavbarItem>
+
         {/*<Link isExternal aria-label="Github" href={siteConfig.links.github}>
           <GithubIcon className="text-default-500" />
         </Link>*/}
         <ThemeSwitch />
-        <Dropdown placement="bottom-start">
-          <DropdownTrigger>
-            <User
-              as="button"
-              avatarProps={{
-                isBordered: true,
-                src: userDB?.dp || user?.user_metadata.avatar_url,
-                size: "sm",
-              }}
-              className="transition-transform"
-              description={""}
-              name={""}
-            />
-          </DropdownTrigger>
-          <DropdownMenu aria-label="User Actions" variant="flat">
-            <DropdownItem key="profile" className="h-14 gap-2">
-              <p className="font-bold">Signed in as</p>
-              <p className="font-bold">{user?.user_metadata.full_name}</p>
-            </DropdownItem>
-            <DropdownItem key="settings">My Settings</DropdownItem>
-            <DropdownItem key="team_settings">Team Settings</DropdownItem>
-            <DropdownItem key="analytics">Analytics</DropdownItem>
-            <DropdownItem key="system">System</DropdownItem>
-            <DropdownItem key="configurations">Configurations</DropdownItem>
-            <DropdownItem key="help_and_feedback" showDivider>
-              Help & Feedback
-            </DropdownItem>
-            <DropdownItem
-              key="logout"
-              color="danger"
-              endContent={<DisconnectIcon size={20} strokeWidth={4} />}
-              onPress={async () => await supabase.auth.signOut()}
+
+        {!user && (
+          <NavbarItem>
+            <Button
+              // href={"/login"}
+              // className="text-sm font-normal text-default-600 bg-default-100"
+              color={"success"}
+              variant="shadow"
+              onPress={() => router.push("/app/login")}
             >
-              Log Out
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+              Sign in
+            </Button>
+          </NavbarItem>
+        )}
+
+        {user && (
+          <NavbarItem>
+            <Dropdown placement="bottom-start">
+              <DropdownTrigger>
+                <User
+                  as="button"
+                  avatarProps={{
+                    isBordered: true,
+                    src: userDB?.dp || user?.user_metadata.avatar_url,
+                    size: "sm",
+                  }}
+                  className="transition-transform"
+                  description={""}
+                  name={""}
+                />
+              </DropdownTrigger>
+              <DropdownMenu aria-label="User Actions" variant="flat">
+                <DropdownItem
+                  key="profile"
+                  as={Link}
+                  className="h-14 gap-2 text-foreground"
+                  href={"/app/me"}
+                >
+                  <p className="font-bold">Signed in as</p>
+                  <p className="font-bold">{user?.user_metadata.full_name}</p>
+                </DropdownItem>
+                <DropdownItem key="settings" href={"/app/me"}>
+                  My Profile
+                </DropdownItem>
+                <DropdownItem key="settings">Settings</DropdownItem>
+                {/*<DropdownItem key="team_settings">Team Settings</DropdownItem>*/}
+                <DropdownItem key="analytics">Analytics</DropdownItem>
+                {/*<DropdownItem key="system">System</DropdownItem>*/}
+                {/*<DropdownItem key="configurations">Configurations</DropdownItem>*/}
+                <DropdownItem key="help_and_feedback" showDivider>
+                  Help & Feedback
+                </DropdownItem>
+                <DropdownItem
+                  key="logout"
+                  color="danger"
+                  endContent={<DisconnectIcon size={20} strokeWidth={4} />}
+                  onPress={async () => await supabase.auth.signOut()}
+                >
+                  Log Out
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </NavbarItem>
+        )}
+
         {/*
           Has been moved to before the logo
           <NavbarMenuToggle />

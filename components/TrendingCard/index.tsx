@@ -30,7 +30,7 @@ export function TrendingBrandCard({
             size="md"
             src={avatarUrl}
           />
-          <div className="font-normal text-5xl leading-normal text-ellipsis whitespace-nowrap overflow-hidden">
+          <div className="font-medium text-3xl lg:text-5xl leading-normal text-ellipsis whitespace-nowrap overflow-hidden">
             {rawName}
           </div>
           <div

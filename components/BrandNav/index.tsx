@@ -1,5 +1,7 @@
 "use client";
 
+import type { Tables } from "@/types/supabase";
+
 import { Listbox, ListboxItem, ListboxSection } from "@nextui-org/listbox";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { Image } from "@nextui-org/image";
@@ -9,6 +11,7 @@ import { Divider } from "@nextui-org/divider";
 import { Spacer } from "@nextui-org/spacer";
 import { Button } from "@nextui-org/button";
 import { toast } from "sonner";
+import { Skeleton } from "@nextui-org/skeleton";
 
 import UpdateBrandModal from "../Modals/UpdateBrandModal";
 import { CreateFeedbackModal } from "../Modals/CreateFeedbackModal";
@@ -18,12 +21,13 @@ import { ListboxWrapper } from "../homeNav/ListboxWrapper";
 import { DBTables } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
 import { useFeedbacksContext } from "@/context";
-import { IBrands } from "@/types";
 import EmbedFeedbacksGenerator from "@/components/sdk/EmbedFeedbacksGenerator";
 
+type Brand = Tables<DBTables.Brand>;
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const iconClasses =
-  "text-xl text-default-500 pointer-events-none flex-shrink-0";
+// const iconClasses =
+//   "text-xl text-default-500 pointer-events-none flex-shrink-0";
 
 const categoryList = [
   {
@@ -53,7 +57,7 @@ export default function BrandNav({
   isBrandDataSuccessful,
 }: {
   brandName?: string;
-  brandData: IBrands;
+  brandData: Brand;
   isBrandDataSuccessful: boolean;
 }) {
   const {
@@ -267,24 +271,24 @@ export default function BrandNav({
         ]
       : [
           /*{
-      text: "Add Event",
-      description: "Add event modal",
-      modal: (
-        <CreateEventModal
-          brandId={brandData ? brandData?.id : null}
-        />
-      ),
-    },
-    {
-      text: "Add Product",
-      description: "Add product modal",
-      modal: (
-        <CreateProductModal
-          brandId={brandData ? brandData?.id : null}
-          buttonText={"Add Product"}
-        />
-      ),
-    },*/
+          text: "Add Event",
+          description: "Add event modal",
+          modal: (
+            <CreateEventModal
+              brandId={brandData ? brandData?.id : null}
+            />
+          ),
+        },
+        {
+          text: "Add Product",
+          description: "Add product modal",
+          modal: (
+            <CreateProductModal
+              brandId={brandData ? brandData?.id : null}
+              buttonText={"Add Product"}
+            />
+          ),
+        },*/
           {
             text: "Add Feedback",
             description: "Add Feedback modal",
@@ -313,7 +317,7 @@ export default function BrandNav({
         >
           <ListboxItem key={"brandProfile"} textValue="brandProfile">
             <Card
-              className="max-sm:grid max-sm:grid-cols-3 lg:grid-cols-none py-0 bg-default-200 dark:bg-default-50 shadow-none"
+              className="max-sm:grid max-sm:grid-cols-3 lg:grid-cols-none py-0 bg-default-50/80 dark:bg-default-50 shadow-none"
               isPressable={false}
             >
               <CardBody className="overflow-visible px-2">
@@ -328,9 +332,14 @@ export default function BrandNav({
               <CardHeader className="pb-0 px-4 flex-col max-sm:col-span-2 items-start">
                 {/* <p className="text-tiny uppercase font-bold">Brand Details</p> */}
                 {/* <small className="text-default-500">12 Tracks</small> */}
-                <h4 className="font-bold text-3xl leading-normal">
-                  {brandData && brandData?.rawName}
-                </h4>
+                <Skeleton
+                  className={"rounded-xl"}
+                  isLoaded={isBrandDataSuccessful}
+                >
+                  <h4 className="font-bold text-3xl leading-normal">
+                    {brandData && brandData?.rawName}
+                  </h4>
+                </Skeleton>
                 {/*{brandData?.ownerEmail}*/}
                 <div className="flex items-center gap-1">
                   <DynamicText
@@ -349,6 +358,8 @@ export default function BrandNav({
                 </div>
                 <Spacer y={2} />
                 <Button
+                  className={"px-0"}
+                  variant={"flat"}
                   onClick={
                     !user?.email
                       ? () => toast("You need to login to follow a brand")

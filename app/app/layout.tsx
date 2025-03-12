@@ -3,6 +3,8 @@ import { Metadata, Viewport } from "next";
 
 import { siteConfig } from "@/config/site";
 import { Navbar } from "@/components/navbar";
+import SearchModal from "@/components/Modals/SearchModal";
+import MobileDrawer from "@/components/MobileDrawer";
 
 export const metadata: Metadata = {
   title: {
@@ -28,11 +30,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="relative flex flex-col h-screen">
+    <div className="relative flex flex-col w-full h-dvh">
+      {/*<div className={"sticky top-0 bg-teal-900 p-4"}>*/}
       <Navbar />
-      <main className="relative w-full h-full overflow-auto mx-auto flex-grow">
+      {/*</div>*/}
+      <div className="relative w-full h-full overflow-auto mx-auto flex-grow">
+        {/*<ModalContainer />*/}
+        <SearchModal />
+        <MobileDrawer />
         {children}
-      </main>
+      </div>
       {/*<footer className="w-full flex items-center justify-center py-3">
           Footer 2
         </footer>*/}
