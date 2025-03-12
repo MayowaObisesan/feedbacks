@@ -52,10 +52,10 @@ export const StarItem = ({
         className={`pointer-events-none transition-transform-colors group-data-[pressed=true]:scale-90 iconify iconify--solar ${
           selectedRating >= rating ? "text-warning" : "text-default-200"
         }`}
-        height="32"
+        height="28"
         role="img"
         viewBox="0 0 24 24"
-        width="32"
+        width="28"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path

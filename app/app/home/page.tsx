@@ -11,10 +11,14 @@ import { useFeedbacksContext } from "@/context";
 import { DBTables } from "@/types/enums";
 import SearchModal from "@/components/Modals/SearchModal";
 import CreateBrandModal from "@/components/Modals/CreateBrandModal";
+import { useTrendingFeedbacks } from "@/hooks/useFeedbacks";
+import { FeedbackCardListSkeleton } from "@/components/Skeletons/FeedbacksCardSkeleton";
 
 export default function Home() {
   const { allBrandsData, mySentFeedbacksData, trendingBrandsData, userDB } =
     useFeedbacksContext();
+  const { data: trendingFeedbacks, isLoading: trendingFeedbacksLoading } =
+    useTrendingFeedbacks(10);
 
   // Listen for user SIGNIN event
   supabase.auth.onAuthStateChange(async (event, session) => {
@@ -107,7 +111,11 @@ export default function Home() {
           </header>
           <ScrollShadow hideScrollBar orientation={"horizontal"} size={80}>
             <div className="flex flex-row gap-x-8 px-2 py-4">
-              {mySentFeedbacksData?.map((eachTrendingFeedback) => (
+              {trendingFeedbacksLoading &&
+                Array.from({ length: 5 })?.map((_) => (
+                  <FeedbackCardListSkeleton key={_ as number} />
+                ))}
+              {trendingFeedbacks?.map((eachTrendingFeedback) => (
                 <FeedbackCard
                   key={eachTrendingFeedback.id}
                   isLoaded={!!mySentFeedbacksData}

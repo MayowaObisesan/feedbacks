@@ -62,10 +62,24 @@ export default function UserAuthForm() {
   const handleSupabaseOauthSignIn = async (provider: Provider) => {
     setLastUsed(provider === "google" ? "google" : "github");
 
+    const getURL = () => {
+      let url =
+        process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
+        process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
+        "http://localhost:3000/";
+
+      // Make sure to include `https://` when not localhost.
+      url = url.startsWith("http") ? url : `https://${url}`;
+      // Make sure to include a trailing `/`.
+      url = url.endsWith("/") ? url : `${url}/`;
+
+      return url;
+    };
+
     await supabase.auth.signInWithOAuth({
       provider: provider,
       options: {
-        redirectTo: "http://localhost:3000/home",
+        redirectTo: getURL(),
       },
     } as SignInWithOAuthCredentials);
   };
@@ -77,8 +91,8 @@ export default function UserAuthForm() {
       }
     >
       <div>{sessionData && <div>Welcome {sessionData.user?.name}</div>}</div>
-      <div className={"text-xl font-bold"}>
-        Continue with your Social Accounts
+      <div className={"text-xl text-balance font-bold"}>
+        Continue using your Social Accounts
       </div>
       {/*<div>
         {JSON.stringify(sessionData, null, 2)}

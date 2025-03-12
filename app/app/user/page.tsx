@@ -21,6 +21,7 @@ import { IBrands } from "@/types";
 import { DBTables, E_ProfileAction } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
 import { CreateProfileModal } from "@/components/profileModal";
+import { useMySentFeedbacks } from "@/hooks/useFeedbacks";
 
 const accordionItemClasses = {
   base: "py-0 w-full",
@@ -125,6 +126,7 @@ const ProfileCard = ({
 export default function Page() {
   const { myEventsData, mySentFeedbacksData, user, userDB } =
     useFeedbacksContext();
+  const { data: mySentFeedbacks } = useMySentFeedbacks(userDB?.email!);
   const [isFollowed, setIsFollowed] = React.useState(false);
   const [myBrandsData, setMyBrandsData] = React.useState<IBrands[]>([]);
   const [followedBrandsData, setFollowedBrandsData] = React.useState<IBrands[]>(
@@ -361,8 +363,8 @@ export default function Page() {
             {
               !!mySentFeedbacksData && (
                 <>
-                  {mySentFeedbacksData?.length > 0 ? (
-                    mySentFeedbacksData?.map((eachFeedback) => (
+                  {mySentFeedbacks?.length! > 0 ? (
+                    mySentFeedbacks?.map((eachFeedback) => (
                       <FeedbackCard
                         key={eachFeedback.id}
                         isLoaded={!isMyBrandsDataFetching}

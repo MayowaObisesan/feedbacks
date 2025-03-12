@@ -57,7 +57,7 @@ export default function RootLayout({
             <div className="relative flex flex-col h-screen">
               <NextTopLoader />
               <Toaster richColors position="top-center" />
-              <main className="relative w-full h-full overflow-auto mx-auto flex-grow">
+              <main className="relative w-full h-dvh overflow-auto mx-auto flex-grow">
                 {children}
               </main>
             </div>

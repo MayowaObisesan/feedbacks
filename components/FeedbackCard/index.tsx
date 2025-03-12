@@ -1,19 +1,25 @@
 "use client";
 
+import type { Tables } from "@/types/supabase";
+
 import { Avatar } from "@nextui-org/avatar";
 import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
 import { Skeleton } from "@nextui-org/skeleton";
 import React, { useEffect } from "react";
 import { useIsMounted } from "usehooks-ts";
+import clsx from "clsx";
 
 import { StarItem } from "../RatingStars/RatingComponent";
 
 import { useFeedbacksContext } from "@/context";
-import { IFeedbacks, IUser } from "@/types";
+import { IUser } from "@/types";
 import { DBTables } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
 
-export default function FeedbackCard(props: IFeedbacks) {
+type Feedback = Tables<DBTables.Feedback>;
+type ExtendFeedback = Feedback & { asGrid?: boolean; isLoaded?: boolean };
+
+export default function FeedbackCard(props: ExtendFeedback) {
   // const [brandData, setBrandData] = React.useState<IBrands>();
   const isMounted = useIsMounted();
   const [userData, setUserData] = React.useState<IUser>();
@@ -51,9 +57,12 @@ export default function FeedbackCard(props: IFeedbacks) {
 
   return (
     <Card
-      className="min-w-[280px] lg:min-w-[360px] h-[200px]"
+      className={clsx(
+        "min-w-[280px] lg:min-w-[360px]",
+        props?.asGrid ? "h-[200px]" : "",
+      )}
       classNames={{
-        base: "p-4",
+        base: "p-2",
       }}
     >
       <CardHeader
@@ -82,14 +91,14 @@ export default function FeedbackCard(props: IFeedbacks) {
               className="rounded-full"
               isLoaded={!!userData}
             >
-              <h4 className="text-small font-semibold leading-none text-default-600">
+              <h4 className="text-small font-semibold leading-none text-default-700">
                 {props?.email === user?.email
                   ? "You"
                   : userData?.userData?.user_metadata.full_name}
               </h4>
             </Skeleton>
             <Skeleton className="rounded-full" isLoaded={!!props.email}>
-              <h5 className="text-small tracking-tight text-default-400">
+              <h5 className="text-small tracking-tight text-default-500">
                 {props.email}
               </h5>
             </Skeleton>
@@ -110,7 +119,7 @@ export default function FeedbackCard(props: IFeedbacks) {
           {isFollowed ? "Unfollow" : "Follow"}
         </Button>*/}
       </CardHeader>
-      <CardBody className="px-3 py-0 text-small text-default-400">
+      <CardBody className="px-3 py-0 text-small">
         <span>{props.description}</span>
         {/*<span className="pt-2">
           #FrontendWithZoey
@@ -119,7 +128,7 @@ export default function FeedbackCard(props: IFeedbacks) {
           </span>
         </span>*/}
       </CardBody>
-      <CardFooter className="gap-3">
+      <CardFooter className="gap-3 py-2">
         {/* <div className="flex gap-1">
           <p className="font-semibold text-default-400 text-small">4</p>
           <p className=" text-default-400 text-small">Following</p>
@@ -128,13 +137,14 @@ export default function FeedbackCard(props: IFeedbacks) {
           <p className="font-semibold text-default-400 text-small">97.1K</p>
           <p className="text-default-400 text-small">Followers</p>
         </div> */}
-        <div className="flex flex-row items-center">
+        <div className="flex flex-row items-center gap-x-1">
           {/* TODO: Change length from 3 to a constant called FEEDBACK_STARS */}
           {Array.from({ length: 3 }).map((_, index) => (
             <>
               <StarItem
                 key={index + 1}
                 rating={index + 1}
+                // @ts-ignore
                 selectedRating={props.starRating}
                 setSelectedRating={() => null}
               />

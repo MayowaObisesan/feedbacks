@@ -1,28 +1,36 @@
 "use client";
 
+import type { Tables } from "@/types/supabase";
+
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
 import { Avatar } from "@nextui-org/avatar";
 import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
 import { Skeleton } from "@nextui-org/skeleton";
 import {
-  LucideBadgeMinus,
   LucideCheck,
+  LucideFocus,
   LucideInfo,
+  LucideLayoutTemplate,
+  LucideMessagesSquare,
   LucideUserPlus2,
 } from "lucide-react";
-import React, { useEffect } from "react";
+import React from "react";
 import { Tooltip } from "@nextui-org/tooltip";
+import { User } from "@supabase/auth-js";
 
 import EmptyCard from "@/components/EmptyCard";
 import FeedbackCard from "@/components/FeedbackCard";
 import { TrendingBrandCard } from "@/components/TrendingCard";
 import { useFeedbacksContext } from "@/context";
-import { IBrands } from "@/types";
+import { IBrands, IUser } from "@/types";
 import { DBTables, E_ProfileAction } from "@/types/enums";
-import { supabase } from "@/utils/supabase/supabase";
 import { CreateProfileModal } from "@/components/profileModal";
 import { DotSpacer } from "@/components/TextSkeleton";
 import CreateBrandModal from "@/components/Modals/CreateBrandModal";
+import { useFollowedBrands, useMyBrands } from "@/hooks/useBrands";
+import TrendingBrandCardSkeleton from "@/components/Skeletons/TrendingBrandCardSkeleton";
+
+type Brand = Tables<DBTables.Brand>;
 
 const accordionItemClasses = {
   base: "py-0 w-full",
@@ -36,22 +44,26 @@ const accordionItemClasses = {
 const ProfileCard = ({
   myBrands,
   followedBrands,
+  user,
+  userDB,
 }: {
-  myBrands: IBrands[];
-  followedBrands: IBrands[];
+  myBrands: Brand[];
+  followedBrands: Brand[];
+  user: User;
+  userDB: IUser;
   isFollowed: boolean;
 }) => {
   // const [userData, setUserData] = React.useState<IUser>();
-  const { user, userDB } = useFeedbacksContext();
+  // const { user, userDB } = useFeedbacksContext();
 
   return (
-    <Card className="min-w-[340px] max-w-[340px]">
+    <Card className="lg:min-w-[340px] lg:max-w-[340px]">
       <CardHeader className="justify-between">
         <div className="flex gap-5">
           <Avatar
             isBordered
             radius="full"
-            size="md"
+            size="lg"
             src={userDB?.dp || user?.user_metadata.avatar_url}
           />
           <div className="flex flex-col gap-1 items-start justify-center">
@@ -141,16 +153,20 @@ export default function Page() {
   // const { onOpen } = useDisclosure();
   const { myEventsData, mySentFeedbacksData, user, userDB } =
     useFeedbacksContext();
-  const [isFollowed, setIsFollowed] = React.useState(false);
-  const [myBrandsData, setMyBrandsData] = React.useState<IBrands[]>([]);
-  const [followedBrandsData, setFollowedBrandsData] = React.useState<IBrands[]>(
-    [],
+  const { data: myBrands, isLoading: myBrandsLoading } = useMyBrands(
+    user?.email!,
   );
+  const { data: followedBrands } = useFollowedBrands(user?.email!);
+  // const [isFollowed, setIsFollowed] = React.useState(false);
+  // const [myBrandsData, setMyBrandsData] = React.useState<IBrands[]>([]);
+  // const [followedBrandsData, setFollowedBrandsData] = React.useState<IBrands[]>(
+  //   [],
+  // );
   // const [sentFeedbacks, setSentFeedbacks] = React.useState<IFeedbacks[]>([]);
-  const [isMyBrandsDataFetching, setIsMyBrandsDataFetching] =
-    React.useState<boolean>(false);
+  // const [isMyBrandsDataFetching, setIsMyBrandsDataFetching] =
+  //   React.useState<boolean>(false);
 
-  useEffect(() => {
+  /*useEffect(() => {
     async function getMyBrands() {
       setIsMyBrandsDataFetching(true);
 
@@ -201,7 +217,7 @@ export default function Page() {
 
     getFollowedBrands();
 
-    /*async function getSentFeedbacks() {
+    async function getSentFeedbacks() {
       const {data, error} = await supabase
         .from(DBTables.Feedback)
         .select("*")
@@ -215,16 +231,18 @@ export default function Page() {
         setSentFeedbacks(data);
       }
     }
-    getSentFeedbacks()*/
-  }, [user]);
+    getSentFeedbacks()
+  }, [user]);*/
 
   return (
-    <section className="flex flex-row flex-nowrap">
-      <section className="sticky top-20 lg:top-4 h-full space-y-2">
+    <section className="flex flex-col lg:flex-row flex-nowrap gap-4">
+      <section className="relative lg:sticky lg:top-4 h-full space-y-2 px-2 py-5">
         <ProfileCard
-          followedBrands={followedBrandsData}
-          isFollowed={isFollowed}
-          myBrands={myBrandsData}
+          followedBrands={followedBrands!}
+          isFollowed={false}
+          myBrands={myBrands!}
+          user={user!}
+          userDB={userDB!}
         />
 
         <Accordion
@@ -289,19 +307,19 @@ export default function Page() {
           </CardBody>
         </Card>
       </section>
-      <section className="space-y-12 py-4 px-8 lg:overflow-y-hidden w-full">
+      <section className="space-y-12 py-4 px-3 lg:px-8 lg:overflow-y-hidden w-full">
         {
           <section>
             {
-              <header className="font-bold text-4xl leading-normal">
+              <header className="font-bold text-xl lg:text-3xl leading-normal">
                 Your Brands
               </header>
             }
             <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
-              {!isMyBrandsDataFetching ? (
+              {!myBrandsLoading ? (
                 <>
-                  {(myBrandsData as IBrands[])?.length > 0 ? (
-                    (myBrandsData as IBrands[])?.map((eachBrand) => (
+                  {(myBrands as IBrands[])?.length > 0 ? (
+                    (myBrands as IBrands[])?.map((eachBrand) => (
                       <TrendingBrandCard
                         key={eachBrand.name}
                         avatarUrl={eachBrand.brandImage}
@@ -313,38 +331,24 @@ export default function Page() {
                     ))
                   ) : (
                     <EmptyCard>
-                      <LucideBadgeMinus
-                        size={40}
-                        strokeWidth={1}
-                        width={"100%"}
-                      />
-                      <div className={"text-2xl text-balance"}>
-                        You haven&apos;t listed any brand yet
-                      </div>
+                      <div className={"flex flex-col items-center gap-y-5"}>
+                        <LucideLayoutTemplate
+                          size={32}
+                          strokeWidth={1}
+                          width={"100%"}
+                        />
+                        <div className={"text-lg lg:text-2xl text-balance"}>
+                          You haven&apos;t listed any brand yet
+                        </div>
 
-                      <CreateBrandModal />
+                        <CreateBrandModal />
+                      </div>
                     </EmptyCard>
                   )}
                 </>
               ) : (
                 [1, 2, 3, 4].map((_) => (
-                  <Card
-                    key={_}
-                    as={"button"}
-                    className="min-w-[280px] lg:min-w-[360px] h-[200px]"
-                  >
-                    <CardBody className="flex flex-col justify-center px-8">
-                      <Skeleton
-                        className={"w-5/6 h-12 mt-4 rounded-full"}
-                        isLoaded={false}
-                      >
-                        <div className="font-normal text-5xl leading-normal text-ellipsis whitespace-nowrap overflow-hidden">
-                          &nbsp;
-                        </div>
-                      </Skeleton>
-                    </CardBody>
-                    <Skeleton className="absolute left-8 bottom-8 w-2/6 h-4 font-extrabold text-sm rounded-full" />
-                  </Card>
+                  <TrendingBrandCardSkeleton key={_ as number} />
                 ))
               )}
             </div>
@@ -352,12 +356,12 @@ export default function Page() {
         }
 
         <section>
-          <header className="font-bold text-4xl leading-normal">
+          <header className="font-bold text-xl lg:text-3xl leading-normal">
             Brands you follow
           </header>
           <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
-            {(followedBrandsData as IBrands[])?.length > 0 ? (
-              (followedBrandsData as IBrands[])?.map((eachBrand) => (
+            {(followedBrands as IBrands[])?.length > 0 ? (
+              (followedBrands as IBrands[])?.map((eachBrand) => (
                 <TrendingBrandCard
                   key={eachBrand.id}
                   avatarUrl={eachBrand.brandImage}
@@ -369,15 +373,19 @@ export default function Page() {
               ))
             ) : (
               <EmptyCard>
-                <LucideBadgeMinus size={40} strokeWidth={1} width={"100%"} />
-                You haven&apos;t listed any brand yet
+                <div className={"flex flex-col items-center gap-y-5"}>
+                  <LucideFocus size={40} strokeWidth={1} width={"100%"} />
+                  <div className={"text-lg lg:text-2xl text-balance"}>
+                    You don&apos;t follow any brand yet
+                  </div>
+                </div>
               </EmptyCard>
             )}
           </div>
         </section>
 
         <section>
-          <header className="font-mono font-bold text-4xl leading-normal">
+          <header className="font-mono font-bold text-xl lg:text-3xl leading-normal">
             Your Feedbacks
           </header>
           <div className="flex flex-col gap-4 px-2 py-4">
@@ -386,20 +394,25 @@ export default function Page() {
                 <>
                   {mySentFeedbacksData?.length > 0 ? (
                     mySentFeedbacksData?.map((eachFeedback) => (
+                      // @ts-ignore
                       <FeedbackCard
                         key={eachFeedback.id}
-                        isLoaded={!isMyBrandsDataFetching}
+                        isLoaded={!myBrandsLoading}
                         {...eachFeedback}
                       />
                     ))
                   ) : (
                     <EmptyCard>
-                      <LucideBadgeMinus
-                        size={80}
-                        strokeWidth={1}
-                        width={"100%"}
-                      />
-                      You haven&apos;t sent any feedback yet
+                      <div className={"flex flex-col items-center gap-y-5"}>
+                        <LucideMessagesSquare
+                          size={40}
+                          strokeWidth={1}
+                          width={"100%"}
+                        />
+                        <div className={"text-lg lg:text-2xl text-balance"}>
+                          You haven&apos;t sent any feedback yet
+                        </div>
+                      </div>
                     </EmptyCard>
                   )}
                 </>

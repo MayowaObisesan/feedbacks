@@ -4,10 +4,10 @@ export const siteConfig = {
   name: "Feedback",
   description: "The platform for brands, feedbacks, events and products.",
   navItems: [
-    {
+    /*{
       label: "Home",
       href: "/app",
-    },
+    },*/
     // {
     //   label: "Docs",
     //   href: "/docs",
@@ -28,10 +28,10 @@ export const siteConfig = {
       label: "Dashboard",
       href: "/dashboard",
     },
-    {
+    /*{
       label: "me",
       href: "/app/me",
-    },
+    },*/
   ],
   navMenuItems: [
     {

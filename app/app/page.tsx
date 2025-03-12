@@ -2,6 +2,8 @@
 
 import { Card, CardBody } from "@nextui-org/card";
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
+import { Button } from "@nextui-org/button";
+import { Alert } from "@heroui/alert";
 
 import { supabase } from "@/utils/supabase/supabase";
 import FeedbackCard from "@/components/FeedbackCard";
@@ -11,10 +13,20 @@ import { useFeedbacksContext } from "@/context";
 import { DBTables } from "@/types/enums";
 import SearchModal from "@/components/Modals/SearchModal";
 import CreateBrandModal from "@/components/Modals/CreateBrandModal";
+import { useTrendingBrands } from "@/hooks/useBrands";
+import TrendingBrandCardSkeleton from "@/components/Skeletons/TrendingBrandCardSkeleton";
+import { useTrendingFeedbacks } from "@/hooks/useFeedbacks";
+import { FeedbackCardListSkeleton } from "@/components/Skeletons/FeedbacksCardSkeleton";
 
 export default function Home() {
-  const { allBrandsData, mySentFeedbacksData, trendingBrandsData, userDB } =
-    useFeedbacksContext();
+  const { userDB } = useFeedbacksContext();
+  const {
+    data: trendingBrands,
+    error: trendingBrandsError,
+    isLoading: trendingBrandsLoading,
+  } = useTrendingBrands();
+  const { data: trendingFeedbacks, isLoading: trendingFeedbacksLoading } =
+    useTrendingFeedbacks(10);
 
   // Listen for user SIGNIN event
   supabase.auth.onAuthStateChange(async (event, session) => {
@@ -54,6 +66,11 @@ export default function Home() {
         <SearchModal />
       </div>
       <section className="space-y-12 px-2 lg:px-8 lg:overflow-y-hidden">
+        {trendingBrandsError && (
+          <div>
+            <Alert color={"danger"} title={"Unable to fetch trending brands"} />
+          </div>
+        )}
         {/* Only show create brand modal for signed-in users */}
         {userDB?.email && (
           <div className={""}>
@@ -61,40 +78,50 @@ export default function Home() {
           </div>
         )}
 
-        {/*{!profileExist && (
-          <Card className="inline-flex">
-            <CardBody>
-              <div className="flex flex-row items-center gap-x-4 text-center">
-                <span>Set your username for your account.</span>
-                <CreateProfileModal buttonText="Add username" />
-              </div>
-            </CardBody>
-          </Card>
-        )}*/}
         <section>
-          <header className="font-extrabold text-2xl md:text-4xl leading-normal">
+          <header className="font-bold text-xl md:text-4xl leading-normal">
             Trending Brands
           </header>
-          {trendingBrandsData ? (
+          {/*<TrendingBrandCardSkeleton />*/}
+          {trendingBrandsLoading && (
             <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
-              {allBrandsData?.map((eachTrendingBrand) => (
+              {Array.from({ length: 5 })?.map((_) => (
+                <TrendingBrandCardSkeleton key={_ as number} />
+              ))}
+            </div>
+          )}
+          {trendingBrands && (
+            <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
+              {trendingBrands?.map((eachTrendingBrand) => (
                 <TrendingBrandCard
                   key={eachTrendingBrand.name}
-                  avatarUrl={eachTrendingBrand.brandImage}
-                  description={eachTrendingBrand.description}
+                  avatarUrl={eachTrendingBrand.brandImage!}
+                  description={eachTrendingBrand.description!}
                   feedbackCount={Number(eachTrendingBrand.feedbackCount)}
                   name={eachTrendingBrand.name}
                   rawName={eachTrendingBrand.rawName}
                 />
               ))}
             </div>
-          ) : (
+          )}
+          {trendingBrands?.length === 0 && (
             <Card className="bg-transparent shadow-none">
               <CardBody className="flex items-center justify-center h-[200px]">
-                <div className="text-3xl text-gray-600 text-center leading-loose">
+                <div className="text-xl lg:text-3xl text-gray-600 text-center leading-loose">
                   No trending brands.
                   <br />
-                  Strange...
+                  <Button>Try again</Button>
+                </div>
+              </CardBody>
+            </Card>
+          )}
+          {trendingBrandsError && (
+            <Card className="bg-transparent shadow-none">
+              <CardBody className="flex items-center justify-center h-[200px]">
+                <div className="text-lg lg:text-3xl text-gray-600 text-center text-pretty leading-loose">
+                  Unable to fetch Brands.
+                  <br />
+                  Please check network connection.
                 </div>
               </CardBody>
             </Card>
@@ -102,15 +129,19 @@ export default function Home() {
         </section>
 
         <section className="">
-          <header className="font-bold text-2xl md:text-4xl leading-normal">
+          <header className="font-bold text-xl md:text-4xl leading-normal">
             Trending Feedbacks
           </header>
-          <ScrollShadow hideScrollBar orientation={"horizontal"} size={80}>
-            <div className="flex flex-row gap-x-8 px-2 py-4">
-              {mySentFeedbacksData?.map((eachTrendingFeedback) => (
+          <ScrollShadow hideScrollBar orientation={"vertical"} size={80}>
+            <div className="flex flex-col lg:flex-row gap-x-8 gap-y-2 px-2 py-4">
+              {trendingFeedbacksLoading &&
+                Array.from({ length: 5 })?.map((_) => (
+                  <FeedbackCardListSkeleton key={_ as number} />
+                ))}
+              {trendingFeedbacks?.map((eachTrendingFeedback) => (
                 <FeedbackCard
                   key={eachTrendingFeedback.id}
-                  isLoaded={!!mySentFeedbacksData}
+                  isLoaded={!trendingFeedbacksLoading}
                   {...eachTrendingFeedback}
                 />
               ))}

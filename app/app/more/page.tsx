@@ -14,7 +14,7 @@ import { DBTables } from "@/types/enums";
 import { IBrands, IFeedbacks } from "@/types";
 import FeedbackCard from "@/components/FeedbackCard";
 import EmptyCard from "@/components/EmptyCard";
-import FeedbackCardSkeleton from "@/components/Skeletons/FeedbacksCardSkeleton";
+import { FeedbackCardSkeleton } from "@/components/Skeletons/FeedbacksCardSkeleton";
 import { TrendingBrandCard } from "@/components/TrendingCard";
 import CreateBrandModal from "@/components/Modals/CreateBrandModal";
 import { useFeedbacksContext } from "@/context";
@@ -293,6 +293,7 @@ function MorePageContent() {
                 <>
                   {(brandFeedbacksData as IFeedbacks[]) ? (
                     (brandFeedbacksData as IFeedbacks[])?.map((_) => (
+                      // @ts-ignore
                       <FeedbackCard
                         key={_.id}
                         // userName={fetchSender(_.sender)?.name}
@@ -321,6 +322,7 @@ function MorePageContent() {
               {!isMoreFetching &&
                 moreBrandFeedbacksData.length > 0 &&
                 moreBrandFeedbacksData.map((_) => (
+                  // @ts-ignore
                   <FeedbackCard key={_.id} {..._} isLoaded={!isMoreFetching} />
                 ))}
             </div>

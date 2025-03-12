@@ -254,7 +254,7 @@ export function CreateProfileModal({
                   : "Update Profile"}
               </ModalHeader>
               <ModalBody className="space-y-4">
-                <Card>
+                <Card fullWidth shadow={"none"}>
                   <CardBody className="p-4">
                     <Tabs
                       aria-label="Options"
@@ -329,7 +329,7 @@ export function CreateProfileModal({
                               title="Select dp"
                             >
                               {/* <LucideCamera /> */}
-                              Select Product Image
+                              Select Profile Image
                               <Input
                                 ref={profileImageRef}
                                 className="hidden"
