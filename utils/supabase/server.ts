@@ -8,11 +8,13 @@ export const createClient = (cookieStore: ReturnType<typeof cookies>) => {
     {
       cookies: {
         getAll() {
+          // @ts-ignore
           return cookieStore.getAll();
         },
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
+              // @ts-ignore
               cookieStore.set(name, value, options),
             );
           } catch {
