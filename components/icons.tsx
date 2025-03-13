@@ -33,7 +33,7 @@ export const DisconnectIcon: React.FC<IconSvgProps> = ({
   return (
     <svg
       height={size || height}
-      style={{ fill: "currentcolor", transform: ";msFilter:;" }}
+      style={{ fill: "currentcolor", transform: ";msFilter:" }}
       viewBox="0 0 24 24"
       width={size || width}
       xmlns="http://www.w3.org/2000/svg"

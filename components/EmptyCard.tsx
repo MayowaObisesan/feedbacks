@@ -1,4 +1,4 @@
-import { Card, CardBody } from "@nextui-org/card";
+import { Card, CardBody } from "@heroui/card";
 
 function EmptyCard({ children }: { children: React.ReactNode }) {
   return (

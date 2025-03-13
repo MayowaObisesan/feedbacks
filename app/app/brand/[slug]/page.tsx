@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@nextui-org/button";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
+import { Button } from "@heroui/button";
+import { ScrollShadow } from "@heroui/scroll-shadow";
 import {
   LucideArrowRight,
   LucideChevronRight,
   LucideMessagesSquare,
 } from "lucide-react";
 import Link from "next/link";
-import { Divider } from "@nextui-org/divider";
+import { Divider } from "@heroui/divider";
 import { Alert } from "@heroui/alert";
 import React from "react";
 
@@ -25,12 +25,14 @@ import { FeedbackCardListSkeleton } from "@/components/Skeletons/FeedbacksCardSk
 import { useBrandFeedbacks } from "@/hooks/useFeedbacks";
 
 function BrandPage({ params }: { params: any }) {
+  // @ts-ignore
+  const { slug } = React.use(params);
   const { myAddress, myEventInvites, user } = useFeedbacksContext();
   const {
     data: brandData,
     error: brandError,
     isFetched: brandIsFetched,
-  } = useBrandByName(params.slug);
+  } = useBrandByName(slug);
   const {
     data: brandFeedbacksData,
     isFetching: brandFeedbacksIsFetching,
@@ -175,7 +177,7 @@ function BrandPage({ params }: { params: any }) {
         <div className="relative lg:h-full overflow-y-auto">
           <BrandNav
             brandData={brandData!}
-            brandName={params.slug}
+            brandName={slug}
             isBrandDataSuccessful={brandIsFetched}
           />
         </div>
@@ -218,7 +220,7 @@ function BrandPage({ params }: { params: any }) {
       <div className="relative min-w-72 md:h-full md:overflow-y-auto">
         <BrandNav
           brandData={brandData!}
-          brandName={params.slug}
+          brandName={slug}
           isBrandDataSuccessful={brandIsFetched}
         />
       </div>
@@ -253,7 +255,7 @@ function BrandPage({ params }: { params: any }) {
                 as={Link}
                 className={"max-sm:hidden"}
                 endContent={<LucideArrowRight size={16} />}
-                href={`/app/more?brandFeedbacks=${params.slug}`}
+                href={`/app/more?brandFeedbacks=${slug}`}
                 variant={"light"}
               >
                 View more
@@ -261,7 +263,7 @@ function BrandPage({ params }: { params: any }) {
               <Button
                 isIconOnly
                 className={"md:hidden"}
-                href={`/app/more?brandFeedbacks=${params.slug}`}
+                href={`/app/more?brandFeedbacks=${slug}`}
                 variant={"light"}
               >
                 <LucideChevronRight size={20} strokeWidth={4} />

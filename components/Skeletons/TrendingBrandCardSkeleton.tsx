@@ -1,7 +1,7 @@
-import { Card, CardBody, CardFooter } from "@nextui-org/card";
-import { Avatar } from "@nextui-org/avatar";
+import { Card, CardBody, CardFooter } from "@heroui/card";
+import { Avatar } from "@heroui/avatar";
 import React from "react";
-import { Skeleton } from "@nextui-org/skeleton";
+import { Skeleton } from "@heroui/skeleton";
 
 export default function TrendingBrandCardSkeleton() {
   return (

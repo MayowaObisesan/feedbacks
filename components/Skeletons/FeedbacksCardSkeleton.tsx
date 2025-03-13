@@ -1,5 +1,5 @@
-import { Card } from "@nextui-org/card";
-import { Skeleton } from "@nextui-org/skeleton";
+import { Card } from "@heroui/card";
+import { Skeleton } from "@heroui/skeleton";
 import { LucideStar } from "lucide-react";
 
 export function FeedbackCardSkeleton() {

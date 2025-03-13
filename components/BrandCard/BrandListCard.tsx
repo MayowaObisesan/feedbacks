@@ -1,5 +1,5 @@
-import { Card } from "@nextui-org/card";
-import { Avatar } from "@nextui-org/avatar";
+import { Card } from "@heroui/card";
+import { Avatar } from "@heroui/avatar";
 import React from "react";
 
 import { formatCount } from "@/utils";

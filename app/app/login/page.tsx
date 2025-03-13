@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@nextui-org/button";
-import { useSession } from "next-auth/react";
+import { Button } from "@heroui/button";
+// import { useSession } from "next-auth/react";
 import { Provider, SignInWithOAuthCredentials } from "@supabase/auth-js";
 
 import { LastUsed, useLastUsed } from "@/hooks/lastUsed";
@@ -15,7 +15,7 @@ export default function UserAuthForm() {
     provider: Provider;
   }>();*/
   const [lastUsed, setLastUsed] = useLastUsed();
-  const { data: sessionData } = useSession();
+  // const { data: sessionData } = useSession();
 
   /*useEffect(() => {
     async function fetchData() {
@@ -76,12 +76,12 @@ export default function UserAuthForm() {
       return url;
     };
 
-    // @ts-ignore
+    /*// @ts-ignore
     console.log("NEXT PUBLIC SITE URL::", process.env.NEXT_PUBLIC_SITE_URL);
     // @ts-ignore
     console.log("NEXT PUBLIC VERCEL URL::", process.env.NEXT_PUBLIC_VERCEL_URL);
     // @ts-ignore
-    console.log("redirect URL::", getURL());
+    console.log("redirect URL::", getURL());*/
 
     await supabase.auth.signInWithOAuth({
       provider: provider,
@@ -97,7 +97,7 @@ export default function UserAuthForm() {
         "fixed top-0 left-0 right-0 flex flex-col justify-center items-center gap-8 h-dvh w-full"
       }
     >
-      <div>{sessionData && <div>Welcome {sessionData.user?.name}</div>}</div>
+      {/*<div>{sessionData && <div>Welcome {sessionData.user?.name}</div>}</div>*/}
       <div className={"text-xl text-balance font-bold"}>
         Continue using your Social Accounts
       </div>
@@ -139,7 +139,7 @@ export default function UserAuthForm() {
           type="button"
           variant="solid"
           // disabled={isLoading}
-          onClick={() => handleSupabaseOauthSignIn("github")}
+          onPress={() => handleSupabaseOauthSignIn("github")}
         >
           <GithubIcon />
           GitHub {lastUsed === "github" ? <LastUsed /> : null}
@@ -148,7 +148,7 @@ export default function UserAuthForm() {
           type="button"
           variant="solid"
           // disabled={isLoading}
-          onClick={() => handleSupabaseOauthSignIn("google")}
+          onPress={() => handleSupabaseOauthSignIn("google")}
         >
           <Icons.google className="mr-2 h-4 w-4" />
           Google {lastUsed === "google" ? <LastUsed /> : null}

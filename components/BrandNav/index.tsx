@@ -2,16 +2,16 @@
 
 import type { Tables } from "@/types/supabase";
 
-import { Listbox, ListboxItem, ListboxSection } from "@nextui-org/listbox";
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
-import { Image } from "@nextui-org/image";
+import { Listbox, ListboxItem, ListboxSection } from "@heroui/listbox";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Image } from "@heroui/image";
 import { useEffect, useState } from "react";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
-import { Divider } from "@nextui-org/divider";
-import { Spacer } from "@nextui-org/spacer";
-import { Button } from "@nextui-org/button";
+import { ScrollShadow } from "@heroui/scroll-shadow";
+import { Divider } from "@heroui/divider";
+import { Spacer } from "@heroui/spacer";
+import { Button } from "@heroui/button";
 import { toast } from "sonner";
-import { Skeleton } from "@nextui-org/skeleton";
+import { Skeleton } from "@heroui/skeleton";
 
 import UpdateBrandModal from "../Modals/UpdateBrandModal";
 import { CreateFeedbackModal } from "../Modals/CreateFeedbackModal";
@@ -268,6 +268,11 @@ export default function BrandNav({
               />
             ),
           },
+          /*{
+            text: "Share Feedback",
+            description: "Embed Feedbacks to your App",
+            modal: <ShareBrandModal />,
+          },*/
         ]
       : [
           /*{
@@ -360,7 +365,7 @@ export default function BrandNav({
                 <Button
                   className={"px-0"}
                   variant={"flat"}
-                  onClick={
+                  onPress={
                     !user?.email
                       ? () => toast("You need to login to follow a brand")
                       : () => {}

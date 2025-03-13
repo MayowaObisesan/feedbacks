@@ -1,21 +1,21 @@
 "use client";
 
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import {
   Modal,
   ModalBody,
   ModalContent,
   ModalHeader,
   useDisclosure,
-} from "@nextui-org/modal";
-import { Kbd } from "@nextui-org/kbd";
-import { Input } from "@nextui-org/input";
-import { Chip } from "@nextui-org/chip";
+} from "@heroui/modal";
+import { Kbd } from "@heroui/kbd";
+import { Input } from "@heroui/input";
+import { Chip } from "@heroui/chip";
 import { useEffect, useState } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
 import { PostgrestError } from "@supabase/supabase-js";
-import { Skeleton } from "@nextui-org/skeleton";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
+import { Skeleton } from "@heroui/skeleton";
+import { ScrollShadow } from "@heroui/scroll-shadow";
 import { Alert } from "@heroui/alert";
 
 import { capitalize } from "@/utils";

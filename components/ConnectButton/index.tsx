@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useAccount, useDisconnect } from "wagmi";
 
@@ -40,7 +40,7 @@ export default function ConnectButton() {
       className="text-sm font-normal text-default-600 bg-default-100"
       startContent={<HeartFilledIcon className="text-danger" />}
       variant="flat"
-      onClick={() => open()}
+      onPress={() => open()}
     >
       Connect Wallet
     </Button>

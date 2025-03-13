@@ -1,10 +1,10 @@
 "use client";
 
-import { Listbox, ListboxItem, ListboxSection } from "@nextui-org/listbox";
+import { Listbox, ListboxItem, ListboxSection } from "@heroui/listbox";
 import { useWindowSize } from "usehooks-ts";
-import { Chip } from "@nextui-org/chip";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
-import { Skeleton } from "@nextui-org/skeleton";
+import { Chip } from "@heroui/chip";
+import { ScrollShadow } from "@heroui/scroll-shadow";
+import { Skeleton } from "@heroui/skeleton";
 import React from "react";
 
 import { ListboxWrapper } from "./ListboxWrapper";

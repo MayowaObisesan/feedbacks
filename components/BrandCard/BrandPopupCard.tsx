@@ -1,5 +1,5 @@
-import { Avatar } from "@nextui-org/avatar";
-import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
+import { Avatar } from "@heroui/avatar";
+import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 import React from "react";
 
 import { parseImageHash } from "@/utils";

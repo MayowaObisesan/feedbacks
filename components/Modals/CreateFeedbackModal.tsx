@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@nextui-org/button";
-import { Textarea } from "@nextui-org/input";
+import { Button } from "@heroui/button";
+import { Input, Textarea } from "@heroui/input";
 import {
   Modal,
   ModalBody,
@@ -9,11 +9,15 @@ import {
   ModalFooter,
   ModalHeader,
   useDisclosure,
-} from "@nextui-org/modal";
+} from "@heroui/modal";
 import { LucidePlus } from "lucide-react";
-import { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 // import { useWriteContract } from "wagmi";
+import { cn } from "@heroui/theme";
+import { Switch } from "@heroui/switch";
+import { Divider } from "@heroui/divider";
+import { Card } from "@heroui/card";
 
 import RatingComponent from "../RatingStars/RatingComponent";
 
@@ -59,9 +63,15 @@ export function CreateFeedbackModal({
   const { user } = useFeedbacksContext();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   // const { writeContract, isPending, isSuccess, isError } = useWriteContract();
+  const [feedbackTitle, setFeedbackTitle] = useState<string>("");
   const [feedbackContent, setFeedbackContent] = useState<string>("");
   const [rating, setRating] = useState<number | null>(2);
   const [isSubmitPending, setIsSubmitPending] = useState(false);
+  const [beAnonymous, setBeAnonymous] = useState<boolean>(false);
+  const memoizedPlaceholder = useMemo(
+    () => getRandomFeedback(feedbackSampleList),
+    [],
+  );
 
   const onCreateFeedback = async () => {
     /*writeContract({
@@ -79,27 +89,21 @@ export function CreateFeedbackModal({
         .insert([
           {
             recipientId: brandId,
-            title: "",
+            title: feedbackTitle,
             email: user?.email,
             description: feedbackContent,
             eventId: null,
             productId: null,
             starRating: rating,
+            beAnonymous: beAnonymous,
           },
         ])
         .select();
-
-      // const {data: brand, error: brandError} = await supabase
-      //   .from(DBTables.Brand)
-      //   .select("*")
-      //   .eq('id', brandId);
 
       const { count } = await supabase
         .from(DBTables.Feedback)
         .select("*", { count: "exact", head: true })
         .eq("recipientId", brandId);
-
-      // console.log("Feedbacks data", feedbacks, count);
 
       // Update the brands parameters also.
       if (count! > 0) {
@@ -170,6 +174,53 @@ export function CreateFeedbackModal({
                 Submit Feedback
               </ModalHeader>
               <ModalBody className="space-y-2">
+                <Card isPressable className={cn("lg:hidden bg-default-100")}>
+                  <Switch
+                    classNames={{
+                      base: cn(
+                        "inline-flex flex-row-reverse w-full max-w-md items-center",
+                        "justify-between cursor-pointer rounded-2xl gap-4 p-4 border-2 border-transparent",
+                        "data-[selected=true]:border-warning",
+                      ),
+                      wrapper: cn(
+                        "p-0 h-4 overflow-visible",
+                        // selected
+                        "group-data-[selected=true]:bg-warning",
+                      ),
+                      thumb: cn(
+                        "w-6 h-6 border-2 shadow-lg",
+                        "group-data-[hover=true]:border-warning",
+                        //selected
+                        "group-data-[selected=true]:ms-6",
+                        // pressed
+                        "group-data-[pressed=true]:w-7",
+                        "group-data-[selected]:group-data-[pressed]:ms-4",
+                      ),
+                    }}
+                    isSelected={beAnonymous}
+                    onValueChange={setBeAnonymous}
+                  >
+                    <div className="flex flex-col gap-1 text-left">
+                      <p className="text-small">Send Feedback as Anonymous</p>
+                      <p className="text-small text-default-400">
+                        Your name will not be shown when you send this feedback.
+                      </p>
+                    </div>
+                  </Switch>
+                </Card>
+
+                <Divider />
+
+                <div>
+                  <Input
+                    label="Title"
+                    labelPlacement="outside"
+                    placeholder="A title for your feedback"
+                    size={"md"}
+                    value={feedbackTitle}
+                    onValueChange={setFeedbackTitle}
+                  />
+                </div>
                 <Textarea
                   isRequired
                   className=""
@@ -178,7 +229,7 @@ export function CreateFeedbackModal({
                   }}
                   label="Your Feedback"
                   labelPlacement="outside"
-                  placeholder={`e.g., ${getRandomFeedback(feedbackSampleList)}`}
+                  placeholder={`e.g., ${memoizedPlaceholder}`}
                   value={feedbackContent}
                   onValueChange={setFeedbackContent}
                 />

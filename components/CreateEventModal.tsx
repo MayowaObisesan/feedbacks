@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@nextui-org/button";
-import { Input, Textarea } from "@nextui-org/input";
+import { Button } from "@heroui/button";
+import { Input, Textarea } from "@heroui/input";
 import {
   Modal,
   ModalBody,
@@ -9,19 +9,19 @@ import {
   ModalFooter,
   ModalHeader,
   useDisclosure,
-} from "@nextui-org/modal";
+} from "@heroui/modal";
 import { LucidePlus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useWriteContract } from "wagmi";
 import { DateValue, parseAbsoluteToLocal } from "@internationalized/date";
 import { I18nProvider } from "@react-aria/i18n";
-import { DateRangePicker } from "@nextui-org/date-picker";
+import { DateRangePicker } from "@heroui/date-picker";
 import { RangeValue } from "@react-types/shared";
 import { zeroAddress } from "viem";
-import { Listbox, ListboxItem } from "@nextui-org/listbox";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
-import { Chip } from "@nextui-org/chip";
+import { Listbox, ListboxItem } from "@heroui/listbox";
+import { ScrollShadow } from "@heroui/scroll-shadow";
+import { Chip } from "@heroui/chip";
 
 import { SearchIcon } from "./icons";
 
@@ -239,7 +239,9 @@ export function CreateEventModal({
                   <I18nProvider locale="en-us">
                     <DateRangePicker
                       label="Event duration"
+                      // @ts-ignore
                       value={eventDuration}
+                      // @ts-ignore
                       onChange={setEventDuration}
                     />
                   </I18nProvider>

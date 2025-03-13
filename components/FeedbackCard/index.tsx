@@ -2,9 +2,9 @@
 
 import type { Tables } from "@/types/supabase";
 
-import { Avatar } from "@nextui-org/avatar";
-import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
-import { Skeleton } from "@nextui-org/skeleton";
+import { Avatar } from "@heroui/avatar";
+import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
+import { Skeleton } from "@heroui/skeleton";
 import React, { useEffect } from "react";
 import { useIsMounted } from "usehooks-ts";
 import clsx from "clsx";
@@ -15,6 +15,7 @@ import { useFeedbacksContext } from "@/context";
 import { IUser } from "@/types";
 import { DBTables } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
+import { hashFullName } from "@/utils";
 
 type Feedback = Tables<DBTables.Feedback>;
 type ExtendFeedback = Feedback & { asGrid?: boolean; isLoaded?: boolean };
@@ -94,7 +95,10 @@ export default function FeedbackCard(props: ExtendFeedback) {
               <h4 className="text-small font-semibold leading-none text-default-700">
                 {props?.email === user?.email
                   ? "You"
-                  : userData?.userData?.user_metadata.full_name}
+                  : hashFullName(
+                      userData?.userData?.user_metadata.full_name,
+                      user?.email!,
+                    )}
               </h4>
             </Skeleton>
             <Skeleton className="rounded-full" isLoaded={!!props.email}>
@@ -142,7 +146,7 @@ export default function FeedbackCard(props: ExtendFeedback) {
           {Array.from({ length: 3 }).map((_, index) => (
             <>
               <StarItem
-                key={index + 1}
+                key={index}
                 rating={index + 1}
                 // @ts-ignore
                 selectedRating={props.starRating}

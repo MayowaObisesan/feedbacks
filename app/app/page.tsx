@@ -1,8 +1,8 @@
 "use client";
 
-import { Card, CardBody } from "@nextui-org/card";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
-import { Button } from "@nextui-org/button";
+import { Card, CardBody } from "@heroui/card";
+import { ScrollShadow } from "@heroui/scroll-shadow";
+import { Button } from "@heroui/button";
 import { Alert } from "@heroui/alert";
 
 import { supabase } from "@/utils/supabase/supabase";
@@ -85,8 +85,8 @@ export default function Home() {
           {/*<TrendingBrandCardSkeleton />*/}
           {trendingBrandsLoading && (
             <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
-              {Array.from({ length: 5 })?.map((_) => (
-                <TrendingBrandCardSkeleton key={_ as number} />
+              {Array.from({ length: 5 })?.map((_, index) => (
+                <TrendingBrandCardSkeleton key={index} />
               ))}
             </div>
           )}
@@ -135,8 +135,8 @@ export default function Home() {
           <ScrollShadow hideScrollBar orientation={"vertical"} size={80}>
             <div className="flex flex-col lg:flex-row gap-x-8 gap-y-2 px-2 py-4">
               {trendingFeedbacksLoading &&
-                Array.from({ length: 5 })?.map((_) => (
-                  <FeedbackCardListSkeleton key={_ as number} />
+                Array.from({ length: 5 })?.map((_, index) => (
+                  <FeedbackCardListSkeleton key={index} />
                 ))}
               {trendingFeedbacks?.map((eachTrendingFeedback) => (
                 <FeedbackCard

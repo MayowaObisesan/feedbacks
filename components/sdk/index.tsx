@@ -1,22 +1,22 @@
 import { toast } from "sonner";
 import { Provider, SignInWithOAuthCredentials } from "@supabase/auth-js";
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { Suspense, useEffect, useState } from "react";
 import { type User as I_User } from "@supabase/supabase-js";
-import { Input, Textarea } from "@nextui-org/input";
-import { Card, CardBody, CardFooter } from "@nextui-org/card";
-import { Divider } from "@nextui-org/divider";
-import { Link } from "@nextui-org/link";
+import { Input, Textarea } from "@heroui/input";
+import { Card, CardBody, CardFooter } from "@heroui/card";
+import { Divider } from "@heroui/divider";
+import { Link } from "@heroui/link";
 import { verifyKey } from "@unkey/api";
 import { useSearchParams } from "next/navigation";
-import { User } from "@nextui-org/user";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
+import { User } from "@heroui/user";
+import { ScrollShadow } from "@heroui/scroll-shadow";
 import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-} from "@nextui-org/dropdown";
+} from "@heroui/dropdown";
 
 import { unkey } from "@/utils/unkey";
 import { IBrands, IUser } from "@/types";
@@ -27,7 +27,7 @@ import { LastUsed, useLastUsed } from "@/hooks/lastUsed";
 import { DisconnectIcon, GithubIcon, Icons } from "@/components/icons";
 import { DBTables } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
-// import { useIsMobile } from "@nextui-org/use-is-mobile";
+// import { useIsMobile } from "@heroui/use-is-mobile";
 
 /*export interface FeedbackInput {
   apiKey: string;

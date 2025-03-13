@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocalStorage } from "usehooks-ts";
-import { Chip } from "@nextui-org/chip";
+import { Chip } from "@heroui/chip";
 
 export function useLastUsed() {
   return useLocalStorage<"github" | "google" | "email" | undefined>(

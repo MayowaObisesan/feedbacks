@@ -5,23 +5,23 @@ import {
   ModalFooter,
   ModalHeader,
   useDisclosure,
-} from "@nextui-org/modal";
+} from "@heroui/modal";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import axios from "axios";
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import {
   LucideCheckCheck,
   LucidePlus,
   LucideUpload,
   LucideX,
 } from "lucide-react";
-import { Chip } from "@nextui-org/chip";
-import { Card } from "@nextui-org/card";
-import { Image } from "@nextui-org/image";
-import { Avatar } from "@nextui-org/avatar";
-import { Input, Textarea } from "@nextui-org/input";
-import { Select, SelectItem } from "@nextui-org/select";
+import { Chip } from "@heroui/chip";
+import { Card } from "@heroui/card";
+import { Image } from "@heroui/image";
+import { Avatar } from "@heroui/avatar";
+import { Input, Textarea } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
 
 import { CameraIcon } from "@/components/icons/CameraIcon";
 import { supabase } from "@/utils/supabase/supabase";
