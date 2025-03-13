@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardBody, CardFooter } from "@nextui-org/card";
+import { Card, CardBody, CardFooter } from "@heroui/card";
 import Link from "next/link";
 import React from "react";
-import { Avatar } from "@nextui-org/avatar";
+import { Avatar } from "@heroui/avatar";
 
 import { formatCount } from "@/utils";
 import { ITrendingBrandCard } from "@/types";

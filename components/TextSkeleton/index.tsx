@@ -1,5 +1,5 @@
-import { Skeleton } from "@nextui-org/skeleton";
-import { Spacer } from "@nextui-org/spacer";
+import { Skeleton } from "@heroui/skeleton";
+import { Spacer } from "@heroui/spacer";
 
 import { capitalize } from "@/utils";
 

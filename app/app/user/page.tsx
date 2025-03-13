@@ -1,10 +1,10 @@
 "use client";
 
-import { Accordion, AccordionItem } from "@nextui-org/accordion";
-import { Avatar } from "@nextui-org/avatar";
-import { Button } from "@nextui-org/button";
-import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
-import { Skeleton } from "@nextui-org/skeleton";
+import { Accordion, AccordionItem } from "@heroui/accordion";
+import { Avatar } from "@heroui/avatar";
+import { Button } from "@heroui/button";
+import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
+import { Skeleton } from "@heroui/skeleton";
 import {
   LucideBadgeMinus,
   LucideCheck,

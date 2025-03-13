@@ -1,13 +1,13 @@
 "use client";
 
 import React, { ReactElement, Suspense, useEffect, useState } from "react";
-import { Skeleton } from "@nextui-org/skeleton";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
+import { Skeleton } from "@heroui/skeleton";
+import { ScrollShadow } from "@heroui/scroll-shadow";
 import { useSearchParams } from "next/navigation";
 import { LucideBadgeMinus } from "lucide-react";
-import { Card, CardBody } from "@nextui-org/card";
-import { Listbox } from "@nextui-org/listbox";
-import { Button } from "@nextui-org/button";
+import { Card, CardBody } from "@heroui/card";
+import { Listbox } from "@heroui/listbox";
+import { Button } from "@heroui/button";
 
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";

@@ -1,11 +1,11 @@
 import { parseZonedDateTime } from "@internationalized/date";
-import { Accordion, AccordionItem } from "@nextui-org/accordion";
-import { Button } from "@nextui-org/button";
-import { Calendar } from "@nextui-org/calendar";
-import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
-import { Divider } from "@nextui-org/divider";
-import { Image } from "@nextui-org/image";
-import { Link } from "@nextui-org/link";
+import { Accordion, AccordionItem } from "@heroui/accordion";
+import { Button } from "@heroui/button";
+import { Calendar } from "@heroui/calendar";
+import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
+import { Divider } from "@heroui/divider";
+import { Image } from "@heroui/image";
+import { Link } from "@heroui/link";
 import {
   LucideCalendarRange,
   LucideCheck,
@@ -138,12 +138,15 @@ export default function EventInviteCard(eventProps: IEvents) {
               // }}
               isReadOnly
               aria-label="Date (Read Only)"
+              // @ts-ignore
               focusedValue={parseZonedDateTime(
                 eventProps?.eventBasicInfo.createEventBasicInfo?.eventEndDate,
               )}
+              // @ts-ignore
               maxValue={parseZonedDateTime(
                 eventProps?.eventBasicInfo.createEventBasicInfo?.eventEndDate,
               )}
+              // @ts-ignore
               minValue={parseZonedDateTime(
                 eventProps?.eventBasicInfo.createEventBasicInfo?.eventStartDate,
               )}

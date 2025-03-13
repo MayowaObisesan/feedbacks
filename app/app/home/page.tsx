@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardBody } from "@nextui-org/card";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
+import { Card, CardBody } from "@heroui/card";
+import { ScrollShadow } from "@heroui/scroll-shadow";
 
 import { supabase } from "@/utils/supabase/supabase";
 import FeedbackCard from "@/components/FeedbackCard";

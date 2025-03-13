@@ -1,11 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { NextUIProvider } from "@nextui-org/system";
+import { HeroUIProvider } from "@heroui/system";
 import { useRouter } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ThemeProviderProps } from "next-themes/dist/types";
-import { SessionProvider } from "next-auth/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export interface ProvidersProps {
@@ -19,11 +18,11 @@ export function Providers({ children, themeProps }: ProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <NextUIProvider navigate={router.push}>
-        <SessionProvider>
-          <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
-        </SessionProvider>
-      </NextUIProvider>
+      <HeroUIProvider navigate={router.push}>
+        {/*<SessionProvider>*/}
+        <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
+        {/*</SessionProvider>*/}
+      </HeroUIProvider>
     </QueryClientProvider>
   );
 }

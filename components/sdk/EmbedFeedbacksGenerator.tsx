@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Input, Textarea } from "@nextui-org/input";
-import { Card } from "@nextui-org/card";
-import { Button } from "@nextui-org/button";
+import { Input, Textarea } from "@heroui/input";
+import { Card } from "@heroui/card";
+import { Button } from "@heroui/button";
 import { toast } from "sonner";
 import {
   Modal,
@@ -11,11 +11,11 @@ import {
   ModalContent,
   ModalHeader,
   useDisclosure,
-} from "@nextui-org/modal";
+} from "@heroui/modal";
 import { Alert } from "@heroui/alert";
 import { LucideDownloadCloud } from "lucide-react";
-import { Switch } from "@nextui-org/switch";
-import { cn } from "@nextui-org/theme";
+import { Switch } from "@heroui/switch";
+import { cn } from "@heroui/theme";
 
 import FeedbacksForm from "@/components/sdk/index";
 import { APIKEY_PREFIX } from "@/constant";
@@ -47,7 +47,7 @@ const EmbedFeedbacksGenerator: React.FC<{
         startContent={<LucideDownloadCloud size={16} strokeWidth={3} />}
         onPress={onOpen}
       >
-        Embed to your App
+        Embed in your App
       </Button>
       <Modal
         backdrop={"blur"}

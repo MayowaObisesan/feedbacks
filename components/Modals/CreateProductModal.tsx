@@ -1,10 +1,10 @@
 "use client";
 
-import { Avatar } from "@nextui-org/avatar";
-import { Button } from "@nextui-org/button";
-import { Card } from "@nextui-org/card";
-import { Image } from "@nextui-org/image";
-import { Input, Textarea } from "@nextui-org/input";
+import { Avatar } from "@heroui/avatar";
+import { Button } from "@heroui/button";
+import { Card } from "@heroui/card";
+import { Image } from "@heroui/image";
+import { Input, Textarea } from "@heroui/input";
 import {
   Modal,
   ModalBody,
@@ -12,7 +12,7 @@ import {
   ModalFooter,
   ModalHeader,
   useDisclosure,
-} from "@nextui-org/modal";
+} from "@heroui/modal";
 import axios from "axios";
 import {
   LucideCheckCheck,
@@ -23,7 +23,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useWriteContract } from "wagmi";
-import { Chip } from "@nextui-org/chip";
+import { Chip } from "@heroui/chip";
 
 import { CameraIcon } from "../icons/CameraIcon";
 

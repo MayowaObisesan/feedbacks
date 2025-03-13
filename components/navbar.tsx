@@ -5,37 +5,205 @@ import {
   NavbarBrand,
   NavbarContent,
   NavbarItem,
-  NavbarMenu,
-  NavbarMenuItem,
-} from "@nextui-org/navbar";
-import { Button } from "@nextui-org/button";
-import { Kbd } from "@nextui-org/kbd";
-import { Link } from "@nextui-org/link";
-import { Input } from "@nextui-org/input";
-import { link as linkStyles } from "@nextui-org/theme";
+} from "@heroui/navbar";
+import { Button } from "@heroui/button";
+import { Link } from "@heroui/link";
+import { link as linkStyles } from "@heroui/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
-import { User } from "@nextui-org/user";
-import { Skeleton } from "@nextui-org/skeleton";
+import { User } from "@heroui/user";
 import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-} from "@nextui-org/dropdown";
+} from "@heroui/dropdown";
 import { useEffect } from "react";
 import { LucideChartNoAxesGantt, Power } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import SearchModal from "@/components/Modals/SearchModal";
-import { parseImageHash } from "@/utils";
 import { useFeedbacksContext } from "@/context";
 import { supabase } from "@/utils/supabase/supabase";
 import { DisconnectIcon, Logo, SearchIcon } from "@/components/icons";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { siteConfig } from "@/config/site";
 
-export const Navbar = () => {
+export function Navbar() {
+  const router = useRouter();
+  const { SetUser, user, userDB } = useFeedbacksContext();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      SetUser(user!);
+    };
+
+    getUser();
+  }, []);
+
+  function SignInButton() {
+    return (
+      <NavbarItem>
+        <Button
+          color={"success"}
+          variant="shadow"
+          onPress={() => router.push("/app/login")}
+        >
+          Sign in
+        </Button>
+      </NavbarItem>
+    );
+  }
+
+  function DropDownView() {
+    return (
+      <NavbarItem className={"flex flex-col justify-center items-center"}>
+        <Dropdown placement="bottom-start">
+          <DropdownTrigger>
+            <User
+              as="button"
+              avatarProps={{
+                isBordered: true,
+                src: userDB?.dp || user?.user_metadata.avatar_url,
+                size: "sm",
+              }}
+              className="transition-transform"
+              description={""}
+              name={""}
+            />
+          </DropdownTrigger>
+          <DropdownMenu aria-label="User Actions" variant="flat">
+            <DropdownItem
+              key="profile"
+              as={Link}
+              className="h-14 gap-2 text-foreground"
+              href={"/app/me"}
+            >
+              <p className="font-bold">Signed in as</p>
+              <p className="font-bold">{user?.user_metadata.full_name}</p>
+            </DropdownItem>
+            {/*<DropdownItem key="settings" href={"/app/me"}>
+              My Profile
+            </DropdownItem>*/}
+            <DropdownItem key="settings">Settings</DropdownItem>
+            {/*<DropdownItem key="team_settings">Team Settings</DropdownItem>*/}
+            <DropdownItem key="analytics">Analytics</DropdownItem>
+            {/*<DropdownItem key="system">System</DropdownItem>*/}
+            {/*<DropdownItem key="configurations">Configurations</DropdownItem>*/}
+            <DropdownItem key="help_and_feedback" showDivider>
+              Help & Feedback
+            </DropdownItem>
+            <DropdownItem
+              key="logout"
+              color="danger"
+              endContent={<DisconnectIcon size={20} strokeWidth={4} />}
+              onPress={async () => await supabase.auth.signOut()}
+            >
+              Log Out
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+      </NavbarItem>
+    );
+  }
+
+  return (
+    <NextUINavbar
+      className={""}
+      classNames={{
+        base: "",
+        wrapper: "px-2",
+        content: "",
+        menu: "",
+      }}
+      maxWidth="full"
+      position={"sticky"}
+    >
+      <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
+        <Button isIconOnly className={"hidden max-md:flex"} variant={"light"}>
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+          <label htmlFor={"id-mobile-drawer"}>
+            <LucideChartNoAxesGantt />
+          </label>
+        </Button>
+        <NavbarBrand as="li" className="gap-3 max-w-fit">
+          <NextLink className="flex justify-start items-center gap-1" href="/">
+            <Logo />
+            <p className="max-sm:hidden font-bold text-inherit">Feedbacks</p>
+          </NextLink>
+        </NavbarBrand>
+        <ul className="hidden lg:flex gap-4 justify-start ml-2">
+          {siteConfig.navItems.map((item) => (
+            <NavbarItem key={item.href + item.label}>
+              <NextLink
+                className={clsx(
+                  linkStyles({ color: "foreground" }),
+                  "data-[active=true]:text-primary data-[active=true]:font-medium",
+                )}
+                color="foreground"
+                href={item.href}
+              >
+                {item.label}
+              </NextLink>
+            </NavbarItem>
+          ))}
+        </ul>
+      </NavbarContent>
+
+      <NavbarContent
+        className="hidden sm:flex basis-1/5 sm:basis-full"
+        justify="end"
+      >
+        {/*<NavbarItem className="hidden sm:flex gap-2">
+          <ThemeSwitch />
+        </NavbarItem>*/}
+
+        <NavbarItem className="hidden lg:flex">
+          <div className="flex flex-wrap gap-3">
+            <Button isIconOnly radius={"full"} variant={"flat"}>
+              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+              <label htmlFor={"id-search-modal"}>
+                <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+              </label>
+            </Button>
+          </div>
+          <SearchModal />
+        </NavbarItem>
+
+        {!user?.email && <SignInButton />}
+
+        {user?.email && <DropDownView />}
+      </NavbarContent>
+
+      {/* MOBILE NAV VIEW */}
+      <NavbarContent
+        className="sm:hidden basis-1 items-center pl-4"
+        justify="end"
+      >
+        <NavbarItem>
+          <div className="flex flex-wrap gap-3">
+            <Button isIconOnly radius={"full"} variant={"flat"}>
+              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+              <label htmlFor={"id-search-modal"}>
+                <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+              </label>
+            </Button>
+          </div>
+        </NavbarItem>
+
+        {!user?.email && <SignInButton />}
+
+        {user?.email && <DropDownView />}
+      </NavbarContent>
+    </NextUINavbar>
+  );
+}
+
+export const NavbarOld = () => {
   const router = useRouter();
   const { SetUser, user, userDB } = useFeedbacksContext();
 
@@ -52,7 +220,7 @@ export const Navbar = () => {
   }, []);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const searchInput = (
+  /*const searchInput = (
     <Input
       aria-label="Search"
       classNames={{
@@ -71,10 +239,10 @@ export const Navbar = () => {
       }
       type="search"
     />
-  );
+  );*/
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const Profile = () => {
+  /*const Profile = () => {
     const { myProfileData, isMyProfileDataFetching } = useFeedbacksContext();
 
     return (
@@ -92,7 +260,7 @@ export const Navbar = () => {
         />
       </Skeleton>
     );
-  };
+  };*/
 
   return (
     <NextUINavbar
@@ -122,7 +290,7 @@ export const Navbar = () => {
         </NavbarBrand>
         <ul className="hidden lg:flex gap-4 justify-start ml-2">
           {siteConfig.navItems.map((item) => (
-            <NavbarItem key={item.href}>
+            <NavbarItem key={item.href + item.label}>
               <NextLink
                 className={clsx(
                   linkStyles({ color: "foreground" }),
@@ -165,6 +333,14 @@ export const Navbar = () => {
 
         <NavbarItem className="hidden lg:flex">
           {/*{searchInput}*/}
+          <div className="flex flex-wrap gap-3">
+            <Button isIconOnly radius={"full"} variant={"flat"}>
+              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+              <label htmlFor={"id-search-modal"}>
+                <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+              </label>
+            </Button>
+          </div>
           <SearchModal />
         </NavbarItem>
 
@@ -189,7 +365,7 @@ export const Navbar = () => {
           </div>
         </NavbarItem>*/}
 
-        {!user && (
+        {!user?.email && (
           <NavbarItem>
             <Button
               // href={"/login"}
@@ -204,7 +380,7 @@ export const Navbar = () => {
           </NavbarItem>
         )}
 
-        {user && (
+        {user?.email && (
           <NavbarItem>
             <Dropdown placement="bottom-start">
               <DropdownTrigger>
@@ -246,6 +422,7 @@ export const Navbar = () => {
         )}
       </NavbarContent>
 
+      {/* MOBILE NAV VIEW */}
       <NavbarContent
         className="sm:hidden basis-1 items-center pl-4"
         justify="end"
@@ -273,7 +450,7 @@ export const Navbar = () => {
         </Link>*/}
         <ThemeSwitch />
 
-        {!user && (
+        {!user?.email && (
           <NavbarItem>
             <Button
               // href={"/login"}
@@ -287,7 +464,7 @@ export const Navbar = () => {
           </NavbarItem>
         )}
 
-        {user && (
+        {user?.email && (
           <NavbarItem>
             <Dropdown placement="bottom-start">
               <DropdownTrigger>
@@ -343,11 +520,11 @@ export const Navbar = () => {
         */}
       </NavbarContent>
 
-      <NavbarMenu>
-        {/*{searchInput}*/}
+      {/*<NavbarMenu>
+        {searchInput}
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig.navMenuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
+            <NavbarMenuItem key={`${item.label}-${index}`}>
               <Link
                 color={
                   index === 2
@@ -364,7 +541,7 @@ export const Navbar = () => {
             </NavbarMenuItem>
           ))}
         </div>
-      </NavbarMenu>
+      </NavbarMenu>*/}
     </NextUINavbar>
   );
 };

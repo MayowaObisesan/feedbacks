@@ -1,6 +1,7 @@
 import axios from "axios";
 import { toast } from "sonner";
 import { Address } from "viem";
+import CryptoJS from "crypto-js";
 
 import { IProfile } from "@/types";
 import { useBrandRead } from "@/hooks/useRead";
@@ -21,6 +22,14 @@ interface I_SendToIPFSProps {
     arg0: boolean,
   ) => void | React.Dispatch<React.SetStateAction<boolean>>;
 }
+
+export function hashFullName(fullName: string, email: string) {
+  // Combine name and email for more uniqueness
+  const uniqueString = `${fullName}-${email}`;
+
+  // Take more characters from the hash
+  return CryptoJS.SHA256(uniqueString).toString().substring(0, 12);
+};
 
 export function cleanBrandRawName(brandName: string) {
   return brandName.trim().toLowerCase().split(" ").join("_");

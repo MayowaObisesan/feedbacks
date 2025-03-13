@@ -2,10 +2,10 @@
 
 import type { Tables } from "@/types/supabase";
 
-import { Accordion, AccordionItem } from "@nextui-org/accordion";
-import { Avatar } from "@nextui-org/avatar";
-import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/card";
-import { Skeleton } from "@nextui-org/skeleton";
+import { Accordion, AccordionItem } from "@heroui/accordion";
+import { Avatar } from "@heroui/avatar";
+import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
+import { Skeleton } from "@heroui/skeleton";
 import {
   LucideCheck,
   LucideFocus,
@@ -15,7 +15,7 @@ import {
   LucideUserPlus2,
 } from "lucide-react";
 import React from "react";
-import { Tooltip } from "@nextui-org/tooltip";
+import { Tooltip } from "@heroui/tooltip";
 import { User } from "@supabase/auth-js";
 
 import EmptyCard from "@/components/EmptyCard";

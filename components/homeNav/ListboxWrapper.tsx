@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
+import { ScrollShadow } from "@heroui/scroll-shadow";
 
 export const ListboxWrapper = ({ children }: { children: any }) => (
   <ScrollShadow
