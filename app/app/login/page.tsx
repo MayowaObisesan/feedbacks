@@ -76,6 +76,13 @@ export default function UserAuthForm() {
       return url;
     };
 
+    // @ts-ignore
+    console.log("NEXT PUBLIC SITE URL::", process.env.NEXT_PUBLIC_SITE_URL);
+    // @ts-ignore
+    console.log("NEXT PUBLIC VERCEL URL::", process.env.NEXT_PUBLIC_VERCEL_URL);
+    // @ts-ignore
+    console.log("redirect URL::", getURL());
+
     await supabase.auth.signInWithOAuth({
       provider: provider,
       options: {
