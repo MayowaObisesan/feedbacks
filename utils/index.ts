@@ -144,6 +144,16 @@ export const formatDateString = (date: string) => {
   });
 };
 
+export const formatDateStringShort = (date: string) => {
+  if (!date) return date;
+
+  return new Date(date).toLocaleDateString("en-us", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
 const sendFileToIPFS = async (
   dp: string,
   setisDpUploading: React.Dispatch<React.SetStateAction<boolean>>,

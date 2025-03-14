@@ -2,7 +2,8 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "Feedback",
-  description: "The platform for brands, feedbacks, events and products.",
+  description:
+    "The platform to send and receive feedbacks that matter about your brand, products, events and services.",
   navItems: [
     /*{
       label: "Home",
@@ -76,10 +77,10 @@ export const siteConfig = {
     },*/
   ],
   links: {
-    github: "https://github.com/nextui-org/nextui",
-    twitter: "https://twitter.com/getnextui",
+    github: "https://github.com/MayowaObisesan",
+    twitter: "https://x.com/amdblessed",
     docs: "https://nextui.org",
-    discord: "https://discord.gg/9b6yyZKmH4",
-    sponsor: "https://patreon.com/jrgarciadev",
+    discord: "https://discord.gg/amtheblessed",
+    sponsor: "https://patreon.com/amtheblessed",
   },
 };

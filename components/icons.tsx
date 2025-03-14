@@ -2,6 +2,71 @@ import * as React from "react";
 
 import { IconSvgProps } from "@/types";
 
+export const FeedbacksLogo = (props: IconProps) => (
+  <svg
+    fill="none"
+    height="24"
+    viewBox="0 0 512 512"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <g transform="translate(-5.49, 3.66)">
+      <rect
+        fill="none"
+        height="514.48"
+        opacity="0.1"
+        rx="13.02"
+        width="513.06"
+        x="6.90"
+        y="-6.48"
+      />
+      <g transform="translate(11.09, -3.25)">
+        <rect
+          fill="currentColor"
+          height="78.10"
+          rx="15.19"
+          width="162.87"
+          x="232.07"
+          y="375.49"
+        />
+        <rect
+          fill="currentColor"
+          height="344.06"
+          rx="13.09"
+          width="87.63"
+          x="309.55"
+          y="109.53"
+        />
+        <rect
+          fill="currentColor"
+          height="78.10"
+          rx="13.02"
+          width="119.91"
+          x="163.52"
+          y="193.25"
+        />
+        <rect
+          fill="currentColor"
+          height="78.10"
+          rx="13.02"
+          width="224.32"
+          x="172.86"
+          y="54.41"
+        />
+        <rect
+          fill="currentColor"
+          height="319.79"
+          rx="10.80"
+          width="88.95"
+          x="107.49"
+          y="54.41"
+        />
+      </g>
+    </g>
+  </svg>
+);
+
 export const Logo: React.FC<IconSvgProps> = ({
   size = 36,
   width,

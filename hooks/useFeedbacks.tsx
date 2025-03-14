@@ -37,7 +37,7 @@ export function useTrendingFeedbacks(limit: number = 5, daysAgo: number = 7) {
   });
 }
 
-export function useAllFeedbacks(page: number = 1, limit: number = 10) {
+export function useAllFeedbacks(limit: number = 10, page: number = 1) {
   const startRange = limit * (page - 1);
   const endRange = limit * page - 1;
 

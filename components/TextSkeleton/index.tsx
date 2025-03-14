@@ -39,3 +39,13 @@ export function DotSpacer() {
     </>
   );
 }
+
+export function DotSpacerSmall() {
+  return (
+    <>
+      <Spacer x={1} />
+      <div className="size-1 bg-foreground-400 rounded-full" />
+      <Spacer x={1} />
+    </>
+  );
+}

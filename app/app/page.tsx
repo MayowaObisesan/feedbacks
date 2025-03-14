@@ -15,8 +15,11 @@ import SearchModal from "@/components/Modals/SearchModal";
 import CreateBrandModal from "@/components/Modals/CreateBrandModal";
 import { useTrendingBrands } from "@/hooks/useBrands";
 import TrendingBrandCardSkeleton from "@/components/Skeletons/TrendingBrandCardSkeleton";
-import { useTrendingFeedbacks } from "@/hooks/useFeedbacks";
-import { FeedbackCardListSkeleton } from "@/components/Skeletons/FeedbacksCardSkeleton";
+import { useAllFeedbacks, useTrendingFeedbacks } from "@/hooks/useFeedbacks";
+import {
+  FeedbackCardListSkeleton,
+  FeedbackCardSkeleton,
+} from "@/components/Skeletons/FeedbacksCardSkeleton";
 
 export default function Home() {
   const { userDB } = useFeedbacksContext();
@@ -27,6 +30,8 @@ export default function Home() {
   } = useTrendingBrands();
   const { data: trendingFeedbacks, isLoading: trendingFeedbacksLoading } =
     useTrendingFeedbacks(10);
+  const { data: allFeedbacks, isLoading: allFeedbacksLoading } =
+    useAllFeedbacks(10);
 
   // Listen for user SIGNIN event
   supabase.auth.onAuthStateChange(async (event, session) => {
@@ -82,7 +87,6 @@ export default function Home() {
           <header className="font-bold text-xl md:text-4xl leading-normal">
             Trending Brands
           </header>
-          {/*<TrendingBrandCardSkeleton />*/}
           {trendingBrandsLoading && (
             <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
               {Array.from({ length: 5 })?.map((_, index) => (
@@ -132,17 +136,41 @@ export default function Home() {
           <header className="font-bold text-xl md:text-4xl leading-normal">
             Trending Feedbacks
           </header>
-          <ScrollShadow hideScrollBar orientation={"vertical"} size={80}>
-            <div className="flex flex-col lg:flex-row gap-x-8 gap-y-2 px-2 py-4">
+          <ScrollShadow hideScrollBar orientation={"horizontal"} size={40}>
+            <div className="flex flex-row gap-x-8 gap-y-2 px-2 py-4">
               {trendingFeedbacksLoading &&
                 Array.from({ length: 5 })?.map((_, index) => (
-                  <FeedbackCardListSkeleton key={index} />
+                  <FeedbackCardSkeleton key={index} />
                 ))}
               {trendingFeedbacks?.map((eachTrendingFeedback) => (
                 <FeedbackCard
                   key={eachTrendingFeedback.id}
                   isLoaded={!trendingFeedbacksLoading}
                   {...eachTrendingFeedback}
+                  asGrid={true}
+                  showBrand={true}
+                />
+              ))}
+            </div>
+          </ScrollShadow>
+        </section>
+
+        <section className="">
+          <header className="font-bold text-xl md:text-4xl leading-normal">
+            Latest Feedbacks
+          </header>
+          <ScrollShadow hideScrollBar orientation={"vertical"} size={80}>
+            <div className="flex flex-col lg:flex-row gap-x-8 gap-y-2 px-2 py-4">
+              {allFeedbacksLoading &&
+                Array.from({ length: 5 })?.map((_, index) => (
+                  <FeedbackCardListSkeleton key={index} />
+                ))}
+              {allFeedbacks?.data?.map((eachFeedback) => (
+                <FeedbackCard
+                  key={eachFeedback.id}
+                  isLoaded={!allFeedbacksLoading}
+                  {...eachFeedback}
+                  showBrand={true}
                 />
               ))}
             </div>

@@ -157,7 +157,8 @@ export function CreateFeedbackModal({
       <Modal
         backdrop="opaque"
         classNames={{
-          base: "px-3 py-4",
+          wrapper: "",
+          base: "px-3 py-4 my-2",
           backdrop:
             "bg-gradient-to-t from-zinc-900 to-zinc-900/80 backdrop-opacity-90",
         }}
@@ -165,7 +166,7 @@ export function CreateFeedbackModal({
         isDismissable={false}
         isOpen={isOpen}
         placement="auto"
-        scrollBehavior={"outside"}
+        scrollBehavior={"normal"}
         onOpenChange={onOpenChange}
       >
         <ModalContent>
