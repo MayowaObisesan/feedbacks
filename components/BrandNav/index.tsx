@@ -362,35 +362,35 @@ export default function BrandNav({
                   />
                 </div>
                 <Spacer y={2} />
-                <Button
+                <div
                   className={"px-0"}
-                  variant={"flat"}
-                  onPress={
+                  /*onPress={
                     !user?.email
                       ? () => toast("You need to login to follow a brand")
                       : () => {}
-                  }
+                  }*/
                 >
-                  {isFollowingBrand ? (
-                    <Button
-                      color={"danger"}
-                      isLoading={isFollowLoading}
-                      variant={"solid"}
-                      onPress={handleUnFollowBrand}
-                    >
-                      Unfollow
-                    </Button>
-                  ) : (
-                    <Button
-                      color={"primary"}
-                      isDisabled={!user?.email}
-                      isLoading={isFollowLoading}
-                      onPress={handleFollowBrand}
-                    >
-                      Follow
-                    </Button>
-                  )}
-                </Button>
+                  {user?.email !== brandData?.ownerEmail &&
+                    (isFollowingBrand ? (
+                      <Button
+                        color={"danger"}
+                        isLoading={isFollowLoading}
+                        variant={"solid"}
+                        onPress={handleUnFollowBrand}
+                      >
+                        Unfollow
+                      </Button>
+                    ) : (
+                      <Button
+                        color={"primary"}
+                        isDisabled={!user?.email}
+                        isLoading={isFollowLoading}
+                        onPress={handleFollowBrand}
+                      >
+                        Follow
+                      </Button>
+                    ))}
+                </div>
                 {myEventInvites?.length > 0 && (
                   <section className="space-y-3 w-full">
                     <Spacer y={4} />

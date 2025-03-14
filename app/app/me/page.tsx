@@ -29,6 +29,7 @@ import { DotSpacer } from "@/components/TextSkeleton";
 import CreateBrandModal from "@/components/Modals/CreateBrandModal";
 import { useFollowedBrands, useMyBrands } from "@/hooks/useBrands";
 import TrendingBrandCardSkeleton from "@/components/Skeletons/TrendingBrandCardSkeleton";
+import { formatDateString } from "@/utils";
 
 type Brand = Tables<DBTables.Brand>;
 
@@ -73,12 +74,12 @@ const ProfileCard = ({
                 isLoaded={!!user?.email}
               />
             ) : (
-              <h4 className="text-small font-semibold leading-none text-default-600">
+              <h4 className="text-small font-semibold leading-none">
                 {user?.user_metadata.full_name}
               </h4>
             )}
             <Skeleton className="rounded-full" isLoaded={!!user?.email}>
-              <h5 className="text-small tracking-tight text-default-400">
+              <h5 className="text-small tracking-tight text-default-500">
                 @{user?.email}
               </h5>
             </Skeleton>
@@ -101,7 +102,7 @@ const ProfileCard = ({
           {isFollowed ? "Unfollow" : "Follow"}
         </Button>*/}
       </CardHeader>
-      <CardBody className="px-3 py-0 text-small text-default-400">
+      <CardBody className="px-3 py-0 text-small text-default-500">
         <p>{userDB?.bio}</p>
         {/*<span className="pt-2">
           #FrontendWithZoey
@@ -118,13 +119,13 @@ const ProfileCard = ({
               placement={"bottom"}
               showArrow={true}
             >
-              <p className="font-semibold text-default-400 text-small">
+              <p className="font-semibold text-default-600 text-small">
                 {myBrands?.length ? Number(myBrands?.length) : 0}
               </p>
             </Tooltip>
           </Skeleton>
           <Tooltip content="The brands you've created" placement={"bottom"}>
-            <p className="text-default-400 text-small">
+            <p className="text-default-600 text-small">
               {Number(myBrands?.length) > 1 ? "Brands" : "Brand"}
             </p>
           </Tooltip>
@@ -132,13 +133,13 @@ const ProfileCard = ({
         <DotSpacer />
         <div className="flex gap-1">
           <Skeleton className="rounded-full" isLoaded={!!followedBrands}>
-            <p className="font-semibold text-default-400 text-small">
+            <p className="font-semibold text-default-600 text-small">
               {followedBrands?.length > 0
                 ? Number(followedBrands?.length > 0)
                 : 0}
             </p>
           </Skeleton>
-          <p className=" text-default-400 text-small">Following</p>
+          <p className=" text-default-600 text-small">Following</p>
         </div>
         {/* <div className="flex gap-1">
           <p className="font-semibold text-default-400 text-small">97.1K</p>
@@ -151,8 +152,7 @@ const ProfileCard = ({
 
 export default function Page() {
   // const { onOpen } = useDisclosure();
-  const { myEventsData, mySentFeedbacksData, user, userDB } =
-    useFeedbacksContext();
+  const { mySentFeedbacksData, user, userDB } = useFeedbacksContext();
   const { data: myBrands, isLoading: myBrandsLoading } = useMyBrands(
     user?.email!,
   );
@@ -286,13 +286,13 @@ export default function Page() {
         <Card>
           <CardHeader>Other details</CardHeader>
           <CardBody className="text-default-500 text-sm space-y-2">
-            <div className="flex flex-row items-center gap-x-2">
+            {/*<div className="flex flex-row items-center gap-x-2">
               <span>Events:</span>
               <span>
                 {myEventsData?.length}{" "}
                 {myEventsData?.length !== 1 ? "events" : "event"}
               </span>
-            </div>
+            </div>*/}
             <div className="flex flex-row items-center gap-x-2">
               <span>Feedback:</span>
               <span>
@@ -302,7 +302,7 @@ export default function Page() {
             </div>
             <div className="flex flex-row items-center gap-x-2">
               <span>Joined at:</span>
-              <span>{user?.created_at}</span>
+              <span>{formatDateString(user?.created_at!)}</span>
             </div>
           </CardBody>
         </Card>

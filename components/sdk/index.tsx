@@ -349,7 +349,7 @@ function FeedbacksFormContent({
             type="button"
             variant="solid"
             // disabled={isLoading}
-            onClick={() => handleSupabaseOauthSignIn("github")}
+            onPress={() => handleSupabaseOauthSignIn("github")}
           >
             <GithubIcon />
             GitHub {lastUsed === "github" ? <LastUsed /> : null}
@@ -358,7 +358,7 @@ function FeedbacksFormContent({
             type="button"
             variant="solid"
             // disabled={isLoading}
-            onClick={() => handleSupabaseOauthSignIn("google")}
+            onPress={() => handleSupabaseOauthSignIn("google")}
           >
             <Icons.google className="mr-2 h-4 w-4" />
             Google {lastUsed === "google" ? <LastUsed /> : null}

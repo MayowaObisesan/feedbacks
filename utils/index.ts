@@ -29,7 +29,7 @@ export function hashFullName(fullName: string, email: string) {
 
   // Take more characters from the hash
   return CryptoJS.SHA256(uniqueString).toString().substring(0, 12);
-};
+}
 
 export function cleanBrandRawName(brandName: string) {
   return brandName.trim().toLowerCase().split(" ").join("_");
@@ -134,6 +134,16 @@ export const formatDate = (time: number) => {
   return formattedDate;
 };
 
+export const formatDateString = (date: string) => {
+  if (!date) return date;
+
+  return new Date(date).toLocaleDateString("en-us", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
 const sendFileToIPFS = async (
   dp: string,
   setisDpUploading: React.Dispatch<React.SetStateAction<boolean>>,
@@ -182,3 +192,7 @@ const sendFileToIPFS = async (
     }
   }
 };
+
+export function sum(args: number[]) {
+  return args?.reduce((total: number, val: number) => total + val, 0);
+}
