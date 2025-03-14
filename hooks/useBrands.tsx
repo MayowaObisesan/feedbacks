@@ -183,7 +183,8 @@ export const useFollowedBrands = (email: string, page: number = 1) => {
         data.filter((eachBrand: IBrands) => eachBrand.followers.includes(email))
           .length > 0;
 
-      return [...data, isFollowed];
+      // return [...data, isFollowed];
+      return data;
     },
   });
 };

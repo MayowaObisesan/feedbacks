@@ -22,7 +22,8 @@ import UpdateBrandModal from "@/components/Modals/UpdateBrandModal";
 import { useFeedbacksContext } from "@/context";
 import { useBrandByName } from "@/hooks/useBrands";
 import { FeedbackCardListSkeleton } from "@/components/Skeletons/FeedbacksCardSkeleton";
-import { useBrandFeedbacks } from "@/hooks/useFeedbacks";
+import { useBrandFeedbacks, useStarRatingCounts } from "@/hooks/useFeedbacks";
+import RatingAggregate from "@/components/RatingAggregate";
 
 function BrandPage({ params }: { params: any }) {
   // @ts-ignore
@@ -38,6 +39,33 @@ function BrandPage({ params }: { params: any }) {
     isFetching: brandFeedbacksIsFetching,
     isFetched: brandFeedbacksIsFetched,
   } = useBrandFeedbacks(brandData?.id!);
+  const { data: starCounts } = useStarRatingCounts(brandData?.id!);
+
+  const distribution = [1, 2, 3].map((rating, index) => ({
+    rating,
+    count: starCounts?.[index] || 0,
+  }));
+
+  const totalFeedbacks = brandData?.feedbackCount!;
+
+  const averageRating =
+    starCounts && Math.max(...starCounts) > 0
+      ? Math.round(((Math.max(...starCounts) / totalFeedbacks) * 100) / 3) / 10
+      : 0;
+
+  const ratingData = {
+    // averageRating: totalFeedbacks > 0 ? ratingSum / totalFeedbacks : 0,
+    averageRating: averageRating,
+    totalRatings: totalFeedbacks,
+    /*distribution: [
+      { rating: 5, count: 600 },
+      { rating: 4, count: 400 },
+      { rating: 3, count: 150 },
+      { rating: 2, count: 50 },
+      { rating: 1, count: 34 },
+    ],*/
+    distribution,
+  };
 
   // const [brandData, setBrandData] = useState<IBrands>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -247,6 +275,7 @@ function BrandPage({ params }: { params: any }) {
         </div>*/}
 
         <section>
+          <RatingAggregate {...ratingData} />
           <header className="flex flex-row justify-between items-center max-md:px-4 font-bold text-lg md:text-3xl leading-normal">
             <div>Your Feedbacks</div>
             <div className={"flex flex-row items-center md:px-4"}>

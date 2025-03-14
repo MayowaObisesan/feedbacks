@@ -222,3 +222,57 @@ export function useMySentFeedbacks(email: string, page: number = 1) {
     gcTime: 1000 * 60 * 60, // 1 hour
   });
 }
+
+export function useStarRatingCounts(brandId?: number | string) {
+  const fetchStarRatingCounts = async (): Promise<number[]> => {
+    const queries = [1, 2, 3].map((rating) =>
+      supabase
+        .from(DBTables.Feedback)
+        .select("*", { count: "exact", head: true })
+        .match({
+          starRating: rating,
+          recipientId: brandId,
+        }),
+    );
+
+    const results = await Promise.all(queries);
+
+    return results.map((result) => result.count || 0);
+  };
+
+  return useQuery({
+    queryKey: ["star-rating-counts", brandId],
+    queryFn: fetchStarRatingCounts,
+    enabled: !!brandId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 60, // 1 hour
+  });
+}
+
+export const useFilteredFeedbacks = (
+  brandId?: number | string,
+  starRating?: number,
+) => {
+  return useQuery({
+    queryKey: ["filtered-feedbacks", brandId, starRating],
+    queryFn: async () => {
+      let query = supabase
+        .from(DBTables.Feedback)
+        .select("*")
+        .eq("recipientId", brandId)
+        .order("createdAt", { ascending: false });
+
+      if (starRating) {
+        query = query.eq("starRating", starRating);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      return data;
+    },
+    enabled: !!brandId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};

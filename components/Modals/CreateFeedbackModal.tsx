@@ -145,10 +145,11 @@ export function CreateFeedbackModal({
   return (
     <>
       <Button
-        color="success"
+        className={"invert"}
+        color="default"
         fullWidth={fullWidth}
         startContent={<LucidePlus size={16} strokeWidth={4} />}
-        variant="shadow"
+        variant="solid"
         onPress={onOpen}
       >
         {buttonText}
@@ -164,6 +165,7 @@ export function CreateFeedbackModal({
         isDismissable={false}
         isOpen={isOpen}
         placement="auto"
+        scrollBehavior={"outside"}
         onOpenChange={onOpenChange}
       >
         <ModalContent>

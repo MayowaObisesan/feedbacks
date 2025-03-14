@@ -15,10 +15,14 @@ import { useFeedbacksContext } from "@/context";
 import { IUser } from "@/types";
 import { DBTables } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
-import { hashFullName } from "@/utils";
+import { formatDateString, hashFullName } from "@/utils";
 
 type Feedback = Tables<DBTables.Feedback>;
-type ExtendFeedback = Feedback & { asGrid?: boolean; isLoaded?: boolean };
+type ExtendFeedback = Feedback & {
+  asGrid?: boolean;
+  isLoaded?: boolean;
+  beAnonymous?: boolean;
+};
 
 export default function FeedbackCard(props: ExtendFeedback) {
   // const [brandData, setBrandData] = React.useState<IBrands>();
@@ -71,8 +75,8 @@ export default function FeedbackCard(props: ExtendFeedback) {
         className="justify-between"
         href={
           props?.email === user?.email
-            ? "me"
-            : `user/${userData?.userData?.user_metadata.user_name}`
+            ? "/app/me"
+            : `/app/user/${userData?.userData?.user_metadata.user_name}`
         }
       >
         <div className="flex gap-5">
@@ -95,15 +99,17 @@ export default function FeedbackCard(props: ExtendFeedback) {
               <h4 className="text-small font-semibold leading-none text-default-700">
                 {props?.email === user?.email
                   ? "You"
-                  : hashFullName(
-                      userData?.userData?.user_metadata.full_name,
-                      user?.email!,
-                    )}
+                  : props.beAnonymous
+                    ? hashFullName(
+                        userData?.userData?.user_metadata.full_name,
+                        user?.email!,
+                      )
+                    : userData?.userData?.user_metadata.full_name}
               </h4>
             </Skeleton>
             <Skeleton className="rounded-full" isLoaded={!!props.email}>
-              <h5 className="text-small tracking-tight text-default-500">
-                {props.email}
+              <h5 className="text-xs tracking-tight text-default-500">
+                {formatDateString(props.createdAt)}
               </h5>
             </Skeleton>
           </div>

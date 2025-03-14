@@ -95,7 +95,7 @@ export default function SearchModal() {
         }}
         isOpen={isSearchOpen}
         placement={"center"}
-        scrollBehavior={"inside"}
+        scrollBehavior={"outside"}
         size={"full"}
         onClose={onClose}
         onOpenChange={onOpenChange}
