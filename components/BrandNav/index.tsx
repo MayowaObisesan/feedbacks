@@ -326,13 +326,15 @@ export default function BrandNav({
               isPressable={false}
             >
               <CardBody className="overflow-visible px-2">
-                <Image
-                  alt="Card background"
-                  className="object-cover rounded-xl size-32 lg:size-72"
-                  src={(brandData && brandData?.brandImage) || ""}
-                  // width={size.width <= E_DeviceWidth.phone ? 120 : 270}
-                  // height={size.width <= E_DeviceWidth.phone ? 120 : 270}
-                />
+                {brandData?.brandImage && (
+                  <Image
+                    alt="Card background"
+                    className="object-cover rounded-xl size-32 lg:size-72"
+                    src={brandData && brandData?.brandImage}
+                    // width={size.width <= E_DeviceWidth.phone ? 120 : 270}
+                    // height={size.width <= E_DeviceWidth.phone ? 120 : 270}
+                  />
+                )}
               </CardBody>
               <CardHeader className="pb-0 px-4 flex-col max-sm:col-span-2 items-start">
                 {/* <p className="text-tiny uppercase font-bold">Brand Details</p> */}
@@ -345,8 +347,8 @@ export default function BrandNav({
                     {brandData && brandData?.rawName}
                   </h4>
                 </Skeleton>
-                {/*{brandData?.ownerEmail}*/}
-                <div className="flex items-center gap-1">
+                {brandData?.description}
+                <div className="flex items-center gap-1 py-2">
                   <DynamicText
                     data={brandData?.followersCount}
                     isLoaded={isBrandDataSuccessful}

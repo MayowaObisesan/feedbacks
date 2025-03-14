@@ -89,7 +89,8 @@ export default function SearchModal() {
 
       <Modal
         classNames={{
-          base: "max-h-full",
+          wrapper: "mt-16",
+          base: "max-h-full my-0",
           body: "px-2 my-0",
           closeButton: "text-3xl font-bold my-0.5",
         }}

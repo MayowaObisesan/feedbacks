@@ -2,12 +2,13 @@
 
 import type { Tables } from "@/types/supabase";
 
-import { Avatar } from "@heroui/avatar";
+import { Avatar, AvatarIcon } from "@heroui/avatar";
 import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 import { Skeleton } from "@heroui/skeleton";
 import React, { useEffect } from "react";
 import { useIsMounted } from "usehooks-ts";
 import clsx from "clsx";
+import { Link } from "@heroui/link";
 
 import { StarItem } from "../RatingStars/RatingComponent";
 
@@ -16,12 +17,14 @@ import { IUser } from "@/types";
 import { DBTables } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
 import { formatDateString, hashFullName } from "@/utils";
+import { useBrandById } from "@/hooks/useBrands";
 
 type Feedback = Tables<DBTables.Feedback>;
 type ExtendFeedback = Feedback & {
   asGrid?: boolean;
   isLoaded?: boolean;
   beAnonymous?: boolean;
+  showBrand?: boolean;
 };
 
 export default function FeedbackCard(props: ExtendFeedback) {
@@ -30,6 +33,7 @@ export default function FeedbackCard(props: ExtendFeedback) {
   const [userData, setUserData] = React.useState<IUser>();
   // const [isFollowed, setIsFollowed] = React.useState(false);
   const { user, userDB } = useFeedbacksContext();
+  const { data: brandData } = useBrandById(props.recipientId);
   // const user: IProfile = FetchUserProfile(props.sender);
   // const userAddress = props.sender;
   // const isLoaded = props.isLoaded;
@@ -57,6 +61,7 @@ export default function FeedbackCard(props: ExtendFeedback) {
         setUserData(data[0]);
       }
     }
+
     getUser();
   }, [isMounted]);
 
@@ -72,7 +77,7 @@ export default function FeedbackCard(props: ExtendFeedback) {
     >
       <CardHeader
         as={"a"}
-        className="justify-between"
+        className="justify-between items-center"
         href={
           props?.email === user?.email
             ? "/app/me"
@@ -85,9 +90,13 @@ export default function FeedbackCard(props: ExtendFeedback) {
             radius="full"
             size="md"
             src={
-              props?.email === user?.email
-                ? userDB?.dp || user?.user_metadata.avatar_url
-                : userData?.dp || userData?.userData?.user_metadata.avatar_url
+              props?.email === user?.email ? (
+                userDB?.dp || user?.user_metadata.avatar_url
+              ) : props?.beAnonymous ? (
+                <Avatar icon={<AvatarIcon />} />
+              ) : (
+                userData?.dp || userData?.userData?.user_metadata.avatar_url
+              )
             }
           />
           <div className="flex flex-col gap-1 items-start justify-center">
@@ -107,8 +116,19 @@ export default function FeedbackCard(props: ExtendFeedback) {
                     : userData?.userData?.user_metadata.full_name}
               </h4>
             </Skeleton>
+            {props?.showBrand && (
+              <span className={"text-xs leading-none"}>
+                to{" "}
+                <Link
+                  className={"font-bold text-xs"}
+                  href={`/app/brand/${brandData?.name}`}
+                >
+                  {brandData?.rawName}
+                </Link>
+              </span>
+            )}
             <Skeleton className="rounded-full" isLoaded={!!props.email}>
-              <h5 className="text-xs tracking-tight text-default-500">
+              <h5 className="flex flex-col text-xs leading-none tracking-normal text-default-500">
                 {formatDateString(props.createdAt)}
               </h5>
             </Skeleton>
@@ -152,7 +172,7 @@ export default function FeedbackCard(props: ExtendFeedback) {
           {Array.from({ length: 3 }).map((_, index) => (
             <>
               <StarItem
-                key={index}
+                key={index + 1}
                 rating={index + 1}
                 // @ts-ignore
                 selectedRating={props.starRating}

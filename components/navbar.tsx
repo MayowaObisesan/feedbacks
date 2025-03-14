@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation";
 import SearchModal from "@/components/Modals/SearchModal";
 import { useFeedbacksContext } from "@/context";
 import { supabase } from "@/utils/supabase/supabase";
-import { DisconnectIcon, Logo, SearchIcon } from "@/components/icons";
+import { DisconnectIcon, FeedbacksLogo, SearchIcon } from "@/components/icons";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { siteConfig } from "@/config/site";
 
@@ -132,7 +132,7 @@ export function Navbar() {
         </Button>
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
-            <Logo />
+            <FeedbacksLogo />
             <p className="max-sm:hidden font-bold text-inherit">Feedbacks</p>
           </NextLink>
         </NavbarBrand>
@@ -284,7 +284,7 @@ export const NavbarOld = () => {
         {/*<NavbarMenuToggle className={"sm:hidden"} />*/}
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
-            <Logo />
+            <FeedbacksLogo />
             <p className="max-sm:hidden font-bold text-inherit">Feedbacks</p>
           </NextLink>
         </NavbarBrand>
