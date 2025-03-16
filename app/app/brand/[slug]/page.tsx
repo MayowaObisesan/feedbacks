@@ -4,13 +4,15 @@ import { Button } from "@heroui/button";
 import { ScrollShadow } from "@heroui/scroll-shadow";
 import {
   LucideArrowRight,
-  LucideChevronRight,
+  LucideHome,
+  LucideLayoutTemplate,
   LucideMessagesSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { Divider } from "@heroui/divider";
 import { Alert } from "@heroui/alert";
-import React from "react";
+import React, { useState } from "react";
+import { BreadcrumbItem, Breadcrumbs } from "@heroui/breadcrumbs";
 
 import BrandNav from "@/components/BrandNav";
 import { CreateEventModal } from "@/components/CreateEventModal";
@@ -28,6 +30,9 @@ import RatingAggregate from "@/components/RatingAggregate";
 function BrandPage({ params }: { params: any }) {
   // @ts-ignore
   const { slug } = React.use(params);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [page, setPage] = useState<number>(1);
+  const limit = 10;
   const { myAddress, myEventInvites, user } = useFeedbacksContext();
   const {
     data: brandData,
@@ -38,8 +43,9 @@ function BrandPage({ params }: { params: any }) {
     data: brandFeedbacksData,
     isFetching: brandFeedbacksIsFetching,
     isFetched: brandFeedbacksIsFetched,
-  } = useBrandFeedbacks(brandData?.id!);
+  } = useBrandFeedbacks(brandData?.id!, user?.email, page, limit);
   const { data: starCounts } = useStarRatingCounts(brandData?.id!);
+  // const totalPages = Math.ceil(brandFeedbacksData?.count! / limit);
 
   const distribution = [1, 2, 3].map((rating, index) => ({
     rating,
@@ -196,7 +202,7 @@ function BrandPage({ params }: { params: any }) {
   // }, [data]);
 
   if (
-    brandFeedbacksData?.length === 0 &&
+    brandFeedbacksData?.data?.length === 0 &&
     myEventInvites?.length === 0
     // && (productData as IProduct[])?.length === 0
   ) {
@@ -244,225 +250,244 @@ function BrandPage({ params }: { params: any }) {
   }
 
   return (
-    <section className="flex flex-col md:flex-row w-ful h-full md:py-4 overflow-auto md:overflow-hidden">
-      <div className="relative min-w-72 md:h-full md:overflow-y-auto">
-        <BrandNav
-          brandData={brandData!}
-          brandName={slug}
-          isBrandDataSuccessful={brandIsFetched}
-        />
-      </div>
-
-      <Divider className="md:hidden my-2" />
-
-      <section className="w-full h-full md:overflow-y-auto lg:px-4 space-y-8">
-        {/*<div className="sticky top-0 z-50 flex w-full items-center gap-x-3 border-divider bg-background/40 px-6 py-2 backdrop-blur-xl sm:px-3.5 sm:before:flex-1">
-          <div className="w-full font-bold text-2xl">{brandData?.rawName}</div>
-          {myEventInvites?.length > 0 && (
-            <span>
-              <Badge content={myEventInvites?.length} color="danger">
-                <Button
-                  radius="full"
-                  isIconOnly
-                  aria-label={`more than ${myEventInvites?.length}`}
-                  variant="light"
-                >
-                  <NotificationIcon />
-                </Button>
-              </Badge>
-            </span>
-          )}
-        </div>*/}
-
-        <section>
-          <RatingAggregate {...ratingData} />
-          <header className="flex flex-row justify-between items-center max-md:px-4 font-bold text-lg md:text-3xl leading-normal">
-            <div>Your Feedbacks</div>
-            <div className={"flex flex-row items-center md:px-4"}>
-              {/*{(brandFeedbacksData as IFeedbacks[])?.length}*/}
-              <Button
-                as={Link}
-                className={"max-sm:hidden"}
-                endContent={<LucideArrowRight size={16} />}
-                href={`/app/more?brandFeedbacks=${slug}`}
-                variant={"light"}
-              >
-                View more
-              </Button>
-              <Button
-                isIconOnly
-                className={"md:hidden"}
-                href={`/app/more?brandFeedbacks=${slug}`}
-                variant={"light"}
-              >
-                <LucideChevronRight size={20} strokeWidth={4} />
-              </Button>
-            </div>
-          </header>
-          <ScrollShadow
-            hideScrollBar
-            className="w-full px-4"
-            orientation={"vertical"}
+    <section className={"md:h-full md:overflow-hidden"}>
+      <div className={"sticky top-0 z-40 p-4 bg-background"}>
+        <Breadcrumbs>
+          <BreadcrumbItem href={"/app"} startContent={<LucideHome size={15} />}>
+            Home
+          </BreadcrumbItem>
+          <BreadcrumbItem
+            href={"/app/brand"}
+            startContent={<LucideLayoutTemplate size={15} />}
           >
-            <div className="flex flex-col flex-nowrap gap-x-8 gap-y-2 lg:px-2 py-4">
-              {brandFeedbacksIsFetching &&
-                Array.from({ length: 5 }).map((_, index: number) => (
-                  <FeedbackCardListSkeleton key={index} />
-                ))}
-              {brandFeedbacksIsFetched &&
-                brandFeedbacksData?.map((_) => (
-                  <FeedbackCard
-                    key={_.id}
-                    // userName={fetchSender(_.sender)?.name}
-                    {..._}
-                    asGrid={false}
-                    isLoaded={!["", null, undefined].includes(_.email)}
-                  />
-                ))}
-              {brandFeedbacksIsFetched && brandFeedbacksData?.length === 0 && (
-                <EmptyCard>
-                  <div className={"flex flex-col items-center gap-y-5"}>
-                    <LucideMessagesSquare
-                      size={40}
-                      strokeWidth={1}
-                      width={"100%"}
-                    />
-                    <div className={"text-lg lg:text-2xl text-balance"}>
-                      You haven&apos;t received any feedback yet
-                    </div>
-                  </div>
-                </EmptyCard>
-              )}
+            Brands
+          </BreadcrumbItem>
+          <BreadcrumbItem>{brandData?.rawName}</BreadcrumbItem>
+        </Breadcrumbs>
+      </div>
+      <section className="relative flex flex-col md:flex-row w-ful h-full md:py-4">
+        <div className="flex-1 relative md:min-w-72 md:h-dvh">
+          <BrandNav
+            brandData={brandData!}
+            brandName={slug}
+            isBrandDataSuccessful={brandIsFetched}
+          />
+        </div>
 
-              {/*{!isThisBrandFeedbacksDataFetching ? (
-                <>
-                  {(brandFeedbacksData as IFeedbacks[]) ? (
-                    (brandFeedbacksData as IFeedbacks[])?.map((_) => (
+        <Divider className="md:hidden my-2" />
+
+        <ScrollShadow hideScrollBar size={8}>
+          <section className="lg:px-4 space-y-8">
+            {/*<div className="sticky top-0 z-50 flex w-full items-center gap-x-3 border-divider bg-background/40 px-6 py-2 backdrop-blur-xl sm:px-3.5 sm:before:flex-1">
+              <div className="w-full font-bold text-2xl">{brandData?.rawName}</div>
+              {myEventInvites?.length > 0 && (
+                <span>
+                  <Badge content={myEventInvites?.length} color="danger">
+                    <Button
+                      radius="full"
+                      isIconOnly
+                      aria-label={`more than ${myEventInvites?.length}`}
+                      variant="light"
+                    >
+                      <NotificationIcon />
+                    </Button>
+                  </Badge>
+                </span>
+              )}
+            </div>*/}
+
+            <section>
+              <RatingAggregate {...ratingData} />
+              <header className="flex flex-row justify-between items-center px-4 font-bold text-base md:text-3xl leading-normal">
+                <div>Your Feedbacks</div>
+                <div className={"flex flex-row items-center md:px-4"}>
+                  {/*{(brandFeedbacksData as IFeedbacks[])?.length}*/}
+                  <Button
+                    as={Link}
+                    className={"max-sm:hidden"}
+                    endContent={<LucideArrowRight size={16} />}
+                    href={`/app/more?brandFeedbacks=${slug}`}
+                    variant={"light"}
+                  >
+                    View more
+                  </Button>
+                  <Button
+                    isIconOnly
+                    className={"md:hidden"}
+                    href={`/app/more?brandFeedbacks=${slug}`}
+                    variant={"light"}
+                  >
+                    <LucideArrowRight size={20} strokeWidth={4} />
+                  </Button>
+                </div>
+              </header>
+              <ScrollShadow
+                hideScrollBar
+                className="w-full px-4 md:py-8"
+                orientation={"vertical"}
+              >
+                <div className="flex flex-col flex-nowrap gap-x-8 gap-y-2 lg:px-2 py-4">
+                  {brandFeedbacksIsFetching &&
+                    Array.from({ length: 5 }).map((_, index: number) => (
+                      <FeedbackCardListSkeleton key={index} />
+                    ))}
+                  {brandFeedbacksIsFetched &&
+                    brandFeedbacksData?.data?.map((_) => (
                       <FeedbackCard
                         key={_.id}
                         // userName={fetchSender(_.sender)?.name}
                         {..._}
+                        asGrid={false}
                         isLoaded={!["", null, undefined].includes(_.email)}
                       />
-                    ))
+                    ))}
+                  {brandFeedbacksIsFetched &&
+                    brandFeedbacksData?.data?.length === 0 && (
+                      <EmptyCard>
+                        <div className={"flex flex-col items-center gap-y-5"}>
+                          <LucideMessagesSquare
+                            size={40}
+                            strokeWidth={1}
+                            width={"100%"}
+                          />
+                          <div className={"text-base lg:text-2xl text-balance"}>
+                            You haven&apos;t received any feedback yet
+                          </div>
+                        </div>
+                      </EmptyCard>
+                    )}
+
+                  {/*{!isThisBrandFeedbacksDataFetching ? (
+                    <>
+                      {(brandFeedbacksData as IFeedbacks[]) ? (
+                        (brandFeedbacksData as IFeedbacks[])?.map((_) => (
+                          <FeedbackCard
+                            key={_.id}
+                            // userName={fetchSender(_.sender)?.name}
+                            {..._}
+                            isLoaded={!["", null, undefined].includes(_.email)}
+                          />
+                        ))
+                      ) : (
+                        <EmptyCard>
+                          You haven&apos;t received any feedback yet
+                        </EmptyCard>
+                      )}
+                    </>
                   ) : (
-                    <EmptyCard>
-                      You haven&apos;t received any feedback yet
-                    </EmptyCard>
-                  )}
-                </>
-              ) : (
-                [1, 2, 3, 4, 5]?.map((_) => (
-                  <Skeleton
-                    key={_}
-                    className="rounded-lg"
-                    isLoaded={!isThisBrandFeedbacksDataFetching}
+                    [1, 2, 3, 4, 5]?.map((_) => (
+                      <Skeleton
+                        key={_}
+                        className="rounded-lg"
+                        isLoaded={!isThisBrandFeedbacksDataFetching}
+                      >
+                        <FeedbackCard
+                          isLoaded={!isThisBrandFeedbacksDataFetching}
+                          // userName={fetchSender(_.sender)?.name}
+                          {..._}
+                        />
+                      </Skeleton>
+                    ))
+                  )}*/}
+                </div>
+              </ScrollShadow>
+            </section>
+
+            {/*{brandFeedbacksData && brandFeedbacksData?.length > 0 ? (
+            ) : (
+              <EmptyCard>
+                <div
+                  className={"flex flex-col justify-center items-center gap-y-4"}
+                >
+                  <LucideMessageSquareQuote
+                    className={"text-content4"}
+                    size={40}
+                    strokeWidth={2}
+                  />
+                  <div className={"text-xl text-foreground-400"}>
+                    You haven&apos;t received any feedbacks yet
+                  </div>
+                </div>
+              </EmptyCard>
+            )}*/}
+
+            {/*<section className="md:px-6">
+              <header className="relative flex flex-row justify-between items-center font-bold text-lg lg:text-2xl leading-normal">
+                <div>Event Invitations</div>
+                <div className={"flex flex-row items-center md:px-4"}>
+                  <Button
+                    as={Link}
+                    className="max-sm:hidden"
+                    endContent={<LucideChevronRight />}
+                    href=""
+                    variant="light"
                   >
-                    <FeedbackCard
-                      isLoaded={!isThisBrandFeedbacksDataFetching}
-                      // userName={fetchSender(_.sender)?.name}
-                      {..._}
-                    />
-                  </Skeleton>
-                ))
-              )}*/}
-            </div>
-          </ScrollShadow>
-        </section>
-
-        {/*{brandFeedbacksData && brandFeedbacksData?.length > 0 ? (
-        ) : (
-          <EmptyCard>
-            <div
-              className={"flex flex-col justify-center items-center gap-y-4"}
-            >
-              <LucideMessageSquareQuote
-                className={"text-content4"}
-                size={40}
-                strokeWidth={2}
-              />
-              <div className={"text-xl text-foreground-400"}>
-                You haven&apos;t received any feedbacks yet
-              </div>
-            </div>
-          </EmptyCard>
-        )}*/}
-
-        {/*<section className="md:px-6">
-          <header className="relative flex flex-row justify-between items-center font-bold text-lg lg:text-2xl leading-normal">
-            <div>Event Invitations</div>
-            <div className={"flex flex-row items-center md:px-4"}>
-              <Button
-                as={Link}
-                className="max-sm:hidden"
-                endContent={<LucideChevronRight />}
-                href=""
-                variant="light"
+                    View more
+                  </Button>
+                  <Button isIconOnly className={"md:hidden"} variant={"light"}>
+                    <LucideChevronRight size={20} strokeWidth={4} />
+                  </Button>
+                </div>
+              </header>
+              <ScrollShadow
+                hideScrollBar
+                className="w-full"
+                orientation={"horizontal"}
               >
-                View more
-              </Button>
-              <Button isIconOnly className={"md:hidden"} variant={"light"}>
-                <LucideChevronRight size={20} strokeWidth={4} />
-              </Button>
-            </div>
-          </header>
-          <ScrollShadow
-            hideScrollBar
-            className="w-full"
-            orientation={"horizontal"}
-          >
-            <div className="flex flex-row flex-nowrap gap-x-8 px-2 py-4">
-              {myEventInvites?.length > 0 &&
-                (multipleEventsInvitesData as IEvents[])?.map(
-                  (eachEventInvite) => (
-                    <EventInviteCard
-                      key={eachEventInvite.eventBasicInfo.eventId}
-                      {...eachEventInvite}
-                    />
-                  ),
-                )}
-            </div>
-          </ScrollShadow>
-        </section>*/}
+                <div className="flex flex-row flex-nowrap gap-x-8 px-2 py-4">
+                  {myEventInvites?.length > 0 &&
+                    (multipleEventsInvitesData as IEvents[])?.map(
+                      (eachEventInvite) => (
+                        <EventInviteCard
+                          key={eachEventInvite.eventBasicInfo.eventId}
+                          {...eachEventInvite}
+                        />
+                      ),
+                    )}
+                </div>
+              </ScrollShadow>
+            </section>*/}
 
-        {/*<section className="space-y-3 md:px-6">
-          <header className="relative flex flex-row justify-between items-center font-bold text-2xl leading-normal">
-            <div>Your Products</div>
-            <div className={"flex flex-row items-center md:px-4"}>
-              <Button
-                as={Link}
-                className="max-sm:hidden"
-                endContent={<LucideChevronRight />}
-                href=""
-                variant="light"
+            {/*<section className="space-y-3 md:px-6">
+              <header className="relative flex flex-row justify-between items-center font-bold text-2xl leading-normal">
+                <div>Your Products</div>
+                <div className={"flex flex-row items-center md:px-4"}>
+                  <Button
+                    as={Link}
+                    className="max-sm:hidden"
+                    endContent={<LucideChevronRight />}
+                    href=""
+                    variant="light"
+                  >
+                    View more
+                  </Button>
+                  <Button isIconOnly className={"md:hidden"} variant={"light"}>
+                    <LucideChevronRight size={20} strokeWidth={4} />
+                  </Button>
+                </div>
+              </header>
+              <ScrollShadow
+                hideScrollBar
+                className="w-full"
+                orientation={"horizontal"}
               >
-                View more
-              </Button>
-              <Button isIconOnly className={"md:hidden"} variant={"light"}>
-                <LucideChevronRight size={20} strokeWidth={4} />
-              </Button>
-            </div>
-          </header>
-          <ScrollShadow
-            hideScrollBar
-            className="w-full"
-            orientation={"horizontal"}
-          >
-            <div className="flex flex-row flex-nowrap gap-x-8 px-2 py-4">
-              {(productData as IProduct[])?.map((eachBrandProduct) => (
-                <ProductCard
-                  key={eachBrandProduct.productId}
-                  {...eachBrandProduct}
-                />
-              ))}
-            </div>
-          </ScrollShadow>
-        </section>*/}
+                <div className="flex flex-row flex-nowrap gap-x-8 px-2 py-4">
+                  {(productData as IProduct[])?.map((eachBrandProduct) => (
+                    <ProductCard
+                      key={eachBrandProduct.productId}
+                      {...eachBrandProduct}
+                    />
+                  ))}
+                </div>
+              </ScrollShadow>
+            </section>*/}
 
-        {/*<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/NECBCxEFMCo?si=jLmvKIYpbDhOHbi0"
-                title="YouTube video player" frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>*/}
+            {/*<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/NECBCxEFMCo?si=jLmvKIYpbDhOHbi0"
+                    title="YouTube video player" frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>*/}
+          </section>
+        </ScrollShadow>
       </section>
     </section>
   );

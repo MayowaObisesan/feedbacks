@@ -88,16 +88,17 @@ export default function SearchModal() {
       </div>
 
       <Modal
+        backdrop={"blur"}
         classNames={{
-          wrapper: "mt-16",
-          base: "max-h-full my-0",
+          wrapper: "mt-20 mb-2",
+          base: "h-[calc(100%-88px)] max-h-full lg:w-3/6 lg:h-[72%] my-0 !rounded-xl",
           body: "px-2 my-0",
           closeButton: "text-3xl font-bold my-0.5",
         }}
         isOpen={isSearchOpen}
         placement={"center"}
         scrollBehavior={"outside"}
-        size={"full"}
+        // size={"full"}
         onClose={onClose}
         onOpenChange={onOpenChange}
       >

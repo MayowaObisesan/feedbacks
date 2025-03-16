@@ -118,14 +118,14 @@ export default function HomeNav() {
       ) : (
         <div className={"flex flex-col gap-y-2 w-full"}>
           <div className={"px-2 font-bold text-lg"}>Categories</div>
-          <ScrollShadow orientation={"horizontal"}>
-            <div className="flex flex-row gap-2 pb-2 overflow-x-scroll">
+          <ScrollShadow hideScrollBar orientation={"horizontal"}>
+            <div className="flex flex-row gap-2 pb-2">
               {categoryListObject().map((eachCategory) => (
                 <Chip
                   key={eachCategory.name.toLowerCase()}
                   className={"first-of-type:ml-2 last-of-type:mr-2"}
                   radius={"sm"}
-                  size={"lg"}
+                  size={"md"}
                 >
                   {eachCategory.name}
                 </Chip>
