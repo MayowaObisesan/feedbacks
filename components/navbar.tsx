@@ -45,6 +45,24 @@ export function Navbar() {
     getUser();
   }, []);
 
+  async function handleSignOut() {
+    try {
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+
+      // Clear user context
+      SetUser(null);
+
+      // Redirect to home or login page
+      // router.push('/');
+
+      // Optional: Force refresh to ensure all authenticated states are cleared
+      router.refresh();
+    } catch (error) {
+      // console.error('Error signing out:', error);
+    }
+  }
+
   function SignInButton() {
     return (
       <NavbarItem>
@@ -101,7 +119,7 @@ export function Navbar() {
               key="logout"
               color="danger"
               endContent={<DisconnectIcon size={20} strokeWidth={4} />}
-              onPress={async () => await supabase.auth.signOut()}
+              onPress={handleSignOut}
             >
               Log Out
             </DropdownItem>

@@ -6,7 +6,6 @@ import { Listbox, ListboxItem, ListboxSection } from "@heroui/listbox";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Image } from "@heroui/image";
 import { useEffect, useState } from "react";
-import { ScrollShadow } from "@heroui/scroll-shadow";
 import { Divider } from "@heroui/divider";
 import { Spacer } from "@heroui/spacer";
 import { Button } from "@heroui/button";
@@ -313,185 +312,185 @@ export default function BrandNav({
 
   return (
     <ListboxWrapper>
-      <ScrollShadow hideScrollBar>
-        <Listbox
-          aria-label="Listbox menu with sections"
-          className="flex flex-row flex-nowrap"
-          emptyContent="No Categories"
-          variant="flat"
-        >
-          <ListboxItem key={"brandProfile"} textValue="brandProfile">
-            <Card
-              className="max-sm:grid max-sm:grid-cols-3 lg:grid-cols-none py-0 bg-default-50/80 dark:bg-default-50 shadow-none"
-              isPressable={false}
-            >
-              <CardBody className="overflow-visible px-2">
-                {brandData?.brandImage && (
-                  <Image
-                    alt="Card background"
-                    className="object-cover rounded-xl size-32 lg:size-72"
-                    src={brandData && brandData?.brandImage}
-                    // width={size.width <= E_DeviceWidth.phone ? 120 : 270}
-                    // height={size.width <= E_DeviceWidth.phone ? 120 : 270}
-                  />
-                )}
-              </CardBody>
-              <CardHeader className="pb-0 px-4 flex-col max-sm:col-span-2 items-start">
-                {/* <p className="text-tiny uppercase font-bold">Brand Details</p> */}
-                {/* <small className="text-default-500">12 Tracks</small> */}
-                <Skeleton
-                  className={"rounded-xl"}
+      {/*<ScrollShadow hideScrollBar>*/}
+      <Listbox
+        aria-label="Listbox menu with sections"
+        className="flex flex-row flex-nowrap"
+        emptyContent="No Categories"
+        variant="flat"
+      >
+        <ListboxItem key={"brandProfile"} textValue="brandProfile">
+          <Card
+            className="max-sm:grid max-sm:grid-cols-3 lg:grid-cols-none py-0 bg-default-50/80 dark:bg-default-50 shadow-none"
+            isPressable={false}
+          >
+            <CardBody className="overflow-visible px-2">
+              {brandData?.brandImage && (
+                <Image
+                  alt="Card background"
+                  className="object-cover rounded-xl size-32 lg:size-72"
+                  src={brandData && brandData?.brandImage}
+                  // width={size.width <= E_DeviceWidth.phone ? 120 : 270}
+                  // height={size.width <= E_DeviceWidth.phone ? 120 : 270}
+                />
+              )}
+            </CardBody>
+            <CardHeader className="pb-0 px-4 flex-col max-sm:col-span-2 items-start">
+              {/* <p className="text-tiny uppercase font-bold">Brand Details</p> */}
+              {/* <small className="text-default-500">12 Tracks</small> */}
+              <Skeleton
+                className={"rounded-xl"}
+                isLoaded={isBrandDataSuccessful}
+              >
+                <h4 className="font-bold text-3xl leading-normal">
+                  {brandData && brandData?.rawName}
+                </h4>
+              </Skeleton>
+              {brandData?.description}
+              <div className="flex items-center gap-1 py-2">
+                <DynamicText
+                  data={brandData?.followersCount}
                   isLoaded={isBrandDataSuccessful}
-                >
-                  <h4 className="font-bold text-3xl leading-normal">
-                    {brandData && brandData?.rawName}
-                  </h4>
-                </Skeleton>
-                {brandData?.description}
-                <div className="flex items-center gap-1 py-2">
-                  <DynamicText
-                    data={brandData?.followersCount}
-                    isLoaded={isBrandDataSuccessful}
-                    textPlural="Followers"
-                    textSingular="Follower"
-                  />
-                  <DotSpacer />
-                  <DynamicText
-                    data={brandData?.feedbackCount}
-                    isLoaded={isBrandDataSuccessful}
-                    textPlural="Feedbacks"
-                    textSingular="Feedback"
-                  />
-                </div>
-                <Spacer y={2} />
-                <div
-                  className={"px-0"}
-                  /*onPress={
-                    !user?.email
-                      ? () => toast("You need to login to follow a brand")
-                      : () => {}
-                  }*/
-                >
-                  {user?.email !== brandData?.ownerEmail &&
-                    (isFollowingBrand ? (
-                      <Button
-                        color={"danger"}
-                        isLoading={isFollowLoading}
-                        variant={"solid"}
-                        onPress={handleUnFollowBrand}
-                      >
-                        Unfollow
-                      </Button>
-                    ) : (
-                      <Button
-                        color={"primary"}
-                        isDisabled={!user?.email}
-                        isLoading={isFollowLoading}
-                        onPress={handleFollowBrand}
-                      >
-                        Follow
-                      </Button>
-                    ))}
-                </div>
-                {myEventInvites?.length > 0 && (
-                  <section className="space-y-3 w-full">
-                    <Spacer y={4} />
-                    <Divider />
-                    <Spacer y={4} />
+                  textPlural="Followers"
+                  textSingular="Follower"
+                />
+                <DotSpacer />
+                <DynamicText
+                  data={brandData?.feedbackCount}
+                  isLoaded={isBrandDataSuccessful}
+                  textPlural="Feedbacks"
+                  textSingular="Feedback"
+                />
+              </div>
+              <Spacer y={2} />
+              <div
+                className={"px-0"}
+                /*onPress={
+                  !user?.email
+                    ? () => toast("You need to login to follow a brand")
+                    : () => {}
+                }*/
+              >
+                {user?.email !== brandData?.ownerEmail &&
+                  (isFollowingBrand ? (
                     <Button
-                      fullWidth
-                      color="danger"
-                      startContent={
-                        <span className="font-bold">
-                          {myEventInvites?.length}
-                        </span>
-                      }
-                      variant="shadow"
+                      color={"danger"}
+                      isLoading={isFollowLoading}
+                      variant={"solid"}
+                      onPress={handleUnFollowBrand}
                     >
-                      {myEventInvites?.length > 1
-                        ? "Pending Invites"
-                        : "Pending Invite"}
+                      Unfollow
                     </Button>
-                    {/* <div className="text-danger text-medium">
+                  ) : (
+                    <Button
+                      color={"primary"}
+                      isDisabled={!user?.email}
+                      isLoading={isFollowLoading}
+                      onPress={handleFollowBrand}
+                    >
+                      Follow
+                    </Button>
+                  ))}
+              </div>
+              {myEventInvites?.length > 0 && (
+                <section className="space-y-3 w-full">
+                  <Spacer y={4} />
+                  <Divider />
+                  <Spacer y={4} />
+                  <Button
+                    fullWidth
+                    color="danger"
+                    startContent={
                       <span className="font-bold">
-                        {myEventInvites?.length}{" "}
+                        {myEventInvites?.length}
                       </span>
-                      {myEventInvites?.length > 1
-                        ? "Pending Invites"
-                        : "Pending Invite"}
-                    </div> */}
-                  </section>
-                )}
-                <Spacer y={4} />
-              </CardHeader>
-            </Card>
-          </ListboxItem>
-          <ListboxSection
-            className="grow shrink-0 lg:space-y-4 px-2 lg:px-4"
-            classNames={{
-              base: "",
-              group:
-                "lg:space-y-4 max-sm:flex max-sm:flex-row max-sm:items-center",
-              heading: "max-sm:hidden text-2xl font-bold lg:py-4",
-            }}
-            itemClasses={{
-              base: "",
-              wrapper: "",
-            }}
-            items={actionsList}
-            title="Actions"
-            // showDivider
-          >
-            {(eachAction) => (
-              <ListboxItem
-                key={eachAction.text.toLocaleLowerCase()}
-                className={""}
-                classNames={{ base: "max-sm:grow" }}
-                // description={eachAction.description}
-                textValue={eachAction.text}
-              >
-                {eachAction.modal}
-              </ListboxItem>
-            )}
-          </ListboxSection>
-          <ListboxSection
-            hidden
-            showDivider
-            className="grow shrink-0 space-y-4 px-4"
-            classNames={{
-              base: "",
-              group: "space-y-4",
-              heading: "text-base py-4",
-            }}
-            itemClasses={{
-              base: "",
-              wrapper: "",
-            }}
-            items={categoryList}
-            title="Categories"
-          >
-            {(eachCategory) => (
-              <ListboxItem
-                key={eachCategory.name.toLowerCase()}
-                className=""
-                description={eachCategory.description}
-              >
-                {eachCategory.name}
-              </ListboxItem>
-            )}
-          </ListboxSection>
-          <ListboxSection hidden className="grow-0 shrink" title="Danger zone">
+                    }
+                    variant="shadow"
+                  >
+                    {myEventInvites?.length > 1
+                      ? "Pending Invites"
+                      : "Pending Invite"}
+                  </Button>
+                  {/* <div className="text-danger text-medium">
+                    <span className="font-bold">
+                      {myEventInvites?.length}{" "}
+                    </span>
+                    {myEventInvites?.length > 1
+                      ? "Pending Invites"
+                      : "Pending Invite"}
+                  </div> */}
+                </section>
+              )}
+              <Spacer y={4} />
+            </CardHeader>
+          </Card>
+        </ListboxItem>
+        <ListboxSection
+          className="grow shrink-0 lg:space-y-4 px-2 lg:px-4"
+          classNames={{
+            base: "",
+            group:
+              "lg:space-y-4 max-sm:flex max-sm:flex-row max-sm:items-center",
+            heading: "max-sm:hidden text-2xl font-bold lg:py-4",
+          }}
+          itemClasses={{
+            base: "",
+            wrapper: "",
+          }}
+          items={actionsList}
+          title="Actions"
+          // showDivider
+        >
+          {(eachAction) => (
             <ListboxItem
-              key="delete"
-              className="text-danger"
-              color="danger"
-              description="Permanently delete the file"
+              key={eachAction.text.toLocaleLowerCase()}
+              className={""}
+              classNames={{ base: "max-sm:grow" }}
+              // description={eachAction.description}
+              textValue={eachAction.text}
             >
-              Delete file
+              {eachAction.modal}
             </ListboxItem>
-          </ListboxSection>
-        </Listbox>
-      </ScrollShadow>
+          )}
+        </ListboxSection>
+        <ListboxSection
+          hidden
+          showDivider
+          className="grow shrink-0 space-y-4 px-4"
+          classNames={{
+            base: "",
+            group: "space-y-4",
+            heading: "text-base py-4",
+          }}
+          itemClasses={{
+            base: "",
+            wrapper: "",
+          }}
+          items={categoryList}
+          title="Categories"
+        >
+          {(eachCategory) => (
+            <ListboxItem
+              key={eachCategory.name.toLowerCase()}
+              className=""
+              description={eachCategory.description}
+            >
+              {eachCategory.name}
+            </ListboxItem>
+          )}
+        </ListboxSection>
+        <ListboxSection hidden className="grow-0 shrink" title="Danger zone">
+          <ListboxItem
+            key="delete"
+            className="text-danger"
+            color="danger"
+            description="Permanently delete the file"
+          >
+            Delete file
+          </ListboxItem>
+        </ListboxSection>
+      </Listbox>
+      {/*</ScrollShadow>*/}
     </ListboxWrapper>
   );
 }

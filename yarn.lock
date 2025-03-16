@@ -254,6 +254,20 @@
     "@heroui/react-utils" "2.1.8"
     "@heroui/shared-utils" "2.1.7"
 
+"@heroui/breadcrumbs@^2.2.12":
+  version "2.2.12"
+  resolved "https://registry.yarnpkg.com/@heroui/breadcrumbs/-/breadcrumbs-2.2.12.tgz#c7438c412f4235ce41d46ac5c852b96cb1fbeb8c"
+  integrity sha512-XRtU52p2j80BvZOvWgDaXfszwiACgxjS3gg5PEOM0X9H2UISW1+MoZjwtbLGYmGSl4ds4LdZGrf6dv6GWAX0nA==
+  dependencies:
+    "@heroui/react-utils" "2.1.8"
+    "@heroui/shared-icons" "2.1.6"
+    "@heroui/shared-utils" "2.1.7"
+    "@react-aria/breadcrumbs" "3.5.21"
+    "@react-aria/focus" "3.20.0"
+    "@react-aria/utils" "3.28.0"
+    "@react-types/breadcrumbs" "3.7.11"
+    "@react-types/shared" "3.28.0"
+
 "@heroui/button@2.2.16":
   version "2.2.16"
   resolved "https://registry.yarnpkg.com/@heroui/button/-/button-2.2.16.tgz#4ad4e573b6ca872706be84e0dd735d9597b2e537"
@@ -1749,6 +1763,18 @@
   resolved "https://registry.yarnpkg.com/@pkgr/core/-/core-0.1.1.tgz#1ec17e2edbec25c8306d424ecfbf13c7de1aaa31"
   integrity sha512-cq8o4cWH0ibXh9VGi5P20Tu9XF/0fFXl9EUinr9QfTM7a7p0oTA4iJRCQWppXR1Pg8dSM0UCItCkPwsk9qWWYA==
 
+"@react-aria/breadcrumbs@3.5.21":
+  version "3.5.21"
+  resolved "https://registry.yarnpkg.com/@react-aria/breadcrumbs/-/breadcrumbs-3.5.21.tgz#7e8fdef1dd6805e3bcfdc3b39f15b5640aaf6c9e"
+  integrity sha512-Sg9nQIcKqHInXqTPml4uuf/2goEi9emPa9z/IGk6nw4kkZJuQYiqYvd5nCpcSqDfB2cWiJ5QZ50JIsKuTdBQpw==
+  dependencies:
+    "@react-aria/i18n" "^3.12.6"
+    "@react-aria/link" "^3.7.9"
+    "@react-aria/utils" "^3.28.0"
+    "@react-types/breadcrumbs" "^3.7.11"
+    "@react-types/shared" "^3.28.0"
+    "@swc/helpers" "^0.5.0"
+
 "@react-aria/button@3.12.0":
   version "3.12.0"
   resolved "https://registry.yarnpkg.com/@react-aria/button/-/button-3.12.0.tgz#40c7af1141aa83a51e0177dd605d2a5dda0ebc84"
@@ -2008,6 +2034,17 @@
   dependencies:
     "@react-aria/interactions" "^3.24.0"
     "@react-aria/utils" "^3.28.0"
+    "@react-types/link" "^3.5.11"
+    "@react-types/shared" "^3.28.0"
+    "@swc/helpers" "^0.5.0"
+
+"@react-aria/link@^3.7.9":
+  version "3.7.10"
+  resolved "https://registry.yarnpkg.com/@react-aria/link/-/link-3.7.10.tgz#526beadde3082d730aecfff861ae45c93b8b0793"
+  integrity sha512-prf7s7O1PHAtA+H2przeGr8Ig4cBjk1f0kO0bQQAC3QvVOOUO7WLNU/N+xgOMNkCKEazDl21QM1o0bDRQCcXZg==
+  dependencies:
+    "@react-aria/interactions" "^3.24.1"
+    "@react-aria/utils" "^3.28.1"
     "@react-types/link" "^3.5.11"
     "@react-types/shared" "^3.28.0"
     "@swc/helpers" "^0.5.0"
@@ -2561,6 +2598,14 @@
   integrity sha512-OXf/kXcD2vFlEnkcZy/GG+a/1xO9BN7Uh3/5/Ceuj9z2E/WwD55YwU3GFM5zzkZ4+DMkdowHnZX37XnmbyD3Mg==
   dependencies:
     "@react-types/shared" "^3.27.0"
+
+"@react-types/breadcrumbs@3.7.11", "@react-types/breadcrumbs@^3.7.11":
+  version "3.7.11"
+  resolved "https://registry.yarnpkg.com/@react-types/breadcrumbs/-/breadcrumbs-3.7.11.tgz#34ef069099b9c01068f26d8a2d1f886ca14a439f"
+  integrity sha512-pMvMLPFr7qs4SSnQ0GyX7i3DkWVs9wfm1lGPFbBO7pJLrHTSK/6Ii4cTEvP6d5o2VgjOVkvce9xCLWW5uosuEQ==
+  dependencies:
+    "@react-types/link" "^3.5.11"
+    "@react-types/shared" "^3.28.0"
 
 "@react-types/button@3.11.0", "@react-types/button@^3.11.0":
   version "3.11.0"

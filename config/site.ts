@@ -26,13 +26,13 @@ export const siteConfig = {
     //   href: "/about",
     // },
     {
+      label: "Brands",
+      href: "/app/brand",
+    },
+    {
       label: "Dashboard",
       href: "/dashboard",
     },
-    /*{
-      label: "me",
-      href: "/app/me",
-    },*/
   ],
   navMenuItems: [
     {

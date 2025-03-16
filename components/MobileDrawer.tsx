@@ -6,6 +6,7 @@ import {
   LucideChartNoAxesGantt,
   LucideHome,
   LucideLayoutDashboard,
+  LucideLayoutTemplate,
 } from "lucide-react";
 import {
   Drawer,
@@ -15,7 +16,7 @@ import {
   DrawerHeader,
 } from "@heroui/drawer";
 import { useDisclosure } from "@heroui/modal";
-import { Avatar } from "@heroui/avatar";
+import { Avatar, AvatarIcon } from "@heroui/avatar";
 import { Listbox, ListboxItem, ListboxSection } from "@heroui/listbox";
 import React from "react";
 import { useRouter } from "next/navigation";
@@ -58,6 +59,7 @@ export default function MobileDrawer() {
                   <Avatar
                     isBordered
                     color="primary"
+                    fallback={<AvatarIcon />}
                     name="Profile Pic"
                     size="md"
                     src={userDB?.dp || user?.user_metadata.avatar_url}
@@ -94,6 +96,13 @@ export default function MobileDrawer() {
                       startContent={<LucideHome size={16} />}
                     >
                       Home
+                    </ListboxItem>
+                    <ListboxItem
+                      key="brands"
+                      href={"/app/brand"}
+                      startContent={<LucideLayoutTemplate size={16} />}
+                    >
+                      Brands
                     </ListboxItem>
                     <ListboxItem
                       key="dashboard"
@@ -140,7 +149,7 @@ export default function MobileDrawer() {
                       base: "",
                       wrapper: "",
                     }}
-                    items={myBrands}
+                    items={myBrands || []}
                     showDivider={false}
                     title="Your Brands"
                   >

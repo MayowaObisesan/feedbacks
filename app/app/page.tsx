@@ -70,7 +70,7 @@ export default function Home() {
       <div className={"hidden"}>
         <SearchModal />
       </div>
-      <section className="space-y-12 px-2 lg:px-8 lg:overflow-y-hidden">
+      <section className="space-y-12 px-2 lg:px-8 lg:overflow-x-hidden">
         {trendingBrandsError && (
           <div>
             <Alert color={"danger"} title={"Unable to fetch trending brands"} />

@@ -2,6 +2,7 @@ export enum DBTables {
   User = "User",
   Brand = "Brand",
   Feedback = "Feedback",
+  FeedbackLikes = "feedback_likes",
 }
 
 export enum E_BillingTier {
