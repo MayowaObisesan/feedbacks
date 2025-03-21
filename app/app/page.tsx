@@ -28,10 +28,16 @@ export default function Home() {
     error: trendingBrandsError,
     isLoading: trendingBrandsLoading,
   } = useTrendingBrands();
-  const { data: trendingFeedbacks, isLoading: trendingFeedbacksLoading } =
-    useTrendingFeedbacks(10);
-  const { data: allFeedbacks, isLoading: allFeedbacksLoading } =
-    useAllFeedbacks(10);
+  const {
+    data: trendingFeedbacks,
+    error: trendingFeedbacksError,
+    isLoading: trendingFeedbacksLoading,
+  } = useTrendingFeedbacks(10);
+  const {
+    data: allFeedbacks,
+    error: allFeedbacksError,
+    isLoading: allFeedbacksLoading,
+  } = useAllFeedbacks(10);
 
   // Listen for user SIGNIN event
   supabase.auth.onAuthStateChange(async (event, session) => {
@@ -70,10 +76,14 @@ export default function Home() {
       <div className={"hidden"}>
         <SearchModal />
       </div>
-      <section className="space-y-12 px-2 lg:px-8 lg:overflow-x-hidden">
+      <section className="flex-1 space-y-12 px-2 lg:px-8 lg:overflow-x-hidden">
         {trendingBrandsError && (
           <div>
-            <Alert color={"danger"} title={"Unable to fetch trending brands"} />
+            <Alert
+              color={"danger"}
+              description={"Unable to fetch trending brands"}
+              title={"Network error"}
+            />
           </div>
         )}
         {/* Only show create brand modal for signed-in users */}
@@ -84,7 +94,7 @@ export default function Home() {
         )}
 
         <section>
-          <header className="font-bold text-xl md:text-4xl leading-normal">
+          <header className="font-bold text-xl md:text-3xl leading-normal">
             Trending Brands
           </header>
           {trendingBrandsLoading && (
@@ -111,7 +121,7 @@ export default function Home() {
           {trendingBrands?.length === 0 && (
             <Card className="bg-transparent shadow-none">
               <CardBody className="flex items-center justify-center h-[200px]">
-                <div className="text-xl lg:text-3xl text-gray-600 text-center leading-loose">
+                <div className="text-lg lg:text-xl text-gray-600 text-center leading-loose">
                   No trending brands.
                   <br />
                   <Button>Try again</Button>
@@ -122,7 +132,7 @@ export default function Home() {
           {trendingBrandsError && (
             <Card className="bg-transparent shadow-none">
               <CardBody className="flex items-center justify-center h-[200px]">
-                <div className="text-lg lg:text-3xl text-gray-600 text-center text-pretty leading-loose">
+                <div className="text-lg lg:text-2xl text-gray-600 text-center text-pretty leading-loose">
                   Unable to fetch Brands.
                   <br />
                   Please check network connection.
@@ -133,7 +143,7 @@ export default function Home() {
         </section>
 
         <section className="">
-          <header className="font-bold text-xl md:text-4xl leading-normal">
+          <header className="font-bold text-xl md:text-3xl leading-normal">
             Trending Feedbacks
           </header>
           <ScrollShadow hideScrollBar orientation={"horizontal"} size={40}>
@@ -142,6 +152,17 @@ export default function Home() {
                 Array.from({ length: 5 })?.map((_, index) => (
                   <FeedbackCardSkeleton key={index} />
                 ))}
+              {trendingFeedbacks?.length === 0 && (
+                <Card className="bg-transparent shadow-none">
+                  <CardBody className="flex items-center justify-center h-[200px]">
+                    <div className="text-lg lg:text-xl text-gray-600 text-center leading-loose">
+                      No trending feedbacks.
+                      <br />
+                      <Button>Try again</Button>
+                    </div>
+                  </CardBody>
+                </Card>
+              )}
               {trendingFeedbacks?.map((eachTrendingFeedback) => (
                 <FeedbackCard
                   key={eachTrendingFeedback.id}
@@ -151,20 +172,42 @@ export default function Home() {
                   showBrand={true}
                 />
               ))}
+              {trendingFeedbacksError && (
+                <Card className="w-full bg-transparent shadow-none">
+                  <CardBody className="flex items-center justify-center h-[200px]">
+                    <div className="text-lg lg:text-2xl text-gray-600 text-center text-pretty leading-loose">
+                      Unable to fetch trending feedbacks.
+                      <br />
+                      Please check network connection.
+                    </div>
+                  </CardBody>
+                </Card>
+              )}
             </div>
           </ScrollShadow>
         </section>
 
         <section className="">
-          <header className="font-bold text-xl md:text-4xl leading-normal">
+          <header className="font-bold text-xl md:text-3xl leading-normal">
             Latest Feedbacks
           </header>
           <ScrollShadow hideScrollBar orientation={"vertical"} size={80}>
-            <div className="flex flex-col lg:flex-row gap-x-8 gap-y-2 px-2 py-4">
+            <div className="flex flex-col md:flex-row gap-x-8 gap-y-2 px-2 py-4">
               {allFeedbacksLoading &&
                 Array.from({ length: 5 })?.map((_, index) => (
                   <FeedbackCardListSkeleton key={index} />
                 ))}
+              {allFeedbacks?.data?.length === 0 && (
+                <Card className="bg-transparent shadow-none">
+                  <CardBody className="flex items-center justify-center h-[200px]">
+                    <div className="text-lg lg:text-xl text-gray-600 text-center leading-loose">
+                      Empty feedbacks. You might want to check your network.
+                      <br />
+                      <Button>Reload</Button>
+                    </div>
+                  </CardBody>
+                </Card>
+              )}
               {allFeedbacks?.data?.map((eachFeedback) => (
                 <FeedbackCard
                   key={eachFeedback.id}
@@ -173,6 +216,17 @@ export default function Home() {
                   showBrand={true}
                 />
               ))}
+              {allFeedbacksError && (
+                <Card className="w-full bg-transparent shadow-none">
+                  <CardBody className="flex items-center justify-center h-[200px]">
+                    <div className="text-lg lg:text-2xl text-gray-600 text-center text-pretty leading-loose">
+                      Unable to fetch latest feedbacks.
+                      <br />
+                      Please check network connection.
+                    </div>
+                  </CardBody>
+                </Card>
+              )}
             </div>
           </ScrollShadow>
         </section>

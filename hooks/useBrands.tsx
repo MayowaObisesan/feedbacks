@@ -1,13 +1,8 @@
-import type { TablesInsert, Tables } from "@/types/supabase";
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";
-import { IBrands } from "@/types";
-
-type Brand = Tables<DBTables.Brand>;
-type BrandInsert = TablesInsert<DBTables.Brand>;
+import { Brand, BrandInsert, IBrands } from "@/types";
 
 // Fetch trending brands based on multiple criteria
 export const useTrendingBrands = (
@@ -135,6 +130,7 @@ export const useBrands = (page: number = 1) => {
 
       return data;
     },
+    maxPages: 30,
   });
 };
 
@@ -158,6 +154,7 @@ export const useMyBrands = (email: string, page: number = 1) => {
 
       return data;
     },
+    gcTime: 1000 * 60 * 60, // 1 hour
   });
 };
 
@@ -168,7 +165,7 @@ export const useFollowedBrands = (email: string, page: number = 1) => {
   const endRange = DEFAULT_LOAD_COUNT * page - 1;
 
   return useQuery({
-    queryKey: ["followedBrands"],
+    queryKey: ["followedBrands", email],
     queryFn: async (): Promise<Brand[]> => {
       const { data, error } = await supabase
         .from(DBTables.Brand)
@@ -176,6 +173,8 @@ export const useFollowedBrands = (email: string, page: number = 1) => {
         .contains("followers", [email])
         .order("createdAt", { ascending: false })
         .range(startRange, endRange);
+
+      console.log("Followed brands query", email, data);
 
       if (error) throw error;
 
@@ -186,6 +185,7 @@ export const useFollowedBrands = (email: string, page: number = 1) => {
       // return [...data, isFollowed];
       return data;
     },
+    enabled: !!email,
   });
 };
 

@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 
 import { siteConfig } from "@/config/site";
 import { Navbar } from "@/components/navbar";
@@ -32,7 +33,9 @@ export default function RootLayout({
   return (
     <div className="relative flex flex-col w-full h-dvh">
       {/*<div className={"sticky top-0 bg-teal-900 p-4"}>*/}
-      <Navbar />
+      <Suspense fallback={null}>
+        <Navbar />
+      </Suspense>
       {/*</div>*/}
       <div className="relative w-full h-full overflow-auto mx-auto flex-grow">
         {/*<ModalContainer />*/}

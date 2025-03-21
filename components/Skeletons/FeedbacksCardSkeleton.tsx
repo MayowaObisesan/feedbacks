@@ -48,7 +48,7 @@ export function FeedbackCardSkeleton() {
 
 export function FeedbackCardListSkeleton() {
   return (
-    <Card className="w-full space-y-5 p-4" radius="lg">
+    <Card className="min-w-[280px] md:min-w-[360px] w-full space-y-5 p-4" radius="lg">
       <div className="max-w-[300px] w-full flex items-center gap-3">
         <div>
           <Skeleton className="flex rounded-full w-12 h-12" />

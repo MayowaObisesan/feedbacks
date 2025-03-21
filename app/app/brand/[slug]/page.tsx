@@ -11,7 +11,7 @@ import {
 import Link from "next/link";
 import { Divider } from "@heroui/divider";
 import { Alert } from "@heroui/alert";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { BreadcrumbItem, Breadcrumbs } from "@heroui/breadcrumbs";
 
 import BrandNav from "@/components/BrandNav";
@@ -26,12 +26,16 @@ import { useBrandByName } from "@/hooks/useBrands";
 import { FeedbackCardListSkeleton } from "@/components/Skeletons/FeedbacksCardSkeleton";
 import { useBrandFeedbacks, useStarRatingCounts } from "@/hooks/useFeedbacks";
 import RatingAggregate from "@/components/RatingAggregate";
+import { InfiniteFlatList } from "@/components/FlatList/infiniteFlatList";
 
 function BrandPage({ params }: { params: any }) {
   // @ts-ignore
   const { slug } = React.use(params);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [page, setPage] = useState<number>(1);
+  const pageRef = useRef(1);
+  const [page, setPage] = useState<number>(pageRef.current);
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState<boolean>(true);
   const limit = 10;
   const { myAddress, myEventInvites, user } = useFeedbacksContext();
   const {
@@ -43,9 +47,9 @@ function BrandPage({ params }: { params: any }) {
     data: brandFeedbacksData,
     isFetching: brandFeedbacksIsFetching,
     isFetched: brandFeedbacksIsFetched,
-  } = useBrandFeedbacks(brandData?.id!, user?.email, page, limit);
+  } = useBrandFeedbacks(brandData?.id!, user?.email, pageRef.current, limit);
   const { data: starCounts } = useStarRatingCounts(brandData?.id!);
-  // const totalPages = Math.ceil(brandFeedbacksData?.count! / limit);
+  const totalPages = Math.ceil(brandFeedbacksData?.count! / limit);
 
   const distribution = [1, 2, 3].map((rating, index) => ({
     rating,
@@ -72,6 +76,40 @@ function BrandPage({ params }: { params: any }) {
     ],*/
     distribution,
   };
+
+  const renderFeedbackItem = (feedback: any) => (
+    <FeedbackCard
+      key={feedback.id}
+      {...feedback}
+      asGrid={false}
+      isLoaded={!["", null, undefined].includes(feedback.email)}
+    />
+  );
+
+  const updateFeedbacks = useCallback((newData: any[], currentPage: number) => {
+    if (currentPage === 1) {
+      setHasMore(true);
+
+      return setFeedbacks(newData);
+    }
+
+    setFeedbacks((prev) => {
+      // Create a map of existing IDs for faster lookup
+      const existingIds = new Map(prev.map((item) => [item.id, true]));
+
+      // Filter out duplicates while maintaining order
+      const uniqueNewData = newData.filter((item) => !existingIds.has(item.id));
+
+      return [...prev, ...uniqueNewData];
+    });
+  }, []);
+
+  useEffect(() => {
+    if (brandFeedbacksData?.data) {
+      updateFeedbacks(brandFeedbacksData.data, pageRef.current);
+      setHasMore(pageRef.current < totalPages);
+    }
+  }, [brandFeedbacksData?.data, pageRef.current, totalPages, updateFeedbacks]);
 
   // const [brandData, setBrandData] = useState<IBrands>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -266,7 +304,7 @@ function BrandPage({ params }: { params: any }) {
         </Breadcrumbs>
       </div>
       <section className="relative flex flex-col md:flex-row w-ful h-full md:py-4">
-        <div className="flex-1 relative md:min-w-72 md:h-dvh">
+        <div className="flex-1 relative md:min-w-72 md:max-w-72 md:h-dvh">
           <BrandNav
             brandData={brandData!}
             brandName={slug}
@@ -276,7 +314,7 @@ function BrandPage({ params }: { params: any }) {
 
         <Divider className="md:hidden my-2" />
 
-        <ScrollShadow hideScrollBar size={8}>
+        <ScrollShadow hideScrollBar className={"flex-1"} size={8}>
           <section className="lg:px-4 space-y-8">
             {/*<div className="sticky top-0 z-50 flex w-full items-center gap-x-3 border-divider bg-background/40 px-6 py-2 backdrop-blur-xl sm:px-3.5 sm:before:flex-1">
               <div className="w-full font-bold text-2xl">{brandData?.rawName}</div>
@@ -321,17 +359,63 @@ function BrandPage({ params }: { params: any }) {
                   </Button>
                 </div>
               </header>
+
+              <InfiniteFlatList
+                ListEmptyComponent={
+                  <EmptyCard>
+                    <div className={"flex flex-col items-center gap-y-5"}>
+                      <LucideMessagesSquare
+                        size={40}
+                        strokeWidth={1}
+                        width={"100%"}
+                      />
+                      <div className={"text-base lg:text-2xl text-balance"}>
+                        You haven&apos;t received any feedback yet
+                      </div>
+                    </div>
+                  </EmptyCard>
+                }
+                ListFooterComponent={
+                  page < totalPages ? (
+                    !brandFeedbacksIsFetched ? (
+                      <div className="p-4 text-center">
+                        <p>Loading more...</p>
+                      </div>
+                    ) : null
+                  ) : (
+                    <div className="p-4 text-center">
+                      <p>No more feedbacks to load</p>
+                    </div>
+                  )
+                }
+                contentContainerClassName="flex flex-col gap-y-2 lg:px-2 py-4"
+                // initialNumToRender={10}
+                keyExtractor={(item) => item.id.toString()}
+                // maxToRenderPerBatch={10}
+                renderItem={renderFeedbackItem}
+                renderedData={feedbacks}
+                onEndReached={() => {
+                  // Only fetch more if we're not already fetching and there are more pages
+                  if (brandFeedbacksIsFetched && pageRef.current < totalPages) {
+                    pageRef.current += 1;
+                    setPage(pageRef.current);
+                  }
+                }}
+                onEndReachedThreshold={0.5}
+              />
+
               <ScrollShadow
                 hideScrollBar
                 className="w-full px-4 md:py-8"
                 orientation={"vertical"}
               >
                 <div className="flex flex-col flex-nowrap gap-x-8 gap-y-2 lg:px-2 py-4">
-                  {brandFeedbacksIsFetching &&
+                  {brandFeedbacksData?.count! <= 10 &&
+                    brandFeedbacksIsFetching &&
                     Array.from({ length: 5 }).map((_, index: number) => (
                       <FeedbackCardListSkeleton key={index} />
                     ))}
-                  {brandFeedbacksIsFetched &&
+                  {/*{brandFeedbacksIsFetched &&
                     brandFeedbacksData?.data?.map((_) => (
                       <FeedbackCard
                         key={_.id}
@@ -355,7 +439,10 @@ function BrandPage({ params }: { params: any }) {
                           </div>
                         </div>
                       </EmptyCard>
-                    )}
+                    )}*/}
+
+                  {/*{brandFeedbacksIsFetched && (
+                  )}*/}
 
                   {/*{!isThisBrandFeedbacksDataFetching ? (
                     <>

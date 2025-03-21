@@ -97,6 +97,7 @@ export type Database = {
           id: number;
           productId: number | null;
           recipientId: number;
+          screenshots: string | null;
           starRating: number | null;
           title: string | null;
           updatedAt: string | null;
@@ -112,6 +113,7 @@ export type Database = {
           id?: number;
           productId?: number | null;
           recipientId: number;
+          screenshots?: string | null;
           starRating?: number | null;
           title?: string | null;
           updatedAt?: string | null;
@@ -127,6 +129,7 @@ export type Database = {
           id?: number;
           productId?: number | null;
           recipientId?: number;
+          screenshots?: string | null;
           starRating?: number | null;
           title?: string | null;
           updatedAt?: string | null;
@@ -157,6 +160,36 @@ export type Database = {
           feedback_id?: number;
           id?: number;
           likes?: string[] | null;
+        };
+        Relationships: [];
+      };
+      feedback_replies: {
+        Row: {
+          brand_id: number;
+          created_at: string;
+          feedback_id: number;
+          id: number;
+          owner_email: string | null;
+          reply: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          brand_id: number;
+          created_at?: string;
+          feedback_id: number;
+          id?: number;
+          owner_email?: string | null;
+          reply?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          brand_id?: number;
+          created_at?: string;
+          feedback_id?: number;
+          id?: number;
+          owner_email?: string | null;
+          reply?: string | null;
+          updated_at?: string | null;
         };
         Relationships: [];
       };

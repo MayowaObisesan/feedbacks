@@ -1,12 +1,8 @@
-import type { Tables } from "@/types/supabase";
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";
-
-type Feedback = Tables<DBTables.Feedback>;
-type FeedbackLikes = Tables<DBTables.FeedbackLikes>;
+import { Feedback, FeedbackLikes, FeedbackReplies } from "@/types";
 
 export function useTrendingFeedbacks(limit: number = 5, daysAgo: number = 7) {
   const fetchTrendingFeedbacks = async (): Promise<Feedback[]> => {
@@ -90,18 +86,28 @@ export function useBrandFeedbacks(
     data: FeedbackWithCounts[];
     count: number;
   }> => {
-    const [feedbackResponse, likesResponse] = await Promise.all([
-      // Fetch feedbacks
-      supabase
-        .from(DBTables.Feedback)
-        .select("*", { count: "exact", head: false })
-        .eq("recipientId", brandId)
-        .order("createdAt", { ascending: false })
-        .range(startRange, endRange),
+    const [feedbackResponse, likesResponse, repliesResponse] =
+      await Promise.all([
+        // Fetch feedbacks
+        supabase
+          .from(DBTables.Feedback)
+          .select("*", { count: "exact", head: false })
+          .eq("recipientId", brandId)
+          .order("createdAt", { ascending: false })
+          .range(startRange, endRange),
 
-      // Fetch all likes for this brand's feedbacks
-      supabase.from(DBTables.FeedbackLikes).select("*").eq("brand_id", brandId),
-    ]);
+        // Fetch all likes for this brand's feedbacks
+        supabase
+          .from(DBTables.FeedbackLikes)
+          .select("*")
+          .eq("brand_id", brandId),
+
+        // Fetch the reply for this brand's feedback
+        supabase
+          .from(DBTables.FeedbackReplies)
+          .select("*")
+          .eq("brand_id", brandId),
+      ]);
 
     if (feedbackResponse.error) {
       throw new Error(feedbackResponse.error.message);
@@ -114,14 +120,21 @@ export function useBrandFeedbacks(
 
     const likes = likesResponse.data || [];
 
+    const replies = repliesResponse.data || [];
+
     // Transform the data to include likes information
     const transformedData = feedbacks.map((feedback) => {
       const feedbackLikes: FeedbackLikes[] = likes.filter(
         (like) => like.feedback_id === feedback.id,
       );
 
+      const feedbackReplies: FeedbackReplies[] = replies.filter(
+        (reply) => reply.feedback_id === feedback.id,
+      );
+
       return {
         ...feedback,
+        replyData: feedbackReplies[0],
         likesCount:
           feedbackLikes.length > 0 ? feedbackLikes[0].likes?.length : 0,
         dislikesCount:
@@ -157,18 +170,21 @@ export function useBrandFeedbacks(
   };
 
   return useQuery({
-    queryKey: ["feedbacks", brandId],
+    queryKey: ["feedbacks", brandId, page],
     queryFn: fetchFeedbacks,
-    enabled: !!brandId,
+    // enabled: !!brandId,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 60, // 1 hour
+    // gcTime: 1000 * 60 * 60, // 1 hour,
+    placeholderData: (previousData) => previousData,
   });
 }
 
 // Optional mutation hook for creating feedbacks
 export function useCreateFeedback() {
+  const queryClient = useQueryClient();
+
   const createFeedback = async (
-    feedback: Omit<Feedback, "id" | "created_at">,
+    feedback: Omit<Feedback, "id" | "createdAt | updatedAt | fromEmbed">,
   ) => {
     const { data, error } = await supabase
       .from(DBTables.Feedback)
@@ -180,11 +196,32 @@ export function useCreateFeedback() {
       throw new Error(error.message);
     }
 
+    const { count } = await supabase
+      .from(DBTables.Feedback)
+      .select("*", { count: "exact", head: true })
+      .eq("recipientId", feedback.recipientId);
+
+    // Update the brands parameters also.
+    if (count! > 0) {
+      await supabase
+        .from(DBTables.Brand)
+        .update({
+          feedbackCount: count,
+        })
+        .eq("id", feedback.recipientId);
+    }
+
     return data;
   };
 
   return useMutation({
     mutationFn: createFeedback,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["feedbacks"] });
+      queryClient.invalidateQueries({
+        queryKey: ["feedbacks", variables.recipientId],
+      });
+    },
   });
 }
 
@@ -261,7 +298,6 @@ export function useUpdateFeedbackLikes() {
         const { data, error } = await supabase
           .from(DBTables.FeedbackLikes)
           .insert(updates)
-          .eq("feedback_id", id)
           .select();
 
         if (error) {
@@ -283,6 +319,81 @@ export function useUpdateFeedbackLikes() {
 
         return data;
       }
+    },
+    onSuccess: (_, variables) => {
+      // queryClient.invalidateQueries({ queryKey: ["feedbacks"] });
+      queryClient.invalidateQueries({ queryKey: ["feedback", variables.id] });
+    },
+  });
+}
+
+// Create or Update feedback reply mutation
+export function useCreateOrUpdateFeedbackReplies() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      ...updates
+    }: Omit<FeedbackReplies, "id" | "created_at" | "updated_at">) => {
+      const { count } = await supabase
+        .from(DBTables.FeedbackReplies)
+        .select("*", { count: "exact", head: true })
+        .eq("feedback_id", updates.feedback_id);
+
+      if (count === 0) {
+        // No one has replied this feedback yet.
+        const { data, error } = await supabase
+          .from(DBTables.FeedbackReplies)
+          .insert(updates)
+          .select();
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        return data;
+      } else {
+        // At lease one person have liked or disliked this feedback.
+        const { data, error } = await supabase
+          .from(DBTables.FeedbackReplies)
+          .update(updates)
+          .eq("feedback_id", updates.feedback_id)
+          .select();
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        return data;
+      }
+    },
+    onSuccess: (_, variables) => {
+      // queryClient.invalidateQueries({ queryKey: ["feedbacks"] });
+      queryClient.invalidateQueries({ queryKey: ["feedback", variables.id] });
+    },
+  });
+}
+
+// Update feedback reply mutation
+export function useUpdateFeedbackReply() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...updates
+    }: Partial<FeedbackReplies> & { id: number }) => {
+      const { data, error } = await supabase
+        .from(DBTables.FeedbackReplies)
+        .update(updates)
+        .eq("feedback_id", id)
+        .select();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data;
     },
     onSuccess: (_, variables) => {
       // queryClient.invalidateQueries({ queryKey: ["feedbacks"] });
