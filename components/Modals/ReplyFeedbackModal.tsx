@@ -44,8 +44,6 @@ export function ReplyFeedbackModal({
         reply: feedbackContent.trim(),
       });
 
-      console.log("create feedback reply response", response, feedbackData.id);
-
       if (response) {
         onClose();
         toast.success("Reply sent.");

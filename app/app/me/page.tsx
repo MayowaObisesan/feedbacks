@@ -201,8 +201,7 @@ export default function Page() {
     isFetched: myBrandsFetched,
   } = useMyBrands(user?.email!);*/
 
-  const { data: followedBrands, isFetched: followedBrandsFetched } =
-    useFollowedBrands(user?.email!);
+  const { data: followedBrands } = useFollowedBrands(user?.email!);
 
   // const [isFollowed, setIsFollowed] = React.useState(false);
   // const [myBrandsData, setMyBrandsData] = React.useState<IBrands[]>([]);
@@ -420,13 +419,13 @@ export default function Page() {
             Brands you follow
           </header>
           <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
-          {user?.email ? (
-            <FollowedBrands followerEmail={user?.email} />
-          ) : (
-            [1, 2, 3, 4].map((_) => (
-              <TrendingBrandCardSkeleton key={_ as number} />
-            ))
-          )}
+            {user?.email ? (
+              <FollowedBrands followerEmail={user?.email} />
+            ) : (
+              [1, 2, 3, 4].map((_) => (
+                <TrendingBrandCardSkeleton key={_ as number} />
+              ))
+            )}
           </div>
         </section>
 

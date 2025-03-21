@@ -369,7 +369,9 @@ export function useCreateOrUpdateFeedbackReplies() {
     },
     onSuccess: (_, variables) => {
       // queryClient.invalidateQueries({ queryKey: ["feedbacks"] });
-      queryClient.invalidateQueries({ queryKey: ["feedback", variables.id] });
+      queryClient.invalidateQueries({
+        queryKey: ["feedback", variables.feedback_id],
+      });
     },
   });
 }

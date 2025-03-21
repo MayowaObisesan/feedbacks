@@ -150,8 +150,6 @@ export function CreateFeedbackModal({
         screenshots: screenshotUrls.join(","),
       });
 
-      console.log("create feedback response", response);
-
       if (response) {
         onClose();
         toast.success("Feedback created successfully.");

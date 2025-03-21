@@ -1,5 +1,6 @@
 import { SVGProps } from "react";
 import { Address } from "viem";
+import { User as S_User } from "@supabase/auth-js";
 
 import { Tables, type TablesInsert } from "@/types/supabase";
 import { DBTables } from "@/types/enums";
@@ -22,7 +23,7 @@ export type IUser = {
   email: string;
   updatedAt: string;
   userId: string;
-  userData: User;
+  userData: S_User;
   dp: string;
 };
 

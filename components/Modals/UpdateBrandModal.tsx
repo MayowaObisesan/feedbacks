@@ -30,11 +30,7 @@ import { CameraIcon } from "../icons/CameraIcon";
 
 // import { useFeedbacksContext } from "@/context";
 import { BRAND_CATEGORIES } from "@/constant";
-import { IBrands } from "@/types";
 import { cleanBrandRawName } from "@/utils";
-import { BrandService } from "@/services/brands";
-import { supabase } from "@/utils/supabase/supabase";
-import { DBTables } from "@/types/enums";
 import { useBrandById, useUpdateBrand } from "@/hooks/useBrands";
 
 const UpdateBrandModal = ({
@@ -292,7 +288,7 @@ const UpdateBrandModal = ({
       >
         <ModalContent className="relative overflow-auto">
           {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-          {(onClose) => (
+          {() => (
             <>
               {/*{!profileExist && (
                 <>

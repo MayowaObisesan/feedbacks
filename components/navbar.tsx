@@ -37,12 +37,9 @@ export function Navbar() {
   const { SetUser } = useFeedbacksContext();
   const {
     data: userAndUserDB,
-    isLoading: userAndUserDBLoading,
     isFetched: userAndUserDBFetched,
   } = useUserAndUserDBQuery();
   const { user, userDB } = userAndUserDB || {};
-
-  console.log(userAndUserDBFetched, userAndUserDBLoading, user, userDB);
 
   /*
   useEffect(() => {

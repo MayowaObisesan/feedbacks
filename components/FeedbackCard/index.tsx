@@ -24,7 +24,7 @@ import { supabase } from "@/utils/supabase/supabase";
 import { formatDateString, hashFullName } from "@/utils";
 import { useBrandById } from "@/hooks/useBrands";
 import { useUpdateFeedbackLikes } from "@/hooks/useFeedbacks";
-import { FeedbackReplies, User } from "@/types";
+import { FeedbackReplies, IUser } from "@/types";
 import { ReplyFeedbackModal } from "@/components/Modals/ReplyFeedbackModal";
 import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
 
@@ -55,7 +55,7 @@ export default function FeedbackCard(
   const { theme } = useTheme();
   // const [brandData, setBrandData] = React.useState<IBrands>();
   const isMounted = useIsMounted();
-  const [userData, setUserData] = React.useState<User>();
+  const [userData, setUserData] = React.useState<IUser>();
   // const [isFollowed, setIsFollowed] = React.useState(false);
   // const { user, userDB } = useFeedbacksContext();
   const { data: userAndUserDB } = useUserAndUserDBQuery();
@@ -432,7 +432,7 @@ export default function FeedbackCard(
           {!props.hideReplyButton &&
             !props.replyData?.reply &&
             brandData?.ownerEmail === user?.email && (
-              <ReplyFeedbackModal brandData={brandData} feedbackData={props} />
+              <ReplyFeedbackModal brandData={brandData!} feedbackData={props} />
             )}
         </div>
       </CardFooter>
