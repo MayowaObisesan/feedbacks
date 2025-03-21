@@ -21,6 +21,7 @@ import {
 import { useEffect } from "react";
 import { LucideChartNoAxesGantt, Power } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 import SearchModal from "@/components/Modals/SearchModal";
 import { useFeedbacksContext } from "@/context";
@@ -28,11 +29,19 @@ import { supabase } from "@/utils/supabase/supabase";
 import { DisconnectIcon, FeedbacksLogo, SearchIcon } from "@/components/icons";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { siteConfig } from "@/config/site";
+import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
 
 export function Navbar() {
+  const queryClient = useQueryClient();
   const router = useRouter();
-  const { SetUser, user, userDB } = useFeedbacksContext();
+  const { SetUser } = useFeedbacksContext();
+  const {
+    data: userAndUserDB,
+    isFetched: userAndUserDBFetched,
+  } = useUserAndUserDBQuery();
+  const { user, userDB } = userAndUserDB || {};
 
+  /*
   useEffect(() => {
     const getUser = async () => {
       const {
@@ -44,6 +53,7 @@ export function Navbar() {
 
     getUser();
   }, []);
+*/
 
   async function handleSignOut() {
     try {
@@ -55,6 +65,9 @@ export function Navbar() {
 
       // Redirect to home or login page
       // router.push('/');
+
+      // Clear the cache
+      queryClient.invalidateQueries({ queryKey: ["userAndUserDB"] });
 
       // Optional: Force refresh to ensure all authenticated states are cleared
       router.refresh();
@@ -192,9 +205,17 @@ export function Navbar() {
           <SearchModal />
         </NavbarItem>
 
-        {!user?.email && <SignInButton />}
-
-        {user?.email && <DropDownView />}
+        <NavbarItem className="">
+          {userAndUserDBFetched ? (
+            user?.email ? (
+              <DropDownView />
+            ) : (
+              <SignInButton />
+            )
+          ) : null}
+        </NavbarItem>
+        {/*{!userAndUserDBLoading && !user?.email && <SignInButton />}*/}
+        {/*{user?.email && <DropDownView />}*/}
       </NavbarContent>
 
       {/* MOBILE NAV VIEW */}

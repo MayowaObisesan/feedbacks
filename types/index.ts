@@ -1,10 +1,20 @@
 import { SVGProps } from "react";
 import { Address } from "viem";
-import { User } from "@supabase/auth-js";
+import { User as S_User } from "@supabase/auth-js";
+
+import { Tables, type TablesInsert } from "@/types/supabase";
+import { DBTables } from "@/types/enums";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
   size?: number;
 };
+
+export type User = Tables<DBTables.User>;
+export type Brand = Tables<DBTables.Brand>;
+export type BrandInsert = TablesInsert<DBTables.Brand>;
+export type Feedback = Tables<DBTables.Feedback>;
+export type FeedbackLikes = Tables<DBTables.FeedbackLikes>;
+export type FeedbackReplies = Tables<DBTables.FeedbackReplies>;
 
 export type IUser = {
   id: number;
@@ -13,7 +23,7 @@ export type IUser = {
   email: string;
   updatedAt: string;
   userId: string;
-  userData: User;
+  userData: S_User;
   dp: string;
 };
 

@@ -1,7 +1,5 @@
 "use client";
 
-import type { Tables } from "@/types/supabase";
-
 import { Listbox, ListboxItem, ListboxSection } from "@heroui/listbox";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Image } from "@heroui/image";
@@ -21,8 +19,9 @@ import { DBTables } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
 import { useFeedbacksContext } from "@/context";
 import EmbedFeedbacksGenerator from "@/components/sdk/EmbedFeedbacksGenerator";
-
-type Brand = Tables<DBTables.Brand>;
+import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
+import { BrandNavSkeleton } from "@/components/Skeletons/BrandNavSkeleton";
+import { Brand } from "@/types";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // const iconClasses =
@@ -63,8 +62,10 @@ export default function BrandNav({
     myEventInvites,
     isMyEventInvitesFetching,
     isMyEventInvitesSuccessful,
-    user,
   } = useFeedbacksContext();
+  const { data: userAndUserDB, isFetched: userAndUserDBFetched } =
+    useUserAndUserDBQuery();
+  const { user } = userAndUserDB || {};
   const isFollowingBrand = brandData?.followers?.includes(user?.email!);
   const [isFollowLoading, setIsFollowLoading] = useState<boolean>(false);
 
@@ -320,110 +321,116 @@ export default function BrandNav({
         variant="flat"
       >
         <ListboxItem key={"brandProfile"} textValue="brandProfile">
-          <Card
-            className="max-sm:grid max-sm:grid-cols-3 lg:grid-cols-none py-0 bg-default-50/80 dark:bg-default-50 shadow-none"
-            isPressable={false}
-          >
-            <CardBody className="overflow-visible px-2">
-              {brandData?.brandImage && (
-                <Image
-                  alt="Card background"
-                  className="object-cover rounded-xl size-32 lg:size-72"
-                  src={brandData && brandData?.brandImage}
-                  // width={size.width <= E_DeviceWidth.phone ? 120 : 270}
-                  // height={size.width <= E_DeviceWidth.phone ? 120 : 270}
-                />
-              )}
-            </CardBody>
-            <CardHeader className="pb-0 px-4 flex-col max-sm:col-span-2 items-start">
-              {/* <p className="text-tiny uppercase font-bold">Brand Details</p> */}
-              {/* <small className="text-default-500">12 Tracks</small> */}
-              <Skeleton
-                className={"rounded-xl"}
-                isLoaded={isBrandDataSuccessful}
-              >
-                <h4 className="font-bold text-3xl leading-normal">
-                  {brandData && brandData?.rawName}
-                </h4>
-              </Skeleton>
-              {brandData?.description}
-              <div className="flex items-center gap-1 py-2">
-                <DynamicText
-                  data={brandData?.followersCount}
+          {!isBrandDataSuccessful ? (
+            <BrandNavSkeleton />
+          ) : (
+            <Card
+              className="max-sm:grid max-sm:grid-cols-3 lg:grid-cols-none py-0 bg-default-50/80 dark:bg-default-50 shadow-none"
+              isPressable={false}
+            >
+              <CardBody className="overflow-visible px-2">
+                {brandData?.brandImage && (
+                  <Image
+                    alt="Card background"
+                    className="object-cover rounded-xl size-32 lg:size-72"
+                    src={brandData && brandData?.brandImage}
+                    // width={size.width <= E_DeviceWidth.phone ? 120 : 270}
+                    // height={size.width <= E_DeviceWidth.phone ? 120 : 270}
+                  />
+                )}
+              </CardBody>
+              <CardHeader className="pb-0 px-4 flex-col max-sm:col-span-2 items-start">
+                {/* <p className="text-tiny uppercase font-bold">Brand Details</p> */}
+                {/* <small className="text-default-500">12 Tracks</small> */}
+                <Skeleton
+                  className={"rounded-xl"}
                   isLoaded={isBrandDataSuccessful}
-                  textPlural="Followers"
-                  textSingular="Follower"
-                />
-                <DotSpacer />
-                <DynamicText
-                  data={brandData?.feedbackCount}
-                  isLoaded={isBrandDataSuccessful}
-                  textPlural="Feedbacks"
-                  textSingular="Feedback"
-                />
-              </div>
-              <Spacer y={2} />
-              <div
-                className={"px-0"}
-                /*onPress={
-                  !user?.email
-                    ? () => toast("You need to login to follow a brand")
-                    : () => {}
-                }*/
-              >
-                {user?.email !== brandData?.ownerEmail &&
-                  (isFollowingBrand ? (
-                    <Button
-                      color={"danger"}
-                      isLoading={isFollowLoading}
-                      variant={"solid"}
-                      onPress={handleUnFollowBrand}
-                    >
-                      Unfollow
-                    </Button>
-                  ) : (
-                    <Button
-                      color={"primary"}
-                      isDisabled={!user?.email}
-                      isLoading={isFollowLoading}
-                      onPress={handleFollowBrand}
-                    >
-                      Follow
-                    </Button>
-                  ))}
-              </div>
-              {myEventInvites?.length > 0 && (
-                <section className="space-y-3 w-full">
-                  <Spacer y={4} />
-                  <Divider />
-                  <Spacer y={4} />
-                  <Button
-                    fullWidth
-                    color="danger"
-                    startContent={
-                      <span className="font-bold">
-                        {myEventInvites?.length}
-                      </span>
-                    }
-                    variant="shadow"
+                >
+                  <h4 className="font-bold text-3xl leading-normal">
+                    {brandData && brandData?.rawName}
+                  </h4>
+                </Skeleton>
+                {brandData?.description}
+                <div className="flex items-center gap-1 py-2">
+                  <DynamicText
+                    data={brandData?.followersCount}
+                    isLoaded={isBrandDataSuccessful}
+                    textPlural="Followers"
+                    textSingular="Follower"
+                  />
+                  <DotSpacer />
+                  <DynamicText
+                    data={brandData?.feedbackCount}
+                    isLoaded={isBrandDataSuccessful}
+                    textPlural="Feedbacks"
+                    textSingular="Feedback"
+                  />
+                </div>
+                <Spacer y={2} />
+                {userAndUserDBFetched && (
+                  <div
+                    className={"px-0"}
+                    /*onPress={
+                    !user?.email
+                      ? () => toast("You need to login to follow a brand")
+                      : () => {}
+                  }*/
                   >
-                    {myEventInvites?.length > 1
-                      ? "Pending Invites"
-                      : "Pending Invite"}
-                  </Button>
-                  {/* <div className="text-danger text-medium">
-                    <span className="font-bold">
-                      {myEventInvites?.length}{" "}
-                    </span>
-                    {myEventInvites?.length > 1
-                      ? "Pending Invites"
-                      : "Pending Invite"}
-                  </div> */}
-                </section>
-              )}
-              <Spacer y={4} />
-            </CardHeader>
-          </Card>
+                    {user?.email !== brandData?.ownerEmail &&
+                      (isFollowingBrand ? (
+                        <Button
+                          color={"danger"}
+                          isLoading={isFollowLoading}
+                          variant={"solid"}
+                          onPress={handleUnFollowBrand}
+                        >
+                          Unfollow
+                        </Button>
+                      ) : (
+                        <Button
+                          color={"primary"}
+                          isDisabled={!user?.email}
+                          isLoading={isFollowLoading}
+                          onPress={handleFollowBrand}
+                        >
+                          Follow
+                        </Button>
+                      ))}
+                  </div>
+                )}
+                {myEventInvites?.length > 0 && (
+                  <section className="space-y-3 w-full">
+                    <Spacer y={4} />
+                    <Divider />
+                    <Spacer y={4} />
+                    <Button
+                      fullWidth
+                      color="danger"
+                      startContent={
+                        <span className="font-bold">
+                          {myEventInvites?.length}
+                        </span>
+                      }
+                      variant="shadow"
+                    >
+                      {myEventInvites?.length > 1
+                        ? "Pending Invites"
+                        : "Pending Invite"}
+                    </Button>
+                    {/* <div className="text-danger text-medium">
+                      <span className="font-bold">
+                        {myEventInvites?.length}{" "}
+                      </span>
+                      {myEventInvites?.length > 1
+                        ? "Pending Invites"
+                        : "Pending Invite"}
+                    </div> */}
+                  </section>
+                )}
+                <Spacer y={4} />
+              </CardHeader>
+            </Card>
+          )}
         </ListboxItem>
         <ListboxSection
           className="grow shrink-0 lg:space-y-4 px-2 lg:px-4"
@@ -449,7 +456,12 @@ export default function BrandNav({
               // description={eachAction.description}
               textValue={eachAction.text}
             >
-              {eachAction.modal}
+              <Skeleton
+                className={"rounded-xl"}
+                isLoaded={isBrandDataSuccessful && userAndUserDBFetched}
+              >
+                {eachAction.modal}
+              </Skeleton>
             </ListboxItem>
           )}
         </ListboxSection>

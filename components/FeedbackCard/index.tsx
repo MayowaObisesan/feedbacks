@@ -8,6 +8,7 @@ import { Skeleton } from "@heroui/skeleton";
 import React, { useEffect } from "react";
 import { useIsMounted } from "usehooks-ts";
 import clsx from "clsx";
+import { Image } from "@heroui/image";
 import { Link } from "@heroui/link";
 import { Chip } from "@heroui/chip";
 import { cn } from "@heroui/theme";
@@ -18,13 +19,14 @@ import { toast } from "sonner";
 
 import { StarItem } from "../RatingStars/RatingComponent";
 
-import { useFeedbacksContext } from "@/context";
-import { IUser } from "@/types";
 import { DBTables } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
 import { formatDateString, hashFullName } from "@/utils";
 import { useBrandById } from "@/hooks/useBrands";
 import { useUpdateFeedbackLikes } from "@/hooks/useFeedbacks";
+import { FeedbackReplies, IUser } from "@/types";
+import { ReplyFeedbackModal } from "@/components/Modals/ReplyFeedbackModal";
+import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
 
 type Feedback = Tables<DBTables.Feedback>;
 type FeedbackLikes = Tables<DBTables.FeedbackLikes>;
@@ -36,6 +38,8 @@ type ExtendFeedback = Feedback & {
   dislikesCount?: number;
   hasLiked?: boolean;
   hasDisliked?: boolean;
+  hideReplyButton?: boolean;
+  replyData?: FeedbackReplies;
   // beAnonymous?: boolean;
   // helpfulResponses?: string[];
   // unhelpfulResponses?: string[];
@@ -53,7 +57,9 @@ export default function FeedbackCard(
   const isMounted = useIsMounted();
   const [userData, setUserData] = React.useState<IUser>();
   // const [isFollowed, setIsFollowed] = React.useState(false);
-  const { user, userDB } = useFeedbacksContext();
+  // const { user, userDB } = useFeedbacksContext();
+  const { data: userAndUserDB } = useUserAndUserDBQuery();
+  const { user, userDB } = userAndUserDB || {};
   const { data: brandData } = useBrandById(props.recipientId);
   const updateFeedbackLikes = useUpdateFeedbackLikes();
   const [clickedHelpfulResponses, setClickedHelpfulResponses] = React.useState<
@@ -286,6 +292,50 @@ export default function FeedbackCard(
             💻
           </span>
         </span>*/}
+
+        {props.replyData && (
+          <Card
+            className={"bg-default-100 dark:bg-background/40 my-3"}
+            shadow={"none"}
+          >
+            <CardBody>
+              <div className={"flex flex-row justify-between items-center"}>
+                <div
+                  className={
+                    "font-medium text-default-400 text-[10px] leading-loose"
+                  }
+                >
+                  Reply
+                </div>
+                <div
+                  className={
+                    "font-medium text-default-400 text-[10px] leading-loose"
+                  }
+                >
+                  {formatDateString(props.replyData.created_at)}
+                </div>
+              </div>
+              <p>{props.replyData.reply}</p>
+            </CardBody>
+          </Card>
+        )}
+
+        {props.screenshots && props.screenshots?.split(",")?.length > 0 && (
+          <div className={"flex flex-row gap-x-2 py-2"}>
+            {props.screenshots?.split(",").length > 0 &&
+              props.screenshots
+                ?.split(",")
+                .map((eachScreenshot, index) => (
+                  <Image
+                    key={index}
+                    alt="HeroUI hero Image"
+                    className={"rounded"}
+                    height={40}
+                    src={eachScreenshot}
+                  />
+                ))}
+          </div>
+        )}
       </CardBody>
       <CardFooter className="justify-between gap-3 py-2">
         {/* <div className="flex gap-1">
@@ -310,72 +360,81 @@ export default function FeedbackCard(
             </>
           ))}
         </div>
-        {props.recipientId !== brandData?.id ? (
-          <div className={"flex flex-row items-center gap-x-2"}>
-            {clickedHelpfulResponses && (
-              <>
-                <span className={"font-bold text-xs"}>
-                  {props?.likesCount! + cachedAdder || 0}
-                </span>
-                <Button
-                  isIconOnly
-                  color={"success"}
-                  radius={"md"}
-                  size={"sm"}
-                  variant={"flat"}
-                  onPress={handleUnLikeResponse}
-                >
-                  <LucideThumbsUp size={14} />
-                </Button>
-              </>
+
+        <div className={"flex flex-row items-center gap-x-2"}>
+          {props.recipientId !== brandData?.id ? (
+            // {brandData?.ownerEmail !== user?.email ? (
+            <div className={"flex flex-row items-center gap-x-2"}>
+              {clickedHelpfulResponses && (
+                <>
+                  <span className={"font-bold text-xs"}>
+                    {props?.likesCount! + cachedAdder || 0}
+                  </span>
+                  <Button
+                    isIconOnly
+                    color={"success"}
+                    radius={"lg"}
+                    size={"sm"}
+                    variant={"flat"}
+                    onPress={handleUnLikeResponse}
+                  >
+                    <LucideThumbsUp size={14} />
+                  </Button>
+                </>
+              )}
+              {clickedUnHelpfulResponses && (
+                <>
+                  <span className={"font-bold text-xs"}>
+                    {props?.dislikesCount! + cachedAdder || 0}
+                  </span>
+                  <Button
+                    isIconOnly
+                    color={"danger"}
+                    radius={"md"}
+                    size={"sm"}
+                    variant={"flat"}
+                    onPress={handleUnDislikeResponse}
+                  >
+                    <LucideThumbsDown size={14} />
+                  </Button>
+                </>
+              )}
+              {!clickedHelpfulResponses && !clickedUnHelpfulResponses && (
+                <ButtonGroup>
+                  <Button
+                    isIconOnly
+                    color={"default"}
+                    radius={"md"}
+                    size={"sm"}
+                    variant={theme === "dark" ? "flat" : "light"}
+                    onPress={handleLikeResponse}
+                    // onPress={() =>
+                    //   setClickedHelpfulResponses(!clickedHelpfulResponses)
+                    // }
+                  >
+                    <LucideThumbsUp size={14} />
+                  </Button>
+                  <Button
+                    isIconOnly
+                    radius={"md"}
+                    size={"sm"}
+                    variant={theme === "dark" ? "flat" : "light"}
+                    onPress={handleDislikeResponse}
+                  >
+                    <LucideThumbsDown size={14} />
+                  </Button>
+                </ButtonGroup>
+              )}
+            </div>
+          ) : (
+            <div />
+          )}
+          {!props.hideReplyButton &&
+            !props.replyData?.reply &&
+            brandData?.ownerEmail === user?.email && (
+              <ReplyFeedbackModal brandData={brandData!} feedbackData={props} />
             )}
-            {clickedUnHelpfulResponses && (
-              <>
-                <span className={"font-bold text-xs"}>
-                  {props?.dislikesCount! + cachedAdder || 0}
-                </span>
-                <Button
-                  isIconOnly
-                  color={"danger"}
-                  radius={"md"}
-                  size={"sm"}
-                  variant={"flat"}
-                  onPress={handleUnDislikeResponse}
-                >
-                  <LucideThumbsDown size={14} />
-                </Button>
-              </>
-            )}
-            {!clickedHelpfulResponses && !clickedUnHelpfulResponses && (
-              <ButtonGroup>
-                <Button
-                  isIconOnly
-                  color={"default"}
-                  radius={"md"}
-                  size={"sm"}
-                  variant={theme === "dark" ? "flat" : "light"}
-                  onPress={handleLikeResponse}
-                  // onPress={() =>
-                  //   setClickedHelpfulResponses(!clickedHelpfulResponses)
-                  // }
-                >
-                  <LucideThumbsUp size={14} />
-                </Button>
-                <Button
-                  isIconOnly
-                  radius={"md"}
-                  size={"sm"}
-                  variant={theme === "dark" ? "flat" : "light"}
-                  onPress={handleDislikeResponse}
-                >
-                  <LucideThumbsDown size={14} />
-                </Button>
-              </ButtonGroup>
-            )}
-          </div>
-        ) : (
-          <div />
-        )}
+        </div>
       </CardFooter>
       {/*<div className={"text-xs"}>12 people found this review helpful</div>*/}
     </Card>

@@ -30,11 +30,8 @@ import { CameraIcon } from "../icons/CameraIcon";
 
 // import { useFeedbacksContext } from "@/context";
 import { BRAND_CATEGORIES } from "@/constant";
-import { IBrands } from "@/types";
 import { cleanBrandRawName } from "@/utils";
-import { BrandService } from "@/services/brands";
-import { supabase } from "@/utils/supabase/supabase";
-import { DBTables } from "@/types/enums";
+import { useBrandById, useUpdateBrand } from "@/hooks/useBrands";
 
 const UpdateBrandModal = ({
   brandId,
@@ -43,9 +40,11 @@ const UpdateBrandModal = ({
   brandId: number | null;
   fullWidth?: boolean;
 }) => {
-  const [brandData, setBrandData] = useState<IBrands | null>(null);
+  // const [brandData, setBrandData] = useState<IBrands | null>(null);
+  const { data: brandData } = useBrandById(brandId!);
+  const updateBrand = useUpdateBrand();
 
-  useEffect(() => {
+  /*useEffect(() => {
     const _getBrand = async () => {
       const { data, error } = await BrandService.getBrandById(brandId!);
 
@@ -59,7 +58,7 @@ const UpdateBrandModal = ({
     };
 
     if (brandId !== null) _getBrand();
-  }, [brandId]);
+  }, [brandId]);*/
 
   /*const { data: _brandData, isFetching: isBrandDataFetching } = useBrandRead({
     functionName: "getBrand",
@@ -75,7 +74,7 @@ const UpdateBrandModal = ({
   );
   // const { profileExist } = useFeedbacksContext();
   const [categoryValues, setCategoryValues] = useState<any>(
-    brandData ? brandData?.category.split(",") : new Set([]),
+    brandData ? brandData?.category?.split(",") : new Set([]),
   );
 
   const [imageHash, setImageHash] = useState<string>(brandData?.brandImage!);
@@ -93,7 +92,7 @@ const UpdateBrandModal = ({
 
   useEffect(() => {
     setBrandName(brandData?.rawName!);
-    setCategoryValues(brandData?.category.split(","));
+    setCategoryValues(brandData?.category?.split(","));
     setDp(brandData?.brandImage!);
     setDpPreview(brandData?.brandImage!);
   }, [brandData]);
@@ -114,7 +113,16 @@ const UpdateBrandModal = ({
     setIsSubmitPending(true);
 
     try {
-      const { data, error } = await supabase.from(DBTables.Brand).update([
+      await updateBrand.mutateAsync({
+        id: brandId!,
+        name: cleanBrandRawName(brandName),
+        rawName: brandName,
+        description: brandDescription,
+        category: Array.from(categoryValues).join(", "),
+        brandImage: imageHash,
+      });
+
+      /*const { data, error } = await supabase.from(DBTables.Brand).update([
         {
           name: cleanBrandRawName(brandName),
           rawName: brandName,
@@ -133,7 +141,9 @@ const UpdateBrandModal = ({
       if (error) {
         // console.error("error creating brand", error);
         toast.error("Error updating brand. Kindly try again.");
-      }
+      }*/
+
+      toast.success("Brand updated successfully.");
     } catch (e) {
       toast.error("Error updating brand. Kindly try again.");
     } finally {
@@ -278,7 +288,7 @@ const UpdateBrandModal = ({
       >
         <ModalContent className="relative overflow-auto">
           {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-          {(onClose) => (
+          {() => (
             <>
               {/*{!profileExist && (
                 <>
@@ -351,7 +361,7 @@ const UpdateBrandModal = ({
                         className={"absolute -top-2 -right-2 z-10 btn-error"}
                         color="danger"
                         radius="full"
-                        onClick={removeProfileUpload}
+                        onPress={removeProfileUpload}
                       >
                         <LucideX size={16} strokeWidth={4} />
                       </Button>
@@ -388,7 +398,7 @@ const UpdateBrandModal = ({
                               <LucideUpload size={16} strokeWidth={4} />
                             )
                           }
-                          onClick={handleImageUpload}
+                          onPress={handleImageUpload}
                         >
                           {!isDpUploading ? "Upload Image" : ""}
                         </Button>
@@ -424,9 +434,9 @@ const UpdateBrandModal = ({
                   classNames={{
                     input: "placeholder:text-default-300",
                   }}
+                  defaultValue={brandData?.description!}
                   label="Description"
                   placeholder={`Describe your brand`}
-                  value={brandData?.description}
                   onValueChange={setBrandDescription}
                 />
                 <Select

@@ -10,7 +10,7 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@heroui/modal";
-import { LucidePlus } from "lucide-react";
+import { LucideFileImage, LucidePlus, LucideX } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 // import { useWriteContract } from "wagmi";
@@ -18,13 +18,13 @@ import { cn } from "@heroui/theme";
 import { Switch } from "@heroui/switch";
 import { Divider } from "@heroui/divider";
 import { Card } from "@heroui/card";
+import { Image } from "@heroui/image";
 
 import RatingComponent from "../RatingStars/RatingComponent";
 
 import { RatingTag } from "@/utils";
-import { supabase } from "@/utils/supabase/supabase";
-import { DBTables } from "@/types/enums";
-import { useFeedbacksContext } from "@/context";
+import { useCreateFeedback } from "@/hooks/useFeedbacks";
+import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
 
 const feedbackSampleList = [
   "The course content was well-structured, and the instructor clearly had a deep understanding of Rust. I loved how practical examples were integrated throughout, which made the learning process smoother!",
@@ -60,7 +60,9 @@ export function CreateFeedbackModal({
   buttonText?: string;
   fullWidth?: boolean;
 }) {
-  const { user } = useFeedbacksContext();
+  const { data: userAndUserDB } = useUserAndUserDBQuery();
+
+  const { user } = userAndUserDB || {};
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   // const { writeContract, isPending, isSuccess, isError } = useWriteContract();
   const [feedbackTitle, setFeedbackTitle] = useState<string>("");
@@ -68,10 +70,13 @@ export function CreateFeedbackModal({
   const [rating, setRating] = useState<number | null>(2);
   const [isSubmitPending, setIsSubmitPending] = useState(false);
   const [beAnonymous, setBeAnonymous] = useState<boolean>(false);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const memoizedPlaceholder = useMemo(
     () => getRandomFeedback(feedbackSampleList),
     [],
   );
+  const createFeedback = useCreateFeedback();
 
   const onCreateFeedback = async () => {
     /*writeContract({
@@ -83,8 +88,74 @@ export function CreateFeedbackModal({
 
     setIsSubmitPending(true);
 
+    const uploadScreenshots = async (files: File[]) => {
+      try {
+        const uploadPromises = files.map(async (file) => {
+          const formData = new FormData();
+
+          formData.append("file", file);
+          formData.append("upload_preset", "feedbacks_preset");
+
+          try {
+            const res = await fetch(
+              process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_URL!,
+              {
+                method: "POST",
+                body: formData,
+              },
+            );
+
+            if (!res.ok) {
+              throw new Error(`Failed to upload ${file.name}`);
+            }
+
+            const data = await res.json();
+
+            return data.secure_url;
+          } catch (error) {
+            toast.error(
+              `Error uploading ${file.name}: ${(error as any).message}`,
+            );
+            throw error;
+          }
+        });
+
+        const uploadedUrls = await Promise.all(uploadPromises);
+
+        toast.success("Screenshots uploaded successfully");
+
+        return uploadedUrls;
+      } catch (error) {
+        toast.error("Error uploading screenshots");
+        throw error;
+      }
+    };
+
     try {
-      const { data, error } = await supabase
+      const screenshotUrls =
+        selectedImages.length > 0
+          ? await uploadScreenshots(selectedImages)
+          : [];
+
+      // @ts-ignore
+      const response = await createFeedback.mutateAsync({
+        recipientId: brandId!,
+        title: feedbackTitle.trim(),
+        email: user?.email!,
+        description: feedbackContent.trim(),
+        eventId: null,
+        productId: null,
+        starRating: rating,
+        beAnonymous: beAnonymous,
+        screenshots: screenshotUrls.join(","),
+      });
+
+      if (response) {
+        onClose();
+        toast.success("Feedback created successfully.");
+      }
+
+      /*const { data, error } = await supabase
         .from(DBTables.Feedback)
         .insert([
           {
@@ -96,6 +167,8 @@ export function CreateFeedbackModal({
             productId: null,
             starRating: rating,
             beAnonymous: beAnonymous,
+            screenshots:
+              selectedImages.length > 0 ? selectedImages.join(",") : "",
           },
         ])
         .select();
@@ -123,12 +196,61 @@ export function CreateFeedbackModal({
       if (error) {
         // console.error("error creating feedback", error);
         toast.error("Error creating your feedback. Kindly try again.");
-      }
+      }*/
     } catch (e) {
       toast.error("Error creating your feedback. Kindly try again.");
     } finally {
       setIsSubmitPending(false);
     }
+  };
+
+  const handleAddScreenshots = () => {
+    const input = document.createElement("input");
+
+    input.type = "file";
+    input.multiple = true;
+    input.accept = "image/*";
+
+    input.onchange = (e) => {
+      const files = Array.from((e.target as HTMLInputElement).files || []);
+
+      // Check number of files
+      if (files.length + selectedImages.length > 2) {
+        toast.error("Maximum 2 images allowed");
+
+        return;
+      }
+
+      // Validate each file
+      const validFiles = files.filter((file) => {
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`${file.name} exceeds 5MB limit`);
+
+          return false;
+        }
+        if (!file.type.startsWith("image/")) {
+          toast.error(`${file.name} is not an image`);
+
+          return false;
+        }
+
+        return true;
+      });
+
+      // Create preview URLs and update state
+      validFiles.forEach((file) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+          setImagePreviews((prev) => [...prev, e.target?.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      setSelectedImages((prev) => [...prev, ...validFiles]);
+    };
+
+    input.click();
   };
 
   /*useEffect(() => {
@@ -148,6 +270,7 @@ export function CreateFeedbackModal({
         className={"invert"}
         color="default"
         fullWidth={fullWidth}
+        isDisabled={!user?.email}
         startContent={<LucidePlus size={16} strokeWidth={4} />}
         variant="solid"
         onPress={onOpen}
@@ -158,7 +281,7 @@ export function CreateFeedbackModal({
         backdrop="opaque"
         classNames={{
           wrapper: "",
-          base: "px-3 py-4 my-2",
+          base: "px-3 py-4 my-2 max-sm:w-full max-sm:h-full",
           backdrop:
             "bg-gradient-to-t from-zinc-900 to-zinc-900/80 backdrop-opacity-90",
         }}
@@ -166,7 +289,7 @@ export function CreateFeedbackModal({
         isDismissable={false}
         isOpen={isOpen}
         placement="auto"
-        scrollBehavior={"normal"}
+        scrollBehavior={"outside"}
         onOpenChange={onOpenChange}
       >
         <ModalContent>
@@ -177,7 +300,7 @@ export function CreateFeedbackModal({
                 Submit Feedback
               </ModalHeader>
               <ModalBody className="space-y-2">
-                <Card isPressable className={cn("lg:hidden bg-default-100")}>
+                <Card isPressable className={cn("bg-default-100")}>
                   <Switch
                     classNames={{
                       base: cn(
@@ -252,15 +375,64 @@ export function CreateFeedbackModal({
                   <div>No rating selected</div>
                 )}
               </ModalBody>
-              <ModalFooter>
-                <Button
-                  color="primary"
-                  isDisabled={feedbackContent === ""}
-                  isLoading={isSubmitPending}
-                  onPress={onCreateFeedback}
+              <ModalFooter className={"flex flex-col px-0"}>
+                <div className={""}>
+                  {imagePreviews.length > 0 && (
+                    <div className="flex gap-3 px-4 py-2 overflow-x-auto">
+                      {imagePreviews.map((preview, index) => (
+                        <div key={index} className="relative w-16 h-16 ">
+                          <Image
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-full object-cover rounded-lg"
+                            height={"64px"}
+                            src={preview}
+                            width={"64px"}
+                          />
+                          <Button
+                            isIconOnly
+                            className="absolute -top-2 -right-2 z-10 bg-danger-500 text-white rounded-full flex items-center justify-center"
+                            size={"sm"}
+                            onPress={() => {
+                              setImagePreviews((prev) =>
+                                prev.filter((_, i) => i !== index),
+                              );
+                              setSelectedImages((prev) =>
+                                prev.filter((_, i) => i !== index),
+                              );
+                            }}
+                          >
+                            <LucideX size={16} />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {imagePreviews.length > 0 && <Divider className={"my-2"} />}
+                </div>
+                <div
+                  className={
+                    "flex flex-row justify-between items-center w-full"
+                  }
                 >
-                  Submit
-                </Button>
+                  <Button
+                    isDisabled={imagePreviews.length === 2}
+                    variant={"flat"}
+                    onPress={handleAddScreenshots}
+                  >
+                    <span className={"flex flex-row gap-x-2 text-small"}>
+                      <LucideFileImage size={20} />
+                      Add Screenshots
+                    </span>
+                  </Button>
+                  <Button
+                    color="primary"
+                    isDisabled={feedbackContent === ""}
+                    isLoading={isSubmitPending}
+                    onPress={onCreateFeedback}
+                  >
+                    Submit
+                  </Button>
+                </div>
               </ModalFooter>
             </>
           )}

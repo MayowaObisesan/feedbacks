@@ -473,7 +473,7 @@
     "@heroui/system" "2.4.12"
     "@heroui/use-measure" "2.1.6"
 
-"@heroui/image@2.2.10":
+"@heroui/image@^2.2.10":
   version "2.2.10"
   resolved "https://registry.yarnpkg.com/@heroui/image/-/image-2.2.10.tgz#ef939b01b588e587b64f7cb60f7b6403fdb31555"
   integrity sha512-02v0bJShCwaoXAjfMLGV900HsJ4J5YtW3OHJD/TIGWQzHNYxv7Mls4u2PyfUpk6IDimlZ+fIiEjfV0zR/HY3MA==
@@ -482,7 +482,7 @@
     "@heroui/shared-utils" "2.1.7"
     "@heroui/use-image" "2.1.7"
 
-"@heroui/input@2.4.16":
+"@heroui/input@^2.4.16":
   version "2.4.16"
   resolved "https://registry.yarnpkg.com/@heroui/input/-/input-2.4.16.tgz#67d96de44ec74181bc6f7c59fcff6880b4a4285c"
   integrity sha512-gSEalFg2usD7SjkevRyulvbJksecW/L9vqZWGHgcm6NpOlt5lGb/b6E2AEuhNFWbrN4pgUmfFUqqmZfFbc4M9Q==
@@ -8420,3 +8420,8 @@ zustand@4.4.1:
   integrity sha512-QCPfstAS4EBiTQzlaGP1gmorkh/UL1Leaj2tdj+zZCZ/9bm0WS7sI2wnfD5lpOszFqWJ1DcPnGoY8RDL61uokw==
   dependencies:
     use-sync-external-store "1.2.0"
+
+zustand@^5.0.3:
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/zustand/-/zustand-5.0.3.tgz#b323435b73d06b2512e93c77239634374b0e407f"
+  integrity sha512-14fwWQtU3pH4dE0dOpdMiWjddcH+QzKIgk1cl8epwSE7yag43k/AD/m4L6+K7DytAOr9gGBe3/EXj9g7cdostg==

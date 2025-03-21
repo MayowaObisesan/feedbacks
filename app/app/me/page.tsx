@@ -8,7 +8,6 @@ import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 import { Skeleton } from "@heroui/skeleton";
 import {
   LucideCheck,
-  LucideFocus,
   LucideInfo,
   LucideLayoutTemplate,
   LucideMessagesSquare,
@@ -22,14 +21,15 @@ import EmptyCard from "@/components/EmptyCard";
 import FeedbackCard from "@/components/FeedbackCard";
 import { TrendingBrandCard } from "@/components/TrendingCard";
 import { useFeedbacksContext } from "@/context";
-import { IBrands, IUser } from "@/types";
+import { IUser } from "@/types";
 import { DBTables, E_ProfileAction } from "@/types/enums";
 import { CreateProfileModal } from "@/components/profileModal";
 import { DotSpacer } from "@/components/TextSkeleton";
 import CreateBrandModal from "@/components/Modals/CreateBrandModal";
-import { useFollowedBrands, useMyBrands } from "@/hooks/useBrands";
+import { useFollowedBrands } from "@/hooks/useBrands";
 import TrendingBrandCardSkeleton from "@/components/Skeletons/TrendingBrandCardSkeleton";
 import { formatDateString } from "@/utils";
+import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
 
 type Brand = Tables<DBTables.Brand>;
 
@@ -150,13 +150,59 @@ const ProfileCard = ({
   );
 };
 
+function FollowedBrands({ followerEmail }: { followerEmail: string }) {
+  const { data: followedBrands, isFetched: followedBrandsFetched } =
+    useFollowedBrands(followerEmail);
+
+  return (
+    <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
+      {!followerEmail &&
+        !followedBrandsFetched &&
+        [1, 2, 3, 4].map((_) => (
+          <TrendingBrandCardSkeleton key={_ as number} />
+        ))}
+      {followedBrands?.length === 0 && (
+        <EmptyCard>
+          <div className={"flex flex-col items-center gap-y-5"}>
+            <LucideLayoutTemplate size={32} strokeWidth={1} width={"100%"} />
+            <div className={"text-lg lg:text-2xl text-balance"}>
+              You don&apos;t follow any brand yet
+            </div>
+          </div>
+        </EmptyCard>
+      )}
+      {followerEmail
+        ? followedBrandsFetched &&
+          followedBrands?.map((eachBrand) => (
+            <TrendingBrandCard
+              key={eachBrand.id}
+              avatarUrl={eachBrand.brandImage!}
+              description={eachBrand.description!}
+              feedbackCount={eachBrand.feedbackCount!}
+              name={eachBrand.name}
+              rawName={eachBrand.rawName}
+            />
+          ))
+        : null}
+    </div>
+  );
+}
+
 export default function Page() {
   // const { onOpen } = useDisclosure();
-  const { mySentFeedbacksData, user, userDB } = useFeedbacksContext();
-  const { data: myBrands, isLoading: myBrandsLoading } = useMyBrands(
-    user?.email!,
-  );
+  const { mySentFeedbacksData } = useFeedbacksContext();
+  const { data: userAndUserDB, isFetched: userAndUserDBFetched } =
+    useUserAndUserDBQuery();
+
+  const { user, userDB, myBrands } = userAndUserDB || {};
+  /*const {
+    data: myBrands,
+    isLoading: myBrandsLoading,
+    isFetched: myBrandsFetched,
+  } = useMyBrands(user?.email!);*/
+
   const { data: followedBrands } = useFollowedBrands(user?.email!);
+
   // const [isFollowed, setIsFollowed] = React.useState(false);
   // const [myBrandsData, setMyBrandsData] = React.useState<IBrands[]>([]);
   // const [followedBrandsData, setFollowedBrandsData] = React.useState<IBrands[]>(
@@ -316,7 +362,39 @@ export default function Page() {
               </header>
             }
             <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
-              {!myBrandsLoading ? (
+              {!userAndUserDBFetched &&
+                [1, 2, 3, 4].map((_) => (
+                  <TrendingBrandCardSkeleton key={_ as number} />
+                ))}
+              {myBrands?.length === 0 && (
+                <EmptyCard>
+                  <div className={"flex flex-col items-center gap-y-5"}>
+                    <LucideLayoutTemplate
+                      size={32}
+                      strokeWidth={1}
+                      width={"100%"}
+                    />
+                    <div className={"text-lg lg:text-2xl text-balance"}>
+                      You haven&apos;t listed any brand yet
+                    </div>
+
+                    <CreateBrandModal />
+                  </div>
+                </EmptyCard>
+              )}
+              {userAndUserDBFetched &&
+                myBrands?.length! > 0 &&
+                myBrands?.map((eachBrand) => (
+                  <TrendingBrandCard
+                    key={eachBrand.name}
+                    avatarUrl={eachBrand.brandImage!}
+                    description={eachBrand.description!}
+                    feedbackCount={Number(eachBrand.feedbackCount)}
+                    name={eachBrand.name}
+                    rawName={eachBrand.rawName}
+                  />
+                ))}
+              {/*{userAndUserDBFetched && myBrandsFetched && (
                 <>
                   {(myBrands as IBrands[])?.length > 0 ? (
                     (myBrands as IBrands[])?.map((eachBrand) => (
@@ -329,28 +407,9 @@ export default function Page() {
                         rawName={eachBrand.rawName}
                       />
                     ))
-                  ) : (
-                    <EmptyCard>
-                      <div className={"flex flex-col items-center gap-y-5"}>
-                        <LucideLayoutTemplate
-                          size={32}
-                          strokeWidth={1}
-                          width={"100%"}
-                        />
-                        <div className={"text-lg lg:text-2xl text-balance"}>
-                          You haven&apos;t listed any brand yet
-                        </div>
-
-                        <CreateBrandModal />
-                      </div>
-                    </EmptyCard>
                   )}
                 </>
-              ) : (
-                [1, 2, 3, 4].map((_) => (
-                  <TrendingBrandCardSkeleton key={_ as number} />
-                ))
-              )}
+              )}*/}
             </div>
           </section>
         }
@@ -360,26 +419,12 @@ export default function Page() {
             Brands you follow
           </header>
           <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
-            {(followedBrands as IBrands[])?.length > 0 ? (
-              (followedBrands as IBrands[])?.map((eachBrand) => (
-                <TrendingBrandCard
-                  key={eachBrand.id}
-                  avatarUrl={eachBrand.brandImage}
-                  description={eachBrand.description}
-                  feedbackCount={eachBrand.feedbackCount}
-                  name={eachBrand.name}
-                  rawName={eachBrand.rawName}
-                />
-              ))
+            {user?.email ? (
+              <FollowedBrands followerEmail={user?.email} />
             ) : (
-              <EmptyCard>
-                <div className={"flex flex-col items-center gap-y-5"}>
-                  <LucideFocus size={40} strokeWidth={1} width={"100%"} />
-                  <div className={"text-lg lg:text-2xl text-balance"}>
-                    You don&apos;t follow any brand yet
-                  </div>
-                </div>
-              </EmptyCard>
+              [1, 2, 3, 4].map((_) => (
+                <TrendingBrandCardSkeleton key={_ as number} />
+              ))
             )}
           </div>
         </section>
@@ -397,7 +442,7 @@ export default function Page() {
                       // @ts-ignore
                       <FeedbackCard
                         key={eachFeedback.id}
-                        isLoaded={!myBrandsLoading}
+                        isLoaded={userAndUserDBFetched}
                         {...eachFeedback}
                       />
                     ))
