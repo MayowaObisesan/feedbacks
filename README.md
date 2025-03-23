@@ -1,3 +1,12 @@
+# BENEFITS OF FEEDBACKS - March 23, 2025.
+## For Brands
+1. Only real users will send feedbacks. You can be sure that only real users will send you feedbacks for your products offering original and transparent feedbacks.
+2. 
+
+## For Users
+1. Brands you send your honest feedbacks cannot see your details. You can choose to send an anonymous feedback or an unanonymous feedback. Either way, the brands cannot access your information.
+
+
 # Next.js & NextUI Template
 
 This is a template for creating applications using Next.js 14 (app directory) and NextUI (v2).

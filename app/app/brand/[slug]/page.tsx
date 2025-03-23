@@ -13,31 +13,34 @@ import { Divider } from "@heroui/divider";
 import { Alert } from "@heroui/alert";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { BreadcrumbItem, Breadcrumbs } from "@heroui/breadcrumbs";
+import { useUser } from "@clerk/nextjs";
 
 import BrandNav from "@/components/BrandNav";
-import { CreateEventModal } from "@/components/CreateEventModal";
 import EmptyCard from "@/components/EmptyCard";
 import FeedbackCard from "@/components/FeedbackCard";
-import { CreateFeedbackModal } from "@/components/Modals/CreateFeedbackModal";
-import { CreateProductModal } from "@/components/Modals/CreateProductModal";
-import UpdateBrandModal from "@/components/Modals/UpdateBrandModal";
-import { useFeedbacksContext } from "@/context";
-import { useBrandByName } from "@/hooks/useBrands";
+import { useBrandByName, useRealTimeBrands } from "@/hooks/useBrands";
 import { FeedbackCardListSkeleton } from "@/components/Skeletons/FeedbacksCardSkeleton";
-import { useBrandFeedbacks, useStarRatingCounts } from "@/hooks/useFeedbacks";
+import {
+  useBrandFeedbacks,
+  useRealTimeFeedbacks,
+  useStarRatingCounts,
+} from "@/hooks/useFeedbacks";
 import RatingAggregate from "@/components/RatingAggregate";
 import { InfiniteFlatList } from "@/components/FlatList/infiniteFlatList";
 
 function BrandPage({ params }: { params: any }) {
+  useRealTimeFeedbacks();
+  useRealTimeBrands();
+
   // @ts-ignore
   const { slug } = React.use(params);
+  const { user } = useUser();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pageRef = useRef(1);
   const [page, setPage] = useState<number>(pageRef.current);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const limit = 10;
-  const { myAddress, myEventInvites, user } = useFeedbacksContext();
   const {
     data: brandData,
     error: brandError,
@@ -47,7 +50,12 @@ function BrandPage({ params }: { params: any }) {
     data: brandFeedbacksData,
     isFetching: brandFeedbacksIsFetching,
     isFetched: brandFeedbacksIsFetched,
-  } = useBrandFeedbacks(brandData?.id!, user?.email, pageRef.current, limit);
+  } = useBrandFeedbacks(
+    brandData?.id!,
+    user?.primaryEmailAddress?.emailAddress,
+    pageRef.current,
+    limit,
+  );
   const { data: starCounts } = useStarRatingCounts(brandData?.id!);
   const totalPages = Math.ceil(brandFeedbacksData?.count! / limit);
 
@@ -56,7 +64,7 @@ function BrandPage({ params }: { params: any }) {
     count: starCounts?.[index] || 0,
   }));
 
-  const totalFeedbacks = brandData?.feedbackCount!;
+  const totalFeedbacks = brandData?.feedback_count!;
 
   const averageRating =
     starCounts && Math.max(...starCounts) > 0
@@ -240,37 +248,41 @@ function BrandPage({ params }: { params: any }) {
   // }, [data]);
 
   if (
-    brandFeedbacksData?.data?.length === 0 &&
-    myEventInvites?.length === 0
+    brandFeedbacksData?.data?.length === 0
+    // && myEventInvites?.length === 0
     // && (productData as IProduct[])?.length === 0
   ) {
     return (
       <section className="flex flex-col lg:flex-row w-ful h-full py-4 overflow-hidden">
-        <div className="relative lg:h-full overflow-y-auto">
+        <div className="relative lg:h-full lg:overflow-y-auto">
           <BrandNav
             brandData={brandData!}
             brandName={slug}
             isBrandDataSuccessful={brandIsFetched}
           />
         </div>
-        <section className="flex flex-col justify-center items-center gap-y-24 w-full h-full overflow-hidden">
+        <section className="flex flex-col justify-center items-center w-full h-full overflow-hidden">
           {brandError && (
-            <Alert>Error fetching brand. Pls check network Connection.</Alert>
+            <Alert
+              color={"danger"}
+              description={"Error fetching brand. Pls check network Connection"}
+            />
           )}
           <div className="text-center">
             <div>Your brand page is a bit empty.</div>
-            <div>Start an engagement with some of this actions.</div>
+            <div>Start an engagement with some of these actions.</div>
           </div>
 
-          <section className="flex flex-col items-center gap-y-5">
+          {/*<section className="flex flex-col items-center gap-y-5">
             <div>
-              {brandData?.ownerEmail === myAddress && (
+              {brandData?.owner_email === user?.primaryEmailAddress?.emailAddress && (
                 <UpdateBrandModal brandId={brandData ? brandData?.id : null} />
               )}
             </div>
             <div className="my-4 space-x-4">
               <CreateFeedbackModal brandId={brandData ? brandData?.id : null} />
-              {brandData?.ownerEmail !== user?.email && (
+              {brandData?.owner_email !==
+                user?.primaryEmailAddress?.emailAddress && (
                 <>
                   <CreateEventModal
                     brandId={brandData ? brandData?.id : null}
@@ -281,7 +293,7 @@ function BrandPage({ params }: { params: any }) {
                 </>
               )}
             </div>
-          </section>
+          </section>*/}
         </section>
       </section>
     );
@@ -300,7 +312,7 @@ function BrandPage({ params }: { params: any }) {
           >
             Brands
           </BreadcrumbItem>
-          <BreadcrumbItem>{brandData?.rawName}</BreadcrumbItem>
+          <BreadcrumbItem>{brandData?.raw_name}</BreadcrumbItem>
         </Breadcrumbs>
       </div>
       <section className="relative flex flex-col md:flex-row w-ful h-full md:py-4">

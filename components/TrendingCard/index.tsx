@@ -44,7 +44,7 @@ export function TrendingBrandCard({
         <CardFooter>
           <div className="absolute left-8 bottom-4 font-extrabold text-sm py-4">
             {Number(formatCount(feedbackCount))}{" "}
-            {feedbackCount > 0 ? "Feedbacks" : "Feedback"}
+            {feedbackCount === 1 ? "Feedback" : "Feedbacks"}
           </div>
         </CardFooter>
       </Card>

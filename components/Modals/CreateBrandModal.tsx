@@ -12,7 +12,7 @@ import axios from "axios";
 import { Button } from "@heroui/button";
 import {
   LucideCheckCheck,
-  LucidePlus,
+  LucideLayoutTemplate,
   LucideUpload,
   LucideX,
 } from "lucide-react";
@@ -22,17 +22,18 @@ import { Image } from "@heroui/image";
 import { Avatar } from "@heroui/avatar";
 import { Input, Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
+import { useUser } from "@clerk/nextjs";
 
 import { CameraIcon } from "@/components/icons/CameraIcon";
-import { supabase } from "@/utils/supabase/supabase";
-import { DBTables, E_BillingTier } from "@/types/enums";
+import { E_BillingTier } from "@/types/enums";
 import { cleanBrandRawName } from "@/utils";
 import { unkey } from "@/utils/unkey";
-import { useFeedbacksContext } from "@/context";
 import { formatCategoryKey, getBrandCategoriesKey } from "@/constant";
+import { useCreateBrand } from "@/hooks/useBrands";
 
 export default function CreateBrandModal() {
-  const { user } = useFeedbacksContext();
+  const { user } = useUser();
+  const createBrand = useCreateBrand();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   // const { writeContract, isPending, isSuccess, isError } = useWriteContract();
   const [brandName, setBrandName] = useState<string>("");
@@ -52,6 +53,17 @@ export default function CreateBrandModal() {
   const [isDpUploading, setisDpUploading] = useState<boolean>(false);
   const profileImageRef = useRef(null);
   const imageHashRef = useRef("");
+
+  const resetForm = () => {
+    setBrandName("");
+    setBrandDescription("");
+    setCategoryValues(new Set([]));
+    setDp("");
+    setDpPreview("");
+    setImageHash("");
+    setImageUploadPending(false);
+    setImageUploadSuccessful(false);
+  };
 
   const onCreateBrand = async () => {
     /*writeContract({
@@ -73,8 +85,8 @@ export default function CreateBrandModal() {
       apiId: createdAPI.result?.apiId!,
       prefix: "fdb",
       byteLength: 16,
-      ownerId: user?.email,
-      name: `${user?.user_metadata.userName}_key`,
+      ownerId: user?.primaryEmailAddress?.emailAddress,
+      name: `${user?.username}_key`,
       meta: {
         billingTier: E_BillingTier.FREE,
         trialEnds: new Date(
@@ -99,20 +111,40 @@ export default function CreateBrandModal() {
     // console.log(createdKey, categoryValues);
 
     try {
-      const { data, error } = await supabase
+      const data = await createBrand.mutateAsync({
+        owner_email: user?.primaryEmailAddress?.emailAddress,
+        name: cleanBrandRawName(brandName),
+        raw_name: brandName,
+        description: brandDescription,
+        category: Array.from(categoryValues).join(", "),
+        followers_count: 0,
+        feedback_count: 0,
+        brand_image: imageHash,
+        api: createdAPI.result?.apiId,
+        user_api_key: createdKey.result?.key,
+        followers: [],
+      });
+
+      if (data) {
+        resetForm();
+        onClose();
+        toast.success("Brand created successfully.");
+      }
+
+      /*const { data, error } = await supabaseClient
         .from(DBTables.Brand)
         .insert([
           {
-            ownerEmail: user?.email,
+            owner_email: user?.primaryEmailAddress?.emailAddress,
             name: cleanBrandRawName(brandName),
-            rawName: brandName,
+            raw_name: brandName,
             description: brandDescription,
             category: Array.from(categoryValues).join(", "),
-            followersCount: 0,
-            feedbackCount: 0,
-            brandImage: imageHash,
+            followers_count: 0,
+            feedback_count: 0,
+            brand_image: imageHash,
             api: createdAPI.result?.apiId,
-            userApiKey: createdKey.result?.key,
+            user_api_key: createdKey.result?.key,
             followers: [],
           },
         ])
@@ -126,9 +158,14 @@ export default function CreateBrandModal() {
       if (error) {
         // console.error("error creating brand", error);
         toast.error("Error creating brand. Kindly try again.");
-      }
+        toast.error("Error creating brand. Kindly try again.", {description: error.message});
+      }*/
     } catch (error) {
       // console.error("Unable to create brand", error);
+      toast.error("Unable to create brand. Kindly try again.", {
+        description:
+          "If it persists, kindly drop a feedback with us. Just search for feedbacks and create your feedback.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -248,7 +285,7 @@ export default function CreateBrandModal() {
     <>
       <Button
         color="success"
-        startContent={<LucidePlus size={16} strokeWidth={4} />}
+        startContent={<LucideLayoutTemplate size={16} strokeWidth={2} />}
         variant="shadow"
         onPress={onOpen}
       >
@@ -353,7 +390,7 @@ export default function CreateBrandModal() {
                         className={"absolute -top-2 -right-2 z-10 btn-error"}
                         color="danger"
                         radius="full"
-                        onClick={removeProfileUpload}
+                        onPress={removeProfileUpload}
                       >
                         <LucideX size={16} strokeWidth={4} />
                       </Button>
@@ -390,7 +427,7 @@ export default function CreateBrandModal() {
                               <LucideUpload size={16} strokeWidth={4} />
                             )
                           }
-                          onClick={handleImageUpload}
+                          onPress={handleImageUpload}
                         >
                           {!isDpUploading ? "Upload Image" : ""}
                         </Button>

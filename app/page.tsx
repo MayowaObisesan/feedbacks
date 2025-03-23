@@ -3,6 +3,12 @@
 import { Link } from "@heroui/link";
 import { Button } from "@heroui/button";
 
+declare global {
+  interface Window {
+    Clerk: any;
+  }
+}
+
 export default function Page() {
   return (
     <section className="flex flex-col">

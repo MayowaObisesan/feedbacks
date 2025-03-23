@@ -66,7 +66,7 @@ const UpdateBrandModal = ({
   });
   const brandData: IBrands = _brandData as IBrands;*/
 
-  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   // const { writeContract, isPending, isSuccess, isError } = useWriteContract();
   const [brandName, setBrandName] = useState<string>(brandData?.name!);
   const [brandDescription, setBrandDescription] = useState<string>(
@@ -77,24 +77,24 @@ const UpdateBrandModal = ({
     brandData ? brandData?.category?.split(",") : new Set([]),
   );
 
-  const [imageHash, setImageHash] = useState<string>(brandData?.brandImage!);
+  const [imageHash, setImageHash] = useState<string>(brandData?.brand_image!);
   const [imageUploadPending, setImageUploadPending] = useState<boolean>(false);
   const [imageUploadSuccessful, setImageUploadSuccessful] =
     useState<boolean>(false);
 
   // For dp upload state management
-  const [dp, setDp] = useState<string>(brandData?.brandImage!);
-  const [dpPreview, setDpPreview] = useState<string>(brandData?.brandImage!);
+  const [dp, setDp] = useState<string>(brandData?.brand_image!);
+  const [dpPreview, setDpPreview] = useState<string>(brandData?.brand_image!);
   const [isDpUploading, setisDpUploading] = useState<boolean>(false);
   const profileImageRef = useRef(null);
   const imageHashRef = useRef("");
   const [isSubmitPending, setIsSubmitPending] = useState(false);
 
   useEffect(() => {
-    setBrandName(brandData?.rawName!);
+    setBrandName(brandData?.raw_name!);
     setCategoryValues(brandData?.category?.split(","));
-    setDp(brandData?.brandImage!);
-    setDpPreview(brandData?.brandImage!);
+    setDp(brandData?.brand_image!);
+    setDpPreview(brandData?.brand_image!);
   }, [brandData]);
 
   const onUpdateBrand = async () => {
@@ -116,10 +116,10 @@ const UpdateBrandModal = ({
       await updateBrand.mutateAsync({
         id: brandId!,
         name: cleanBrandRawName(brandName),
-        rawName: brandName,
+        raw_name: brandName,
         description: brandDescription,
         category: Array.from(categoryValues).join(", "),
-        brandImage: imageHash,
+        brand_image: imageHash,
       });
 
       /*const { data, error } = await supabase.from(DBTables.Brand).update([
@@ -422,7 +422,7 @@ const UpdateBrandModal = ({
                   // autoFocus
                   isClearable
                   isRequired
-                  defaultValue={brandData?.rawName}
+                  defaultValue={brandData?.raw_name}
                   label="Name"
                   placeholder="Update your brand name"
                   value={brandName}

@@ -84,11 +84,11 @@ export default function Home() {
               {allBrandsData?.map((eachTrendingBrand) => (
                 <TrendingBrandCard
                   key={eachTrendingBrand.name}
-                  avatarUrl={eachTrendingBrand.brandImage}
-                  description={eachTrendingBrand.description}
-                  feedbackCount={Number(eachTrendingBrand.feedbackCount)}
+                  avatarUrl={eachTrendingBrand.brand_image!}
+                  description={eachTrendingBrand.description!}
+                  feedbackCount={Number(eachTrendingBrand.feedback_count)}
                   name={eachTrendingBrand.name}
-                  rawName={eachTrendingBrand.rawName}
+                  rawName={eachTrendingBrand.raw_name}
                 />
               ))}
             </div>

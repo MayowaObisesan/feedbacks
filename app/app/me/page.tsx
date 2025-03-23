@@ -15,13 +15,15 @@ import {
 } from "lucide-react";
 import React from "react";
 import { Tooltip } from "@heroui/tooltip";
-import { User } from "@supabase/auth-js";
+import { useUser } from "@clerk/nextjs";
+import { UserResource } from "@clerk/types";
+import { Divider } from "@heroui/divider";
 
 import EmptyCard from "@/components/EmptyCard";
 import FeedbackCard from "@/components/FeedbackCard";
 import { TrendingBrandCard } from "@/components/TrendingCard";
 import { useFeedbacksContext } from "@/context";
-import { IUser } from "@/types";
+import { Feedback, IUser } from "@/types";
 import { DBTables, E_ProfileAction } from "@/types/enums";
 import { CreateProfileModal } from "@/components/profileModal";
 import { DotSpacer } from "@/components/TextSkeleton";
@@ -47,12 +49,14 @@ const ProfileCard = ({
   followedBrands,
   user,
   userDB,
+  sentFeedbacks,
 }: {
   myBrands: Brand[];
   followedBrands: Brand[];
-  user: User;
+  user: UserResource;
   userDB: IUser;
   isFollowed: boolean;
+  sentFeedbacks: Feedback[];
 }) => {
   // const [userData, setUserData] = React.useState<IUser>();
   // const { user, userDB } = useFeedbacksContext();
@@ -65,22 +69,25 @@ const ProfileCard = ({
             isBordered
             radius="full"
             size="lg"
-            src={userDB?.dp || user?.user_metadata.avatar_url}
+            src={userDB?.dp || user?.imageUrl}
           />
           <div className="flex flex-col gap-1 items-start justify-center">
-            {!user?.email ? (
+            {!user?.primaryEmailAddress?.emailAddress ? (
               <Skeleton
                 className="w-5/6 h-6 rounded-full"
-                isLoaded={!!user?.email}
+                isLoaded={!!user?.primaryEmailAddress?.emailAddress}
               />
             ) : (
               <h4 className="text-small font-semibold leading-none">
-                {user?.user_metadata.full_name}
+                {user?.fullName}
               </h4>
             )}
-            <Skeleton className="rounded-full" isLoaded={!!user?.email}>
+            <Skeleton
+              className="rounded-full"
+              isLoaded={!!user?.primaryEmailAddress?.emailAddress}
+            >
               <h5 className="text-small tracking-tight text-default-500">
-                @{user?.email}
+                {user?.primaryEmailAddress?.emailAddress}
               </h5>
             </Skeleton>
           </div>
@@ -112,35 +119,57 @@ const ProfileCard = ({
         </span>*/}
       </CardBody>
       <CardFooter className="gap-1">
-        <div className="flex gap-1 hover:underline hover:underline-offset-4 hover:decoration-content2-foreground">
-          <Skeleton className="rounded-full" isLoaded={!!myBrands}>
-            <Tooltip
-              content="The brands you've created"
-              placement={"bottom"}
-              showArrow={true}
-            >
-              <p className="font-semibold text-default-600 text-small">
-                {myBrands?.length ? Number(myBrands?.length) : 0}
-              </p>
-            </Tooltip>
-          </Skeleton>
-          <Tooltip content="The brands you've created" placement={"bottom"}>
-            <p className="text-default-600 text-small">
-              {Number(myBrands?.length) > 1 ? "Brands" : "Brand"}
-            </p>
-          </Tooltip>
-        </div>
-        <DotSpacer />
-        <div className="flex gap-1">
-          <Skeleton className="rounded-full" isLoaded={!!followedBrands}>
-            <p className="font-semibold text-default-600 text-small">
-              {followedBrands?.length > 0
-                ? Number(followedBrands?.length > 0)
-                : 0}
-            </p>
-          </Skeleton>
-          <p className=" text-default-600 text-small">Following</p>
-        </div>
+        <section className={"flex flex-col gap-4 w-full"}>
+          <div className={"flex flex-row items-center gap-1"}>
+            <div className="flex gap-1 hover:underline hover:underline-offset-4 hover:decoration-content2-foreground">
+              <Skeleton className="rounded-full" isLoaded={!!myBrands}>
+                <Tooltip
+                  content="The brands you've created"
+                  placement={"bottom"}
+                  showArrow={true}
+                >
+                  <p className="font-semibold text-default-600 text-small">
+                    {myBrands?.length ? Number(myBrands?.length) : 0}
+                  </p>
+                </Tooltip>
+              </Skeleton>
+              <Tooltip content="The brands you've created" placement={"bottom"}>
+                <p className="text-default-600 text-small">
+                  {Number(myBrands?.length) > 1 ? "Brands" : "Brand"}
+                </p>
+              </Tooltip>
+            </div>
+            <DotSpacer />
+            <div className="flex gap-1">
+              <Skeleton className="rounded-full" isLoaded={!!followedBrands}>
+                <p className="font-semibold text-default-600 text-small">
+                  {followedBrands?.length > 0
+                    ? Number(followedBrands?.length > 0)
+                    : 0}
+                </p>
+              </Skeleton>
+              <p className="text-default-600 text-small">Following</p>
+            </div>
+          </div>
+
+          <Divider className={"shadow bg-default-100"} />
+
+          <div className="flex flex-col gap-2 px-1 w-full text-default-600 text-small">
+            <div className="flex flex-row items-center gap-x-2">
+              <span className={"text-default-500"}>Sent Feedbacks:</span>
+              <span>
+                <span className={"font-semibold"}>{sentFeedbacks?.length}</span>{" "}
+                {sentFeedbacks?.length !== 1 ? "Feedbacks" : "Feedback"}
+              </span>
+            </div>
+            <div className="flex flex-row items-center gap-x-2">
+              <span className={"text-default-500"}>Joined:</span>
+              <span className={"text-default-500"}>
+                {formatDateString(user?.createdAt?.toString()!)}
+              </span>
+            </div>
+          </div>
+        </section>
         {/* <div className="flex gap-1">
           <p className="font-semibold text-default-400 text-small">97.1K</p>
           <p className="text-default-400 text-small">Followers</p>
@@ -176,11 +205,11 @@ function FollowedBrands({ followerEmail }: { followerEmail: string }) {
           followedBrands?.map((eachBrand) => (
             <TrendingBrandCard
               key={eachBrand.id}
-              avatarUrl={eachBrand.brandImage!}
+              avatarUrl={eachBrand.brand_image!}
               description={eachBrand.description!}
-              feedbackCount={eachBrand.feedbackCount!}
+              feedbackCount={eachBrand.feedback_count!}
               name={eachBrand.name}
-              rawName={eachBrand.rawName}
+              rawName={eachBrand.raw_name}
             />
           ))
         : null}
@@ -189,19 +218,22 @@ function FollowedBrands({ followerEmail }: { followerEmail: string }) {
 }
 
 export default function Page() {
+  const { user } = useUser();
   // const { onOpen } = useDisclosure();
   const { mySentFeedbacksData } = useFeedbacksContext();
   const { data: userAndUserDB, isFetched: userAndUserDBFetched } =
     useUserAndUserDBQuery();
 
-  const { user, userDB, myBrands } = userAndUserDB || {};
+  const { userDB, myBrands } = userAndUserDB || {};
   /*const {
     data: myBrands,
     isLoading: myBrandsLoading,
     isFetched: myBrandsFetched,
   } = useMyBrands(user?.email!);*/
 
-  const { data: followedBrands } = useFollowedBrands(user?.email!);
+  const { data: followedBrands } = useFollowedBrands(
+    user?.primaryEmailAddress?.emailAddress!,
+  );
 
   // const [isFollowed, setIsFollowed] = React.useState(false);
   // const [myBrandsData, setMyBrandsData] = React.useState<IBrands[]>([]);
@@ -220,7 +252,7 @@ export default function Page() {
         const { data, error } = await supabase
           .from(DBTables.Brand)
           .select("*")
-          .eq("ownerEmail", user?.email)
+          .eq("owner_email", user?.email)
           .range(0, 10);
 
         if (error) {
@@ -286,7 +318,8 @@ export default function Page() {
         <ProfileCard
           followedBrands={followedBrands!}
           isFollowed={false}
-          myBrands={myBrands!}
+          myBrands={myBrands || []}
+          sentFeedbacks={mySentFeedbacksData!}
           user={user!}
           userDB={userDB!}
         />
@@ -329,16 +362,16 @@ export default function Page() {
           </AccordionItem>
         </Accordion>
 
-        <Card>
+        {/*<Card>
           <CardHeader>Other details</CardHeader>
           <CardBody className="text-default-500 text-sm space-y-2">
-            {/*<div className="flex flex-row items-center gap-x-2">
+            <div className="flex flex-row items-center gap-x-2">
               <span>Events:</span>
               <span>
                 {myEventsData?.length}{" "}
                 {myEventsData?.length !== 1 ? "events" : "event"}
               </span>
-            </div>*/}
+            </div>
             <div className="flex flex-row items-center gap-x-2">
               <span>Feedback:</span>
               <span>
@@ -348,10 +381,10 @@ export default function Page() {
             </div>
             <div className="flex flex-row items-center gap-x-2">
               <span>Joined at:</span>
-              <span>{formatDateString(user?.created_at!)}</span>
+              <span>{formatDateString(user?.createdAt?.toString()!)}</span>
             </div>
           </CardBody>
-        </Card>
+        </Card>*/}
       </section>
       <section className="space-y-12 py-4 px-3 lg:px-8 lg:overflow-y-hidden w-full">
         {
@@ -387,11 +420,11 @@ export default function Page() {
                 myBrands?.map((eachBrand) => (
                   <TrendingBrandCard
                     key={eachBrand.name}
-                    avatarUrl={eachBrand.brandImage!}
+                    avatarUrl={eachBrand.brand_image!}
                     description={eachBrand.description!}
-                    feedbackCount={Number(eachBrand.feedbackCount)}
+                    feedbackCount={Number(eachBrand.feedback_count)}
                     name={eachBrand.name}
-                    rawName={eachBrand.rawName}
+                    rawName={eachBrand.raw_name}
                   />
                 ))}
               {/*{userAndUserDBFetched && myBrandsFetched && (
@@ -419,8 +452,10 @@ export default function Page() {
             Brands you follow
           </header>
           <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
-            {user?.email ? (
-              <FollowedBrands followerEmail={user?.email} />
+            {user?.primaryEmailAddress?.emailAddress ? (
+              <FollowedBrands
+                followerEmail={user?.primaryEmailAddress?.emailAddress}
+              />
             ) : (
               [1, 2, 3, 4].map((_) => (
                 <TrendingBrandCardSkeleton key={_ as number} />

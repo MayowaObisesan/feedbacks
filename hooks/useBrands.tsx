@@ -1,8 +1,41 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";
-import { Brand, BrandInsert, IBrands } from "@/types";
+import { Brand, BrandInsert } from "@/types";
+import { useFeedbacksContext } from "@/context";
+
+export const useRealTimeBrands = () => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    supabase
+      .channel("brand-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: DBTables.Brand,
+        },
+        (payload) => {
+          queryClient.invalidateQueries({
+            predicate: (query) => {
+              const queryKey = query.queryKey[0];
+
+              return typeof queryKey === "string" && queryKey === "brands";
+            },
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.channel("brand-changes").unsubscribe();
+    };
+  }, [queryClient]);
+};
 
 // Fetch trending brands based on multiple criteria
 export const useTrendingBrands = (
@@ -23,13 +56,29 @@ export const useTrendingBrands = (
         .from(DBTables.Brand)
         .select("*")
         // .gte("createdAt", pastDate.toISOString())
-        .order("feedbackCount", { ascending: false })
-        .order("followersCount", { ascending: false })
+        .order("feedback_count", { ascending: false })
+        .order("followers_count", { ascending: false })
         .limit(limit);
 
       if (error) throw error;
 
-      return data;
+      const transformedData = await Promise.all(
+        data?.map(async (eachBrand) => {
+          // Fetch all feedbacks count of this brand
+          const { count } = await supabase
+            .from(DBTables.Feedback)
+            .select("*", { count: "exact", head: true })
+            .eq("recipient_id", eachBrand.id);
+
+          return {
+            ...eachBrand,
+            feedback_count: count || 0,
+          };
+        }),
+      );
+
+      // return data;
+      return transformedData || [];
     },
   });
 };
@@ -42,12 +91,27 @@ export const useLatestBrands = (limit: number = 5) => {
       const { data, error } = await supabase
         .from(DBTables.Brand)
         .select("*")
-        .order("createdAt", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(limit);
 
       if (error) throw error;
 
-      return data;
+      const transformedData = await Promise.all(
+        data?.map(async (eachBrand) => {
+          // Fetch all feedbacks count of this brand
+          const { count } = await supabase
+            .from(DBTables.Feedback)
+            .select("*", { count: "exact", head: true })
+            .eq("recipient_id", eachBrand.id);
+
+          return {
+            ...eachBrand,
+            feedback_count: count || 0,
+          };
+        }),
+      );
+
+      return transformedData || [];
     },
   });
 };
@@ -60,7 +124,7 @@ export const useLatestBrandsByFeedback = (limit: number = 5) => {
       const { data, error } = await supabase
         .from(DBTables.Brand)
         .select("*")
-        .order("feedbackCount", { ascending: false })
+        .order("feedback_count", { ascending: false })
         .limit(limit);
 
       if (error) throw error;
@@ -78,7 +142,7 @@ export const useLatestBrandsByFollowers = (limit: number = 5) => {
       const { data, error } = await supabase
         .from(DBTables.Brand)
         .select("*")
-        .order("followersCount", { ascending: false })
+        .order("followers_count", { ascending: false })
         .limit(limit);
 
       if (error) throw error;
@@ -100,7 +164,7 @@ export const useLatestBrandsByCategory = (
         .from(DBTables.Brand)
         .select("*")
         .eq("category", category)
-        .order("createdAt", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(limit);
 
       if (error) throw error;
@@ -123,12 +187,27 @@ export const useBrands = (page: number = 1) => {
       const { data, error } = await supabase
         .from(DBTables.Brand)
         .select("*")
-        .order("createdAt", { ascending: false })
+        .order("created_at", { ascending: false })
         .range(startRange, endRange);
 
       if (error) throw error;
 
-      return data;
+      const transformedData = await Promise.all(
+        data?.map(async (eachBrand) => {
+          // Fetch all feedbacks count of this brand
+          const { count } = await supabase
+            .from(DBTables.Feedback)
+            .select("*", { count: "exact", head: true })
+            .eq("recipient_id", eachBrand.id);
+
+          return {
+            ...eachBrand,
+            feedback_count: count || 0,
+          };
+        }),
+      );
+
+      return transformedData || [];
     },
     maxPages: 30,
   });
@@ -146,13 +225,28 @@ export const useMyBrands = (email: string, page: number = 1) => {
       const { data, error } = await supabase
         .from(DBTables.Brand)
         .select("*")
-        .eq("ownerEmail", email)
-        .order("createdAt", { ascending: false })
+        .eq("owner_email", email)
+        .order("created_at", { ascending: false })
         .range(startRange, endRange);
 
       if (error) throw error;
 
-      return data;
+      const transformedData = await Promise.all(
+        data?.map(async (eachBrand) => {
+          // Fetch all feedbacks count of this brand
+          const { count } = await supabase
+            .from(DBTables.Feedback)
+            .select("*", { count: "exact", head: true })
+            .eq("recipient_id", eachBrand.id);
+
+          return {
+            ...eachBrand,
+            feedback_count: count || 0,
+          };
+        }),
+      );
+
+      return transformedData || [];
     },
     gcTime: 1000 * 60 * 60, // 1 hour
   });
@@ -171,7 +265,7 @@ export const useFollowedBrands = (email: string, page: number = 1) => {
         .from(DBTables.Brand)
         .select("*")
         .contains("followers", [email])
-        .order("createdAt", { ascending: false })
+        .order("created_at", { ascending: false })
         .range(startRange, endRange);
 
       console.log("Followed brands query", email, data);
@@ -179,7 +273,7 @@ export const useFollowedBrands = (email: string, page: number = 1) => {
       if (error) throw error;
 
       const isFollowed =
-        data.filter((eachBrand: IBrands) => eachBrand.followers.includes(email))
+        data.filter((eachBrand: Brand) => eachBrand.followers?.includes(email))
           .length > 0;
 
       // return [...data, isFollowed];
@@ -202,7 +296,12 @@ export const useBrandById = (id: number) => {
 
       if (error) throw error;
 
-      return data;
+      const { count } = await supabase
+        .from(DBTables.Feedback)
+        .select("*", { count: "exact", head: true })
+        .eq("recipient_id", id);
+
+      return { ...data, feedback_count: count };
     },
     enabled: !!id,
   });
@@ -221,7 +320,12 @@ export const useBrandByName = (name: string) => {
 
       if (error) throw error;
 
-      return data;
+      const { count } = await supabase
+        .from(DBTables.Feedback)
+        .select("*", { count: "exact", head: true })
+        .eq("recipient_id", data?.id);
+
+      return { ...data, feedback_count: count };
     },
     enabled: !!name,
   });
@@ -230,10 +334,11 @@ export const useBrandByName = (name: string) => {
 // Create brand mutation
 export const useCreateBrand = () => {
   const queryClient = useQueryClient();
+  const { supabaseClient } = useFeedbacksContext();
 
   return useMutation({
     mutationFn: async (newBrand: BrandInsert) => {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from(DBTables.Brand)
         .insert(newBrand)
         .select()
@@ -245,6 +350,15 @@ export const useCreateBrand = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["brands"] });
+      queryClient.invalidateQueries({ queryKey: ["myBrands"] });
+      // Invalidate all brand-related queries
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey[0];
+
+          return typeof queryKey === "string" && queryKey === "brands";
+        },
+      });
     },
   });
 };
@@ -252,10 +366,11 @@ export const useCreateBrand = () => {
 // Update brand mutation
 export const useUpdateBrand = () => {
   const queryClient = useQueryClient();
+  const { supabaseClient } = useFeedbacksContext();
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Brand> & { id: number }) => {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from(DBTables.Brand)
         .update(updates)
         .eq("id", id)

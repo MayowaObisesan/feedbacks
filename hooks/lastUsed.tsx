@@ -5,7 +5,7 @@ import { Chip } from "@heroui/chip";
 
 export function useLastUsed() {
   return useLocalStorage<"github" | "google" | "email" | undefined>(
-    "last_feedback_unkey_login",
+    "last_feedback_login",
     undefined,
   );
 }

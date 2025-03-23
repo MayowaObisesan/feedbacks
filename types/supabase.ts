@@ -34,105 +34,111 @@ export type Database = {
   };
   public: {
     Tables: {
-      Brand: {
+      brand: {
         Row: {
           api: string | null;
-          brandImage: string | null;
+          brand_image: string | null;
           category: string | null;
-          createdAt: string;
+          created_at: string;
           description: string | null;
-          feedbackCount: number | null;
+          feedback_count: number | null;
           followers: string[] | null;
-          followersCount: number | null;
+          followers_count: number | null;
           id: number;
           name: string;
-          ownerEmail: string | null;
-          rawName: string;
-          updatedAt: string | null;
-          userApiKey: string | null;
+          owner_email: string | null;
+          raw_name: string;
+          updated_at: string | null;
+          user_api_key: string | null;
+          user_id: string;
         };
         Insert: {
           api?: string | null;
-          brandImage?: string | null;
+          brand_image?: string | null;
           category?: string | null;
-          createdAt?: string;
+          created_at?: string;
           description?: string | null;
-          feedbackCount?: number | null;
+          feedback_count?: number | null;
           followers?: string[] | null;
-          followersCount?: number | null;
+          followers_count?: number | null;
           id?: number;
           name: string;
-          ownerEmail?: string | null;
-          rawName: string;
-          updatedAt?: string | null;
-          userApiKey?: string | null;
+          owner_email?: string | null;
+          raw_name: string;
+          updated_at?: string | null;
+          user_api_key?: string | null;
+          user_id?: string;
         };
         Update: {
           api?: string | null;
-          brandImage?: string | null;
+          brand_image?: string | null;
           category?: string | null;
-          createdAt?: string;
+          created_at?: string;
           description?: string | null;
-          feedbackCount?: number | null;
+          feedback_count?: number | null;
           followers?: string[] | null;
-          followersCount?: number | null;
+          followers_count?: number | null;
           id?: number;
           name?: string;
-          ownerEmail?: string | null;
-          rawName?: string;
-          updatedAt?: string | null;
-          userApiKey?: string | null;
+          owner_email?: string | null;
+          raw_name?: string;
+          updated_at?: string | null;
+          user_api_key?: string | null;
+          user_id?: string;
         };
         Relationships: [];
       };
-      Feedback: {
+      feedback: {
         Row: {
-          beAnonymous: boolean | null;
-          createdAt: string;
+          be_anonymous: boolean | null;
+          created_at: string;
           description: string;
           email: string;
-          eventId: number | null;
-          fromEmbed: boolean | null;
-          hashTags: string | null;
+          event_id: number | null;
+          from_embed: boolean | null;
+          hash_tags: string | null;
           id: number;
-          productId: number | null;
-          recipientId: number;
+          product_id: number | null;
+          recipient_id: number;
           screenshots: string | null;
-          starRating: number | null;
+          star_rating: number | null;
           title: string | null;
-          updatedAt: string | null;
+          updated_at: string | null;
+          user_id: string;
         };
         Insert: {
-          beAnonymous?: boolean | null;
-          createdAt?: string;
+          be_anonymous?: boolean | null;
+          created_at?: string;
           description: string;
           email: string;
-          eventId?: number | null;
-          fromEmbed?: boolean | null;
-          hashTags?: string | null;
+          event_id?: number | null;
+          from_embed?: boolean | null;
+          hash_tags?: string | null;
           id?: number;
-          productId?: number | null;
-          recipientId: number;
+          product_id?: number | null;
+          recipient_id: number;
           screenshots?: string | null;
-          starRating?: number | null;
+          star_rating?: number | null;
           title?: string | null;
-          updatedAt?: string | null;
+          updated_at?: string | null;
+          user_id?: string;
         };
         Update: {
-          beAnonymous?: boolean | null;
-          createdAt?: string;
+          be_anonymous?: boolean | null;
+          created_at?: string;
           description?: string;
           email?: string;
-          eventId?: number | null;
-          fromEmbed?: boolean | null;
-          hashTags?: string | null;
+          event_id?: number | null;
+          from_embed?: boolean | null;
+          hash_tags?: string | null;
           id?: number;
-          productId?: number | null;
-          recipientId?: number;
+          product_id?: number | null;
+          recipient_id?: number;
           screenshots?: string | null;
-          starRating?: number | null;
+          star_rating?: number | null;
           title?: string | null;
-          updatedAt?: string | null;
+          updated_at?: string | null;
+          user_id?: string;
         };
         Relationships: [];
       };
@@ -144,6 +150,7 @@ export type Database = {
           feedback_id: number;
           id: number;
           likes: string[] | null;
+          user_id: string;
         };
         Insert: {
           brand_id: number;
@@ -152,6 +159,7 @@ export type Database = {
           feedback_id: number;
           id?: number;
           likes?: string[] | null;
+          user_id?: string;
         };
         Update: {
           brand_id?: number;
@@ -160,6 +168,7 @@ export type Database = {
           feedback_id?: number;
           id?: number;
           likes?: string[] | null;
+          user_id?: string;
         };
         Relationships: [];
       };
@@ -172,6 +181,7 @@ export type Database = {
           owner_email: string | null;
           reply: string | null;
           updated_at: string | null;
+          user_id: string;
         };
         Insert: {
           brand_id: number;
@@ -181,6 +191,7 @@ export type Database = {
           owner_email?: string | null;
           reply?: string | null;
           updated_at?: string | null;
+          user_id?: string;
         };
         Update: {
           brand_id?: number;
@@ -190,39 +201,40 @@ export type Database = {
           owner_email?: string | null;
           reply?: string | null;
           updated_at?: string | null;
+          user_id?: string;
         };
         Relationships: [];
       };
-      User: {
+      user: {
         Row: {
           bio: string;
-          createdAt: string;
+          created_at: string;
           dp: string | null;
           email: string | null;
           id: number;
-          updatedAt: string;
-          userData: Json;
-          userId: string | null;
+          updated_at: string;
+          user_data: Json;
+          user_id: string;
         };
         Insert: {
           bio: string;
-          createdAt?: string;
+          created_at?: string;
           dp?: string | null;
           email?: string | null;
           id?: number;
-          updatedAt?: string;
-          userData: Json;
-          userId?: string | null;
+          updated_at: string;
+          user_data: Json;
+          user_id?: string;
         };
         Update: {
           bio?: string;
-          createdAt?: string;
+          created_at?: string;
           dp?: string | null;
           email?: string | null;
           id?: number;
-          updatedAt?: string;
-          userData?: Json;
-          userId?: string | null;
+          updated_at?: string;
+          user_data?: Json;
+          user_id?: string;
         };
         Relationships: [];
       };
@@ -231,7 +243,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      requesting_user_id: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
     };
     Enums: {
       [_ in never]: never;

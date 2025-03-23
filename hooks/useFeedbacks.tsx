@@ -1,8 +1,44 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";
 import { Feedback, FeedbackLikes, FeedbackReplies } from "@/types";
+import { useFeedbacksContext } from "@/context";
+
+export const useRealTimeFeedbacks = () => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("feedback-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: DBTables.Feedback,
+        },
+        (payload) => {
+          queryClient.invalidateQueries({ queryKey: ["all-feedbacks"] });
+          queryClient.invalidateQueries({ queryKey: ["trending-feedbacks"] });
+          queryClient.invalidateQueries({
+            predicate: (query) => {
+              const queryKey = query.queryKey[0];
+
+              return typeof queryKey === "string" && queryKey === "feedbacks";
+            },
+          });
+        },
+      )
+      .subscribe();
+    console.log("Subscribing to feedback changes.");
+
+    return () => {
+      supabase.channel("feedback-changes").unsubscribe();
+    };
+  }, [queryClient]);
+};
 
 export function useTrendingFeedbacks(limit: number = 5, daysAgo: number = 7) {
   const fetchTrendingFeedbacks = async (): Promise<Feedback[]> => {
@@ -13,10 +49,10 @@ export function useTrendingFeedbacks(limit: number = 5, daysAgo: number = 7) {
     const { data, error } = await supabase
       .from(DBTables.Feedback)
       .select("*")
-      // .gte("createdAt", dateThreshold.toISOString())
-      .gte("starRating", 2) // Only fetch feedbacks with rating >= 4
-      .order("starRating", { ascending: false })
-      .order("createdAt", { ascending: false })
+      // .gte("created_at", dateThreshold.toISOString())
+      .gte("star_rating", 2) // Only fetch feedbacks with rating >= 4
+      .order("star_rating", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(limit);
 
     if (error) {
@@ -45,7 +81,7 @@ export function useAllFeedbacks(limit: number = 10, page: number = 1) {
     const { count, data, error } = await supabase
       .from(DBTables.Feedback)
       .select("*", { count: "exact", head: false })
-      .order("createdAt", { ascending: false })
+      .order("created_at", { ascending: false })
       .range(startRange, endRange);
 
     if (error) {
@@ -92,8 +128,8 @@ export function useBrandFeedbacks(
         supabase
           .from(DBTables.Feedback)
           .select("*", { count: "exact", head: false })
-          .eq("recipientId", brandId)
-          .order("createdAt", { ascending: false })
+          .eq("recipient_id", brandId)
+          .order("created_at", { ascending: false })
           .range(startRange, endRange),
 
         // Fetch all likes for this brand's feedbacks
@@ -182,11 +218,12 @@ export function useBrandFeedbacks(
 // Optional mutation hook for creating feedbacks
 export function useCreateFeedback() {
   const queryClient = useQueryClient();
+  const { supabaseClient } = useFeedbacksContext();
 
   const createFeedback = async (
-    feedback: Omit<Feedback, "id" | "createdAt | updatedAt | fromEmbed">,
+    feedback: Omit<Feedback, "id" | "created_at | updated_at | from_embed">,
   ) => {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from(DBTables.Feedback)
       .insert([feedback])
       .select()
@@ -196,22 +233,24 @@ export function useCreateFeedback() {
       throw new Error(error.message);
     }
 
-    const { count } = await supabase
-      .from(DBTables.Feedback)
-      .select("*", { count: "exact", head: true })
-      .eq("recipientId", feedback.recipientId);
+    if (data) {
+      const { count } = await supabase
+        .from(DBTables.Feedback)
+        .select("*", { count: "exact", head: true })
+        .eq("recipient_id", feedback.recipient_id);
 
-    // Update the brands parameters also.
-    if (count! > 0) {
-      await supabase
-        .from(DBTables.Brand)
-        .update({
-          feedbackCount: count,
-        })
-        .eq("id", feedback.recipientId);
+      // Update the brands parameters also.
+      if (count! > 0) {
+        await supabase
+          .from(DBTables.Brand)
+          .update({
+            feedback_count: count,
+          })
+          .eq("id", feedback.recipient_id);
+      }
+
+      return data;
     }
-
-    return data;
   };
 
   return useMutation({
@@ -219,7 +258,7 @@ export function useCreateFeedback() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["feedbacks"] });
       queryClient.invalidateQueries({
-        queryKey: ["feedbacks", variables.recipientId],
+        queryKey: ["feedbacks", variables.recipient_id],
       });
     },
   });
@@ -251,13 +290,14 @@ export function useFeedbackById(id: string) {
 // Update feedback mutation
 export function useUpdateFeedback() {
   const queryClient = useQueryClient();
+  const { supabaseClient } = useFeedbacksContext();
 
   return useMutation({
     mutationFn: async ({
       id,
       ...updates
     }: Partial<Feedback> & { id: number }) => {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from(DBTables.Feedback)
         .update(updates)
         .eq("id", id)
@@ -282,6 +322,7 @@ export function useUpdateFeedback() {
 // Update feedback mutation
 export function useUpdateFeedbackLikes() {
   const queryClient = useQueryClient();
+  const { supabaseClient } = useFeedbacksContext();
 
   return useMutation({
     mutationFn: async ({
@@ -295,7 +336,7 @@ export function useUpdateFeedbackLikes() {
 
       if (count === 0) {
         // No one has liked or disliked this feedback yet.
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from(DBTables.FeedbackLikes)
           .insert(updates)
           .select();
@@ -307,7 +348,7 @@ export function useUpdateFeedbackLikes() {
         return data;
       } else {
         // At lease one person have liked or disliked this feedback.
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from(DBTables.FeedbackLikes)
           .update(updates)
           .eq("feedback_id", id)
@@ -330,6 +371,7 @@ export function useUpdateFeedbackLikes() {
 // Create or Update feedback reply mutation
 export function useCreateOrUpdateFeedbackReplies() {
   const queryClient = useQueryClient();
+  const { supabaseClient } = useFeedbacksContext();
 
   return useMutation({
     mutationFn: async ({
@@ -342,7 +384,7 @@ export function useCreateOrUpdateFeedbackReplies() {
 
       if (count === 0) {
         // No one has replied this feedback yet.
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from(DBTables.FeedbackReplies)
           .insert(updates)
           .select();
@@ -354,7 +396,7 @@ export function useCreateOrUpdateFeedbackReplies() {
         return data;
       } else {
         // At lease one person have liked or disliked this feedback.
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from(DBTables.FeedbackReplies)
           .update(updates)
           .eq("feedback_id", updates.feedback_id)
@@ -379,13 +421,14 @@ export function useCreateOrUpdateFeedbackReplies() {
 // Update feedback reply mutation
 export function useUpdateFeedbackReply() {
   const queryClient = useQueryClient();
+  const { supabaseClient } = useFeedbacksContext();
 
   return useMutation({
     mutationFn: async ({
       id,
       ...updates
     }: Partial<FeedbackReplies> & { id: number }) => {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from(DBTables.FeedbackReplies)
         .update(updates)
         .eq("feedback_id", id)
@@ -407,10 +450,11 @@ export function useUpdateFeedbackReply() {
 // Delete feedback mutation
 export function useDeleteFeedback() {
   const queryClient = useQueryClient();
+  const { supabaseClient } = useFeedbacksContext();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from(DBTables.Feedback)
         .delete()
         .eq("id", id);
@@ -436,7 +480,7 @@ export function useMySentFeedbacks(email: string, page: number = 1) {
       .from(DBTables.Feedback)
       .select("*", { count: "exact", head: false })
       .eq("email", email)
-      .order("createdAt", { ascending: false })
+      .order("created_at", { ascending: false })
       .range(startRange, endRange);
 
     if (error) {
@@ -461,8 +505,8 @@ export function useStarRatingCounts(brandId?: number | string) {
         .from(DBTables.Feedback)
         .select("*", { count: "exact", head: true })
         .match({
-          starRating: rating,
-          recipientId: brandId,
+          star_rating: rating,
+          recipient_id: brandId,
         }),
     );
 
@@ -482,19 +526,19 @@ export function useStarRatingCounts(brandId?: number | string) {
 
 export const useFilteredFeedbacks = (
   brandId?: number | string,
-  starRating?: number,
+  star_rating?: number,
 ) => {
   return useQuery({
-    queryKey: ["filtered-feedbacks", brandId, starRating],
+    queryKey: ["filtered-feedbacks", brandId, star_rating],
     queryFn: async () => {
       let query = supabase
         .from(DBTables.Feedback)
         .select("*")
-        .eq("recipientId", brandId)
-        .order("createdAt", { ascending: false });
+        .eq("recipient_id", brandId)
+        .order("created_at", { ascending: false });
 
-      if (starRating) {
-        query = query.eq("starRating", starRating);
+      if (star_rating) {
+        query = query.eq("star_rating", star_rating);
       }
 
       const { data, error } = await query;

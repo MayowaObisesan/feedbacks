@@ -8,16 +8,16 @@ import { LucideBadgeMinus } from "lucide-react";
 import { Card, CardBody } from "@heroui/card";
 import { Listbox } from "@heroui/listbox";
 import { Button } from "@heroui/button";
+import { useUser } from "@clerk/nextjs";
 
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";
-import { IBrands, IFeedbacks } from "@/types";
+import { Brand, IBrands, IFeedbacks } from "@/types";
 import FeedbackCard from "@/components/FeedbackCard";
 import EmptyCard from "@/components/EmptyCard";
 import { FeedbackCardSkeleton } from "@/components/Skeletons/FeedbacksCardSkeleton";
 import { TrendingBrandCard } from "@/components/TrendingCard";
 import CreateBrandModal from "@/components/Modals/CreateBrandModal";
-import { useFeedbacksContext } from "@/context";
 
 /*
 // This is the page where all load-more are displayed.
@@ -52,8 +52,8 @@ function MorePageContent() {
   }*/
 
   function LoadMoreMyBrands() {
-    const { user } = useFeedbacksContext();
-    const [myBrandsData, setMyBrandsData] = React.useState<IBrands[]>([]);
+    const { user } = useUser();
+    const [myBrandsData, setMyBrandsData] = React.useState<Brand[]>([]);
     // const [sentFeedbacks, setSentFeedbacks] = React.useState<IFeedbacks[]>([]);
     const [isMyBrandsDataFetching, setIsMyBrandsDataFetching] =
       React.useState<boolean>(false);
@@ -69,8 +69,8 @@ function MorePageContent() {
         const { data, error } = await supabase
           .from(DBTables.Brand)
           .select("*")
-          .eq("ownerEmail", user?.email)
-          .range(0, 99);
+          .eq("owner_email", user?.primaryEmailAddress?.emailAddress)
+          .range(0, 9);
 
         if (error) {
           // console.error("Error fetching your brands", error);
@@ -99,15 +99,15 @@ function MorePageContent() {
       >
         {!isMyBrandsDataFetching ? (
           <>
-            {(myBrandsData as IBrands[])?.length > 0 ? (
-              (myBrandsData as IBrands[])?.map((eachBrand) => (
+            {myBrandsData?.length > 0 ? (
+              myBrandsData?.map((eachBrand) => (
                 <TrendingBrandCard
                   key={eachBrand.name}
-                  avatarUrl={eachBrand.brandImage}
-                  description={eachBrand.description}
-                  feedbackCount={Number(eachBrand.feedbackCount)}
+                  avatarUrl={eachBrand.brand_image!}
+                  description={eachBrand.description!}
+                  feedbackCount={Number(eachBrand.feedback_count)}
                   name={eachBrand.name}
-                  rawName={eachBrand.rawName}
+                  rawName={eachBrand.raw_name}
                 />
               ))
             ) : (

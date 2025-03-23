@@ -18,7 +18,7 @@ export default function BrandsPage() {
   const [filter, setFilter] = useState<string>("");
 
   const filteredBrands = brands?.filter((brand) =>
-    brand.rawName.toLowerCase().includes(filter.toLowerCase()),
+    brand.raw_name.toLowerCase().includes(filter.toLowerCase()),
   );
 
   return (
@@ -63,13 +63,13 @@ export default function BrandsPage() {
                 <div className="flex items-center gap-4">
                   <div>
                     <Avatar
-                      name={brand.rawName}
+                      name={brand.raw_name}
                       size="lg"
-                      src={brand.brandImage!}
+                      src={brand.brand_image!}
                     />
                   </div>
                   <div className={"text-left"}>
-                    <h3 className="text-lg font-semibold">{brand.rawName}</h3>
+                    <h3 className="text-lg font-semibold">{brand.raw_name}</h3>
                     <p className="text-sm text-default-500">
                       {brand.description?.substring(0, 100)}
                       {brand.description?.length! > 100 ? "..." : ""}

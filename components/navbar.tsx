@@ -18,28 +18,26 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@heroui/dropdown";
-import { useEffect } from "react";
-import { LucideChartNoAxesGantt, Power } from "lucide-react";
+import { LucideChartNoAxesGantt } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { SignedIn, SignedOut, SignOutButton, useUser } from "@clerk/nextjs";
+import * as React from "react";
 
 import SearchModal from "@/components/Modals/SearchModal";
 import { useFeedbacksContext } from "@/context";
 import { supabase } from "@/utils/supabase/supabase";
 import { DisconnectIcon, FeedbacksLogo, SearchIcon } from "@/components/icons";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { siteConfig } from "@/config/site";
 import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
 
 export function Navbar() {
+  const { user } = useUser();
   const queryClient = useQueryClient();
   const router = useRouter();
   const { SetUser } = useFeedbacksContext();
-  const {
-    data: userAndUserDB,
-    isFetched: userAndUserDBFetched,
-  } = useUserAndUserDBQuery();
-  const { user, userDB } = userAndUserDB || {};
+  const { data: userAndUserDB } = useUserAndUserDBQuery();
+  const { userDB } = userAndUserDB || {};
 
   /*
   useEffect(() => {
@@ -82,7 +80,7 @@ export function Navbar() {
         <Button
           color={"success"}
           variant="shadow"
-          onPress={() => router.push("/app/login")}
+          onPress={() => router.push("/app/sign-in")}
         >
           Sign in
         </Button>
@@ -99,7 +97,7 @@ export function Navbar() {
               as="button"
               avatarProps={{
                 isBordered: true,
-                src: userDB?.dp || user?.user_metadata.avatar_url,
+                src: userDB?.dp || user?.imageUrl,
                 size: "sm",
               }}
               className="transition-transform"
@@ -115,7 +113,7 @@ export function Navbar() {
               href={"/app/me"}
             >
               <p className="font-bold">Signed in as</p>
-              <p className="font-bold">{user?.user_metadata.full_name}</p>
+              <p className="font-bold">{user?.fullName}</p>
             </DropdownItem>
             {/*<DropdownItem key="settings" href={"/app/me"}>
               My Profile
@@ -135,6 +133,16 @@ export function Navbar() {
               onPress={handleSignOut}
             >
               Log Out
+            </DropdownItem>
+            <DropdownItem
+              key="signout"
+              as={Button}
+              className={"text-left"}
+              color="danger"
+              endContent={<DisconnectIcon size={20} strokeWidth={4} />}
+              variant={"light"}
+            >
+              <SignOutButton />
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
@@ -205,7 +213,18 @@ export function Navbar() {
           <SearchModal />
         </NavbarItem>
 
-        <NavbarItem className="">
+        <NavbarItem>
+          {/* @ts-ignore */}
+          <SignedOut>
+            <SignInButton />
+          </SignedOut>
+          {/* @ts-ignore */}
+          <SignedIn>
+            <DropDownView />
+          </SignedIn>
+        </NavbarItem>
+
+        {/*<NavbarItem className="">
           {userAndUserDBFetched ? (
             user?.email ? (
               <DropDownView />
@@ -213,7 +232,7 @@ export function Navbar() {
               <SignInButton />
             )
           ) : null}
-        </NavbarItem>
+        </NavbarItem>*/}
         {/*{!userAndUserDBLoading && !user?.email && <SignInButton />}*/}
         {/*{user?.email && <DropDownView />}*/}
       </NavbarContent>
@@ -234,13 +253,24 @@ export function Navbar() {
           </div>
         </NavbarItem>
 
-        {!user?.email && <SignInButton />}
+        {/* @ts-ignore */}
+        <SignedIn>
+          <DropDownView />
+        </SignedIn>
+        {/* @ts-ignore */}
+        <SignedOut>
+          <SignInButton />
+        </SignedOut>
 
-        {user?.email && <DropDownView />}
+        {/*{!user?.email && <SignInButton />}
+
+        {user?.email && <DropDownView />}*/}
       </NavbarContent>
     </NextUINavbar>
   );
 }
+
+/*
 
 export const NavbarOld = () => {
   const router = useRouter();
@@ -259,7 +289,7 @@ export const NavbarOld = () => {
   }, []);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  /*const searchInput = (
+  /!*const searchInput = (
     <Input
       aria-label="Search"
       classNames={{
@@ -278,10 +308,10 @@ export const NavbarOld = () => {
       }
       type="search"
     />
-  );*/
+  );*!/
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  /*const Profile = () => {
+  /!*const Profile = () => {
     const { myProfileData, isMyProfileDataFetching } = useFeedbacksContext();
 
     return (
@@ -299,7 +329,7 @@ export const NavbarOld = () => {
         />
       </Skeleton>
     );
-  };*/
+  };*!/
 
   return (
     <NextUINavbar
@@ -315,12 +345,12 @@ export const NavbarOld = () => {
     >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <Button isIconOnly className={"hidden max-md:flex"} variant={"light"}>
-          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+          {/!* eslint-disable-next-line jsx-a11y/label-has-associated-control *!/}
           <label htmlFor={"id-mobile-drawer"}>
             <LucideChartNoAxesGantt />
           </label>
         </Button>
-        {/*<NavbarMenuToggle className={"sm:hidden"} />*/}
+        {/!*<NavbarMenuToggle className={"sm:hidden"} />*!/}
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
             <FeedbacksLogo />
@@ -350,7 +380,7 @@ export const NavbarOld = () => {
         justify="end"
       >
         <NavbarItem className="hidden sm:flex gap-2">
-          {/*<Link isExternal aria-label="Twitter" href={siteConfig.links.twitter}>
+          {/!*<Link isExternal aria-label="Twitter" href={siteConfig.links.twitter}>
             <TwitterIcon className="text-default-500" />
           </Link>
           <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
@@ -358,23 +388,23 @@ export const NavbarOld = () => {
           </Link>
           <Link isExternal aria-label="Github" href={siteConfig.links.github}>
             <GithubIcon className="text-default-500" />
-          </Link>*/}
+          </Link>*!/}
           <ThemeSwitch />
         </NavbarItem>
 
-        {/*{profileExist ? (
+        {/!*{profileExist ? (
           <NavbarItem className="flex">{<Profile />}</NavbarItem>
         ) : (
           <div>
             <CreateProfileModal buttonText="Create Profile" />
           </div>
-        )}*/}
+        )}*!/}
 
         <NavbarItem className="hidden lg:flex">
-          {/*{searchInput}*/}
+          {/!*{searchInput}*!/}
           <div className="flex flex-wrap gap-3">
             <Button isIconOnly radius={"full"} variant={"flat"}>
-              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+              {/!* eslint-disable-next-line jsx-a11y/label-has-associated-control *!/}
               <label htmlFor={"id-search-modal"}>
                 <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
               </label>
@@ -383,7 +413,7 @@ export const NavbarOld = () => {
           <SearchModal />
         </NavbarItem>
 
-        {/* <NavbarItem className="hidden md:flex">
+        {/!* <NavbarItem className="hidden md:flex">
           <Button
             isExternal
             as={Link}
@@ -394,15 +424,15 @@ export const NavbarOld = () => {
           >
             Sponsor
           </Button>
-        </NavbarItem> */}
+        </NavbarItem> *!/}
 
-        {/*<NavbarItem className="">
+        {/!*<NavbarItem className="">
           <div className="flex items-center">
              <w3m-button />
              <w3m-button size="md" />
             <ConnectButton />
           </div>
-        </NavbarItem>*/}
+        </NavbarItem>*!/}
 
         {!user?.email && (
           <NavbarItem>
@@ -461,32 +491,32 @@ export const NavbarOld = () => {
         )}
       </NavbarContent>
 
-      {/* MOBILE NAV VIEW */}
+      {/!* MOBILE NAV VIEW *!/}
       <NavbarContent
         className="sm:hidden basis-1 items-center pl-4"
         justify="end"
       >
-        {/*<Button variant={"flat"} isIconOnly radius={"lg"}>
+        {/!*<Button variant={"flat"} isIconOnly radius={"lg"}>
           <label htmlFor={"id-search-modal"}>
             <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
           </label>
-        </Button>*/}
+        </Button>*!/}
 
         <NavbarItem>
           <div className="flex flex-wrap gap-3">
             <Button isIconOnly radius={"full"} variant={"flat"}>
-              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+              {/!* eslint-disable-next-line jsx-a11y/label-has-associated-control *!/}
               <label htmlFor={"id-search-modal"}>
                 <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
               </label>
             </Button>
           </div>
-          {/*<SearchModal />*/}
+          {/!*<SearchModal />*!/}
         </NavbarItem>
 
-        {/*<Link isExternal aria-label="Github" href={siteConfig.links.github}>
+        {/!*<Link isExternal aria-label="Github" href={siteConfig.links.github}>
           <GithubIcon className="text-default-500" />
-        </Link>*/}
+        </Link>*!/}
         <ThemeSwitch />
 
         {!user?.email && (
@@ -533,10 +563,10 @@ export const NavbarOld = () => {
                   My Profile
                 </DropdownItem>
                 <DropdownItem key="settings">Settings</DropdownItem>
-                {/*<DropdownItem key="team_settings">Team Settings</DropdownItem>*/}
+                {/!*<DropdownItem key="team_settings">Team Settings</DropdownItem>*!/}
                 <DropdownItem key="analytics">Analytics</DropdownItem>
-                {/*<DropdownItem key="system">System</DropdownItem>*/}
-                {/*<DropdownItem key="configurations">Configurations</DropdownItem>*/}
+                {/!*<DropdownItem key="system">System</DropdownItem>*!/}
+                {/!*<DropdownItem key="configurations">Configurations</DropdownItem>*!/}
                 <DropdownItem key="help_and_feedback" showDivider>
                   Help & Feedback
                 </DropdownItem>
@@ -553,13 +583,13 @@ export const NavbarOld = () => {
           </NavbarItem>
         )}
 
-        {/*
+        {/!*
           Has been moved to before the logo
           <NavbarMenuToggle />
-        */}
+        *!/}
       </NavbarContent>
 
-      {/*<NavbarMenu>
+      {/!*<NavbarMenu>
         {searchInput}
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig.navMenuItems.map((item, index) => (
@@ -580,7 +610,8 @@ export const NavbarOld = () => {
             </NavbarMenuItem>
           ))}
         </div>
-      </NavbarMenu>*/}
+      </NavbarMenu>*!/}
     </NextUINavbar>
   );
 };
+*/

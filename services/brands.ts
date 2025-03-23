@@ -15,7 +15,7 @@ export class BrandService {
     let { data, error } = await supabase
       .from(DBTables.Brand)
       .select("*")
-      .eq("ownerEmail", email);
+      .eq("owner_email", email);
 
     return { data, error };
   }

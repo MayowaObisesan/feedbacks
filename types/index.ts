@@ -4,6 +4,7 @@ import { User as S_User } from "@supabase/auth-js";
 
 import { Tables, type TablesInsert } from "@/types/supabase";
 import { DBTables } from "@/types/enums";
+import { UserResource } from "@clerk/types";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
   size?: number;
@@ -23,7 +24,7 @@ export type IUser = {
   email: string;
   updatedAt: string;
   userId: string;
-  userData: S_User;
+  userData: UserResource;
   dp: string;
 };
 
