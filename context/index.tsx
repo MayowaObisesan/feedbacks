@@ -10,59 +10,27 @@ import React, {
 import { useIsFirstRender } from "@uidotdev/usehooks";
 import { Address } from "viem";
 import { undefined } from "zod";
-import { type User as I_User } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { useSession, useUser } from "@clerk/nextjs";
+import { UserResource } from "@clerk/types";
 
-import { IBrands, IEvents, IFeedbacks, IProfile, IUser } from "@/types";
-import { supabase } from "@/utils/supabase/supabase";
+import { Brand, Feedback, IBrands, IUser } from "@/types";
 import { DBTables } from "@/types/enums";
+import { useRealTimeBrands } from "@/hooks/useBrands";
+import { useRealTimeFeedbacks } from "@/hooks/useFeedbacks";
+import { useRealTimeUsers } from "@/hooks/useFeedbackUser";
 
 interface IFeedbacksContext {
+  readonly supabaseClient: any;
   myAddress: Address;
-  allBrandsData: IBrands[] | undefined;
+  allBrandsData: Brand[] | undefined;
   trendingBrandsData: IBrands[] | undefined;
-  profileExist: boolean;
-  myProfileData: IProfile;
-  isMyProfileDataFetching: boolean;
-  myEventInvites: number[];
-  isMyEventInvitesFetching: boolean;
-  isMyEventInvitesStale: boolean;
-  isMyEventInvitesSuccessful: boolean;
-  myBrandCount: number;
-  isMyBrandCountFetching: boolean;
-  isMyBrandCountSuccessful: boolean;
-  multipleEventsInvitesData: IEvents[];
-  isMultipleInvitesDataFetching: boolean;
-  isMultipleInvitesDataSuccessful: boolean;
-  myFeedbacksData: IFeedbacks[];
-  isMyFeedbacksDataFetching: boolean;
-  isMyFeedbacksDataStale: boolean;
-  isMyFeedbacksDataSuccessful: boolean;
-  allFeedbacksData: IFeedbacks[];
-  isAllFeedbacksDataFetching: boolean;
-  isAllFeedbacksDataStale: boolean;
-  isAllFeedbacksDataSuccessful: boolean;
-  myBrandsData: IBrands[];
-  isMyBrandsDataFetching: boolean;
-  isMyBrandsDataStale: boolean;
-  isMyBrandsDataSuccessful: boolean;
-  myFollowedBrandsData: IBrands[];
-  isMyFollowedBrandsDataFetching: boolean;
-  isMyFollowedBrandsDataStale: boolean;
-  isMyFollowedBrandsDataSuccessful: boolean;
-  myFollowedBrandsPaginatedData: IBrands[];
-  isMyFollowedBrandsPaginatedDataFetching: boolean;
-  isMyFollowedBrandsPaginatedDataStale: boolean;
-  isMyFollowedBrandsPaginatedDataSuccessful: boolean;
-  myEventsData: IEvents[];
-  isMyEventsDataFetching: boolean;
-  isMyEventsDataStale: boolean;
-  isMyEventsDataSuccessful: boolean;
   userSessionData: any;
   updateSessionData: any;
-  user: I_User | undefined;
+  // user: UserResource | undefined;
   SetUser: any;
   userDB: IUser | undefined;
-  mySentFeedbacksData: IFeedbacks[] | undefined;
+  mySentFeedbacksData: Feedback[] | undefined;
 }
 
 interface FeedbacksProviderProps {
@@ -70,78 +38,15 @@ interface FeedbacksProviderProps {
 }
 
 const FeedbacksContext = createContext<IFeedbacksContext>({
-  user: undefined as unknown as I_User,
+  supabaseClient: null,
   SetUser: undefined,
   userDB: undefined as unknown as IUser,
   userSessionData: undefined,
   updateSessionData: undefined,
-  mySentFeedbacksData: undefined as unknown as IFeedbacks[],
+  mySentFeedbacksData: undefined as unknown as Feedback[],
   myAddress: "0x",
-  allBrandsData: [
-    {
-      id: 0,
-      name: "",
-      rawName: "",
-      ownerEmail: "",
-      feedbackCount: 0,
-      createdAt: "",
-      followersCount: 0,
-      brandImage: "",
-      api: "",
-      description: "",
-      userApiKey: "",
-      updatedAt: "",
-      category: "",
-      imageHash: "",
-      brandId: 0,
-      followers: [""],
-    },
-  ],
+  allBrandsData: [] as Brand[],
   trendingBrandsData: undefined as unknown as IBrands[],
-  profileExist: false,
-  myProfileData: {
-    name: "",
-    bio: "",
-    email: "",
-    profilePictureHash: "",
-    creationTime: "",
-    lastUpdated: "",
-  },
-  isMyProfileDataFetching: false,
-  myEventInvites: [],
-  isMyEventInvitesFetching: false,
-  isMyEventInvitesStale: false,
-  isMyEventInvitesSuccessful: false,
-  myBrandCount: 0,
-  isMyBrandCountFetching: true,
-  isMyBrandCountSuccessful: false,
-  multipleEventsInvitesData: [],
-  isMultipleInvitesDataFetching: false,
-  isMultipleInvitesDataSuccessful: false,
-  myFeedbacksData: [],
-  isMyFeedbacksDataFetching: false,
-  isMyFeedbacksDataStale: false,
-  isMyFeedbacksDataSuccessful: false,
-  allFeedbacksData: [],
-  isAllFeedbacksDataFetching: false,
-  isAllFeedbacksDataStale: false,
-  isAllFeedbacksDataSuccessful: false,
-  myBrandsData: [],
-  isMyBrandsDataFetching: false,
-  isMyBrandsDataStale: false,
-  isMyBrandsDataSuccessful: false,
-  myFollowedBrandsData: [],
-  isMyFollowedBrandsDataFetching: false,
-  isMyFollowedBrandsDataStale: false,
-  isMyFollowedBrandsDataSuccessful: false,
-  myFollowedBrandsPaginatedData: [],
-  isMyFollowedBrandsPaginatedDataFetching: false,
-  isMyFollowedBrandsPaginatedDataStale: false,
-  isMyFollowedBrandsPaginatedDataSuccessful: false,
-  myEventsData: [],
-  isMyEventsDataFetching: false,
-  isMyEventsDataStale: false,
-  isMyEventsDataSuccessful: false,
 });
 
 function reconstructMyProfile(myProfileData: any) {
@@ -158,24 +63,66 @@ function reconstructMyProfile(myProfileData: any) {
 }
 
 const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
+  useRealTimeUsers();
+  useRealTimeBrands();
+  useRealTimeFeedbacks();
+  const [supabaseClient, setSupabaseClient] = useState<SupabaseClient>();
   // For the w2 version of Feedbacks
   const [userSessionData, setUserSessionData] = useState();
-  const [user, setUser] = useState<I_User>();
+  // const [user, setUser] = useState<I_User>();
   const [userDB, setUserDB] = useState<IUser>();
-  const [allBrandsData, setAllBrandsData] = useState<IBrands[]>([]);
+  const [allBrandsData, setAllBrandsData] = useState<Brand[]>([]);
   const [trendingBrandsData, setTrendingBrandsData] = useState<IBrands[]>([]);
   const [mySentFeedbacksData, setMySentFeedbacksData] = React.useState<
-    IFeedbacks[]
+    Feedback[]
   >([]);
   const [profileExist, setProfileExist] = React.useState<boolean>(false);
-
   // const { address: myAddress } = useAccount();
   const isFirstRender = useIsFirstRender();
 
+  // The `useUser()` hook will be used to ensure that Clerk has loaded data about the logged in user
+  const { user } = useUser();
+  // The `useSession()` hook will be used to get the Clerk session object
+  const { isSignedIn, session } = useSession();
+
+  // Create a custom supabase client that injects the Clerk Supabase token into the request headers
+  function createClerkSupabaseClient() {
+    return createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_KEY!,
+      {
+        global: {
+          // Get the custom Supabase token from Clerk
+          fetch: async (url, options = {}) => {
+            const clerkToken = await session?.getToken({
+              template: "supabase",
+            });
+
+            // Insert the Clerk Supabase token into the headers
+            const headers = new Headers(options?.headers);
+
+            headers.set("Authorization", `Bearer ${clerkToken}`);
+
+            // Now call the default fetch
+            return fetch(url, {
+              ...options,
+              headers,
+            });
+          },
+        },
+      },
+    );
+  }
+
+  // Create a `client` object for accessing Supabase data using the Clerk token
+  const client = createClerkSupabaseClient();
+
   // Fetch all brands
   useEffect(() => {
+    setSupabaseClient(client);
+
     async function getAllBrands() {
-      const { data: brands } = await supabase
+      const { data: brands } = await client
         .from(DBTables.Brand)
         .select("*")
         .range(0, 10);
@@ -195,7 +142,7 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
           => This can be achieved by querying the feedback table and grouping by brandId and then sorting by count.
     */
     async function getTrendingBrands() {
-      const { data: trendingBrands } = await supabase
+      const { data: trendingBrands } = await client
         .from(DBTables.Brand)
         .select("*")
         .range(0, 10);
@@ -204,13 +151,15 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
         setTrendingBrandsData(trendingBrands);
       }
     }
+
     getTrendingBrands();
 
     async function getMySentFeedbacks() {
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from(DBTables.Feedback)
         .select("*")
-        .eq("email", user?.email!)
+        .eq("email", user?.primaryEmailAddress?.emailAddress!)
+        .order("created_at", { ascending: false })
         .range(0, 10);
 
       if (error) {
@@ -221,13 +170,12 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
         setMySentFeedbacksData(data);
       }
     }
-    getMySentFeedbacks();
 
     async function getProfile() {
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from(DBTables.User)
         .select("*")
-        .eq("email", user?.email);
+        .eq("email", user?.primaryEmailAddress?.emailAddress);
 
       if (error) {
         console.error("Unable to fetch userProfile", error);
@@ -236,7 +184,11 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
         setProfileExist(data[0]);
       }
     }
-    getProfile();
+
+    if (isSignedIn) {
+      getMySentFeedbacks();
+      getProfile();
+    }
   }, [user]);
 
   /*const { data: allBrandsData } = useBrandRead({
@@ -351,13 +303,13 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
     setUserSessionData(data);
   }, []);
 
-  const SetUser = async (user: I_User) => {
-    setUser(user);
+  const SetUser = async (user: UserResource) => {
+    // setUser(user);
 
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from(DBTables.User)
       .select("*")
-      .eq("email", user?.email);
+      .eq("email", user?.primaryEmailAddress?.emailAddress);
 
     if (error) {
       throw new Error("Unable to fetch your profile");
@@ -376,10 +328,10 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
     <FeedbacksContext.Provider
       // @ts-ignore
       value={{
+        supabaseClient,
         // myAddress,
         allBrandsData,
         trendingBrandsData,
-        profileExist,
         /*myProfileData,
         isMyProfileDataFetching,
         myEventInvites,
@@ -418,7 +370,6 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
         isAllFeedbacksDataSuccessful,*/
         userSessionData,
         updateSessionData,
-        user,
         SetUser,
         userDB,
         mySentFeedbacksData,

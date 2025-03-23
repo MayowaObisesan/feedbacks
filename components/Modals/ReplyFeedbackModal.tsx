@@ -38,9 +38,9 @@ export function ReplyFeedbackModal({
     try {
       // @ts-ignore
       const response = await createOrUpdateFeedbackReply.mutateAsync({
-        brand_id: feedbackData.recipientId,
+        brand_id: feedbackData.recipient_id,
         feedback_id: feedbackData.id,
-        owner_email: brandData?.ownerEmail,
+        owner_email: brandData?.owner_email,
         reply: feedbackContent.trim(),
       });
 

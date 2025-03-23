@@ -4,6 +4,8 @@ import { Progress } from "@heroui/progress";
 import { LucideStar } from "lucide-react";
 
 import { StarItem } from "@/components/RatingStars/RatingComponent";
+import { useRealTimeBrands } from "@/hooks/useBrands";
+import { useRealTimeFeedbacks } from "@/hooks/useFeedbacks";
 
 interface RatingDistribution {
   rating: number;
@@ -21,6 +23,9 @@ export default function RatingAggregate({
   totalRatings,
   distribution,
 }: RatingAggregateProps) {
+  useRealTimeBrands();
+  useRealTimeFeedbacks();
+
   return (
     <div className="flex flex-row gap-8 p-4">
       {/* Left side - Big rating number */}

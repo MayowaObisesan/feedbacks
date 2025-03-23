@@ -4,25 +4,29 @@ import { Card, CardBody } from "@heroui/card";
 import { ScrollShadow } from "@heroui/scroll-shadow";
 import { Button } from "@heroui/button";
 import { Alert } from "@heroui/alert";
+import { useUser } from "@clerk/nextjs";
 
-import { supabase } from "@/utils/supabase/supabase";
 import FeedbackCard from "@/components/FeedbackCard";
 import HomeNav from "@/components/homeNav";
 import { TrendingBrandCard } from "@/components/TrendingCard";
-import { useFeedbacksContext } from "@/context";
-import { DBTables } from "@/types/enums";
 import SearchModal from "@/components/Modals/SearchModal";
 import CreateBrandModal from "@/components/Modals/CreateBrandModal";
-import { useTrendingBrands } from "@/hooks/useBrands";
+import { useRealTimeBrands, useTrendingBrands } from "@/hooks/useBrands";
 import TrendingBrandCardSkeleton from "@/components/Skeletons/TrendingBrandCardSkeleton";
-import { useAllFeedbacks, useTrendingFeedbacks } from "@/hooks/useFeedbacks";
+import {
+  useAllFeedbacks,
+  useRealTimeFeedbacks,
+  useTrendingFeedbacks,
+} from "@/hooks/useFeedbacks";
 import {
   FeedbackCardListSkeleton,
   FeedbackCardSkeleton,
 } from "@/components/Skeletons/FeedbacksCardSkeleton";
 
 export default function Home() {
-  const { userDB } = useFeedbacksContext();
+  useRealTimeBrands();
+  useRealTimeFeedbacks();
+  const { user } = useUser();
   const {
     data: trendingBrands,
     error: trendingBrandsError,
@@ -40,7 +44,7 @@ export default function Home() {
   } = useAllFeedbacks(10);
 
   // Listen for user SIGNIN event
-  supabase.auth.onAuthStateChange(async (event, session) => {
+  /*supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === "SIGNED_IN") {
       // console.log("SIGNED_IN", session);
       // Create the User table instance here.
@@ -64,7 +68,7 @@ export default function Home() {
         ]);
       }
     }
-  });
+  });*/
 
   // useContractEvent({ eventName: "BrandRegistered" });
 
@@ -87,7 +91,7 @@ export default function Home() {
           </div>
         )}
         {/* Only show create brand modal for signed-in users */}
-        {userDB?.email && (
+        {user?.primaryEmailAddress?.emailAddress && (
           <div className={""}>
             <CreateBrandModal />
           </div>
@@ -109,11 +113,11 @@ export default function Home() {
               {trendingBrands?.map((eachTrendingBrand) => (
                 <TrendingBrandCard
                   key={eachTrendingBrand.name}
-                  avatarUrl={eachTrendingBrand.brandImage!}
+                  avatarUrl={eachTrendingBrand.brand_image!}
                   description={eachTrendingBrand.description!}
-                  feedbackCount={Number(eachTrendingBrand.feedbackCount)}
+                  feedbackCount={Number(eachTrendingBrand.feedback_count)}
                   name={eachTrendingBrand.name}
-                  rawName={eachTrendingBrand.rawName}
+                  rawName={eachTrendingBrand.raw_name}
                 />
               ))}
             </div>
@@ -123,8 +127,6 @@ export default function Home() {
               <CardBody className="flex items-center justify-center h-[200px]">
                 <div className="text-lg lg:text-xl text-gray-600 text-center leading-loose">
                   No trending brands.
-                  <br />
-                  <Button>Try again</Button>
                 </div>
               </CardBody>
             </Card>
@@ -136,6 +138,8 @@ export default function Home() {
                   Unable to fetch Brands.
                   <br />
                   Please check network connection.
+                  <br />
+                  <Button variant={"flat"}>Try again</Button>
                 </div>
               </CardBody>
             </Card>
@@ -153,12 +157,10 @@ export default function Home() {
                   <FeedbackCardSkeleton key={index} />
                 ))}
               {trendingFeedbacks?.length === 0 && (
-                <Card className="bg-transparent shadow-none">
+                <Card className="w-full bg-transparent shadow-none">
                   <CardBody className="flex items-center justify-center h-[200px]">
                     <div className="text-lg lg:text-xl text-gray-600 text-center leading-loose">
                       No trending feedbacks.
-                      <br />
-                      <Button>Try again</Button>
                     </div>
                   </CardBody>
                 </Card>
@@ -179,6 +181,8 @@ export default function Home() {
                       Unable to fetch trending feedbacks.
                       <br />
                       Please check network connection.
+                      <br />
+                      <Button variant={"flat"}>Try again</Button>
                     </div>
                   </CardBody>
                 </Card>
@@ -198,12 +202,11 @@ export default function Home() {
                   <FeedbackCardListSkeleton key={index} />
                 ))}
               {allFeedbacks?.data?.length === 0 && (
-                <Card className="bg-transparent shadow-none">
+                <Card className="w-full bg-transparent shadow-none">
                   <CardBody className="flex items-center justify-center h-[200px]">
                     <div className="text-lg lg:text-xl text-gray-600 text-center leading-loose">
-                      Empty feedbacks. You might want to check your network.
-                      <br />
-                      <Button>Reload</Button>
+                      Empty feedbacks. <br />
+                      You might want to check your network.
                     </div>
                   </CardBody>
                 </Card>
@@ -223,6 +226,8 @@ export default function Home() {
                       Unable to fetch latest feedbacks.
                       <br />
                       Please check network connection.
+                      <br />
+                      <Button variant={"flat"}>Try again</Button>
                     </div>
                   </CardBody>
                 </Card>

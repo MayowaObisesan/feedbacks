@@ -26,13 +26,14 @@ import { toast } from "sonner";
 import axios from "axios";
 import { Tab, Tabs } from "@heroui/tabs";
 import { Chip } from "@heroui/chip";
+import { useUser } from "@clerk/nextjs";
 
 import { CameraIcon } from "../icons/CameraIcon";
 
 // import { BRAND_ABI, BRAND_ADDRESS } from "@/constant";
-import { DBTables, E_ProfileAction } from "@/types/enums";
-import { supabase } from "@/utils/supabase/supabase";
+import { E_ProfileAction } from "@/types/enums";
 import { useFeedbacksContext } from "@/context";
+import { useCreateOrUpdateUser } from "@/hooks/useFeedbackUser";
 
 export function CreateProfileModal({
   action = E_ProfileAction.update,
@@ -45,28 +46,24 @@ export function CreateProfileModal({
   trigger?: ReactNode;
   buttonProps?: any;
 }) {
-  const { user, userDB } = useFeedbacksContext();
+  const { user } = useUser();
+  const { userDB } = useFeedbacksContext();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const createOrUpdateUser = useCreateOrUpdateUser();
   // const { writeContract, isPending, isSuccess, isError } = useWriteContract();
-  const [userName, setUserName] = useState<string>(
-    user?.user_metadata.user_name,
-  );
+  const [userName, setUserName] = useState<string>(user?.username!);
   // const [email, setEmail] = useState<string>("");
   const [bio, setBio] = useState<string>(userDB?.bio!);
-  const [imageHash, setImageHash] = useState<string>(
-    user?.user_metadata.avatar_url,
-  );
+  const [imageHash, setImageHash] = useState<string>(user?.imageUrl!);
   const [imageUploadPending, setImageUploadPending] = useState<boolean>(false);
   const [imageUploadSuccessful, setImageUploadSuccessful] = useState<boolean>(
-    userDB?.dp || user?.user_metadata.avatar_url,
+    !!(userDB?.dp || user?.imageUrl),
   );
 
   // For dp upload state management
-  const [dp, setDp] = useState<string>(
-    userDB?.dp || user?.user_metadata.avatar_url,
-  );
+  const [dp, setDp] = useState<string>(userDB?.dp || user?.imageUrl!);
   const [dpPreview, setDpPreview] = useState<string>(
-    userDB?.dp || user?.user_metadata.avatar_url,
+    userDB?.dp || user?.imageUrl!,
   );
   const [isDpUploading, setisDpUploading] = useState<boolean>(false);
   const profileImageRef = useRef(null);
@@ -118,10 +115,15 @@ export function CreateProfileModal({
   const onUpdateProfile = async () => {
     setIsSubmitPending(true);
     try {
-      const { data, error } = await supabase
+      const data = await createOrUpdateUser.mutateAsync({
+        email: user?.primaryEmailAddress?.emailAddress!,
+        updates: { bio: bio, dp: imageHash },
+      });
+
+      /*const { data, error } = await supabase
         .from(DBTables.User)
         .update({ bio: bio, dp: imageHash })
-        .eq("email", user?.email)
+        .eq("email", user?.primaryEmailAddress?.emailAddress)
         .select();
 
       if (error) {
@@ -140,9 +142,23 @@ export function CreateProfileModal({
 
         // close the profile modal
         onClose();
+      }*/
+
+      if (data) {
+        toast.success("Profile updated successfully", {
+          richColors: true,
+          duration: 4000,
+        });
+
+        // close the profile modal
+        onClose();
       }
     } catch (e: any) {
-      toast.error("Error updating profile", e.message);
+      toast.error("Unable to update profile", {
+        richColors: true,
+        duration: 4000,
+      });
+      toast.error("Error updating profile", { description: e.message });
     } finally {
       setIsSubmitPending(false);
     }
@@ -223,8 +239,9 @@ export function CreateProfileModal({
   return (
     <>
       <Button
+        className={"invert"}
         color="success"
-        variant="shadow"
+        variant="solid"
         onPress={onOpen}
         // endContent={<LucideUserPlus2 size={16} strokeWidth={2} />}
         {...buttonProps}
@@ -289,22 +306,24 @@ export function CreateProfileModal({
                                   src={dpPreview}
                                 />
                               )}
-                              {/* <div
-                    className="w-32 rounded-full ring ring-primary-content ring-offset-base-100 ring-offset-2"
-                    ref={profileImageRef}
-                  >
-                    <Image
-                      width={100}
-                      height={100}
-                      alt=""
-                      src={
-                        userData.profilePicture == ""
-                          ? defaultImage
-                          : userData.profilePicture
-                      }
-                      className="bg-base-300"
-                    />
-                  </div> */}
+                              {/*
+                                <div
+                                    className="w-32 rounded-full ring ring-primary-content ring-offset-base-100 ring-offset-2"
+                                    ref={profileImageRef}
+                                  >
+                                    <Image
+                                      width={100}
+                                      height={100}
+                                      alt=""
+                                      src={
+                                        userData.profilePicture == ""
+                                          ? defaultImage
+                                          : userData.profilePicture
+                                      }
+                                      className="bg-base-300"
+                                    />
+                                  </div>
+                              */}
                             </div>
                             {dpPreview && (
                               <Button
@@ -314,7 +333,7 @@ export function CreateProfileModal({
                                 }
                                 color="danger"
                                 radius="full"
-                                onClick={removeProfileUpload}
+                                onPress={removeProfileUpload}
                               >
                                 <LucideX size={16} strokeWidth={4} />
                               </Button>
@@ -390,14 +409,11 @@ export function CreateProfileModal({
                           <Input
                             // isRequired
                             // autoFocus
-                            disabled={!!user?.user_metadata}
+                            isDisabled={!!(user?.username || user?.fullName)}
                             label="Username"
                             placeholder="What is your username?"
-                            readOnly={!!user?.user_metadata}
-                            value={
-                              user?.user_metadata.name ||
-                              user?.user_metadata.user_name
-                            }
+                            readOnly={!!user?.username}
+                            value={user?.username! || user?.fullName!}
                             variant="flat"
                             onValueChange={setUserName}
                           />
@@ -432,7 +448,7 @@ export function CreateProfileModal({
                   {selected === "profileInfo" && (
                     <Button
                       isIconOnly
-                      onClick={() => setSelected("profileImage")}
+                      onPress={() => setSelected("profileImage")}
                     >
                       {<LucideChevronLeft size={16} strokeWidth={4} />}
                     </Button>
@@ -453,11 +469,13 @@ export function CreateProfileModal({
                     </Button>
                   ) : (
                     <Button
-                      isIconOnly
                       className="ml-auto"
-                      onClick={() => setSelected("profileInfo")}
+                      endContent={
+                        <LucideChevronRight size={16} strokeWidth={4} />
+                      }
+                      onPress={() => setSelected("profileInfo")}
                     >
-                      {<LucideChevronRight size={16} strokeWidth={4} />}
+                      Next
                     </Button>
                   )}
                 </div>

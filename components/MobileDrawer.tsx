@@ -21,15 +21,17 @@ import { Listbox, ListboxItem, ListboxSection } from "@heroui/listbox";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { Chip } from "@heroui/chip";
+import { useUser } from "@clerk/nextjs";
 
 import { useFeedbacksContext } from "@/context";
 import { useMyBrands } from "@/hooks/useBrands";
 import { ThemeSwitch } from "@/components/theme-switch";
 
 export default function MobileDrawer() {
+  const { user } = useUser();
   const router = useRouter();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { user, userDB } = useFeedbacksContext();
+  const { userDB } = useFeedbacksContext();
   const email = userDB?.email;
   const { data: myBrands } = useMyBrands(email!);
 
@@ -62,13 +64,15 @@ export default function MobileDrawer() {
                     fallback={<AvatarIcon />}
                     name="Profile Pic"
                     size="md"
-                    src={userDB?.dp || user?.user_metadata.avatar_url}
+                    src={userDB?.dp || user?.imageUrl}
                   />
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold">
-                      {user?.user_metadata.full_name}
+                      {user?.fullName}
                     </span>
-                    <span className="text-xs text-gray-500">{user?.email}</span>
+                    <span className="text-xs text-gray-500">
+                      {user?.primaryEmailAddress?.emailAddress}
+                    </span>
                   </div>
                 </div>
               </DrawerHeader>
@@ -170,7 +174,7 @@ export default function MobileDrawer() {
                               color="primary"
                               name="Profile Pic"
                               size="sm"
-                              src={eachBrand.brandImage!}
+                              src={eachBrand.brand_image!}
                             />
                           </div>
                         }
@@ -178,7 +182,7 @@ export default function MobileDrawer() {
                           router.push(`/app/brand/${eachBrand.name}`)
                         }
                       >
-                        {eachBrand.rawName}
+                        {eachBrand.raw_name}
                       </ListboxItem>
                     )}
                   </ListboxSection>

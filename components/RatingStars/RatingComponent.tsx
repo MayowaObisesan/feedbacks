@@ -5,12 +5,26 @@ export const StarItem = ({
   selectedRating,
   setSelectedRating,
   allowClick = false,
+  size = "md",
 }: {
   rating: number;
   selectedRating: number;
   setSelectedRating: React.Dispatch<React.SetStateAction<number | null>>;
   allowClick?: boolean;
+  size?: "lg" | "md" | "sm";
 }) => {
+  let starSize;
+
+  if (size === "sm") {
+    starSize = 20;
+  } else if (size === "md") {
+    starSize = 28;
+  } else if (size === "lg") {
+    starSize = 32;
+  } else {
+    starSize = 28;
+  }
+
   const handleRatingChange = (event: { target: { value: any } }) => {
     if (allowClick) setSelectedRating(Number(event.target.value));
   };
@@ -52,10 +66,10 @@ export const StarItem = ({
         className={`pointer-events-none transition-transform-colors group-data-[pressed=true]:scale-90 iconify iconify--solar ${
           selectedRating >= rating ? "text-warning" : "text-default-200"
         }`}
-        height="28"
+        height={starSize}
         role="img"
         viewBox="0 0 24 24"
-        width="28"
+        width={starSize}
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
@@ -70,9 +84,11 @@ export const StarItem = ({
 const RatingComponent = ({
   selectedRating,
   setSelectedRating,
+  starSize,
 }: {
   selectedRating: number;
   setSelectedRating: React.Dispatch<React.SetStateAction<number | null>>;
+  starSize?: "lg" | "md" | "sm";
 }) => {
   //   const [selectedRating, setSelectedRating] = useState(1);
 
@@ -96,6 +112,7 @@ const RatingComponent = ({
               rating={rating}
               selectedRating={selectedRating}
               setSelectedRating={setSelectedRating}
+              size={starSize}
             />
           ))}
         </div>

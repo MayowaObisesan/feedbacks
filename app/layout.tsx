@@ -1,8 +1,10 @@
 import "@/styles/globals.css";
+import * as React from "react";
 import { Metadata, Viewport } from "next";
 import clsx from "clsx";
 import { Toaster } from "sonner";
 import NextTopLoader from "nextjs-toploader";
+import { ClerkLoaded, ClerkProvider } from "@clerk/nextjs";
 
 import { Providers } from "./providers";
 
@@ -37,34 +39,38 @@ export default function RootLayout({
   // const initialState = cookieToInitialState(config, headers().get("cookie"));
 
   return (
-    <html
-      suppressHydrationWarning
-      lang="en"
-      // data-theme={theme === "light" ? "dark" : "light"}
-    >
-      <head>
-        <title />
-      </head>
-      <body
-        className={clsx(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable,
-        )}
+    // @ts-ignore
+    <ClerkProvider>
+      <html
+        suppressHydrationWarning
+        lang="en"
+        // data-theme={theme === "light" ? "dark" : "light"}
       >
-        {/*<Web3ModalProvider initialState={initialState}>*/}
-        <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          <FeedbacksProvider>
-            <div className="relative flex flex-col h-screen">
-              <NextTopLoader />
-              <Toaster richColors position="top-center" />
-              <main className="relative w-full h-dvh overflow-auto mx-auto flex-grow">
-                {children}
-              </main>
-            </div>
-          </FeedbacksProvider>
-        </Providers>
-        {/*</Web3ModalProvider>*/}
-      </body>
-    </html>
+        <head>
+          <title />
+        </head>
+        <body
+          className={clsx(
+            "min-h-screen bg-background font-sans antialiased",
+            fontSans.variable,
+          )}
+        >
+          {/*<Web3ModalProvider initialState={initialState}>*/}
+          <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
+            <FeedbacksProvider>
+              <div className="relative flex flex-col h-screen">
+                <NextTopLoader />
+                <Toaster richColors position="top-center" />
+                <main className="relative w-full h-dvh overflow-auto mx-auto flex-grow">
+                  {/*@ts-ignore*/}
+                  <ClerkLoaded>{children}</ClerkLoaded>
+                </main>
+              </div>
+            </FeedbacksProvider>
+          </Providers>
+          {/*</Web3ModalProvider>*/}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

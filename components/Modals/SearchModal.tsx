@@ -21,7 +21,7 @@ import { Alert } from "@heroui/alert";
 import { capitalize } from "@/utils";
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";
-import { IBrands } from "@/types";
+import { Brand } from "@/types";
 import { BrandListCard } from "@/components/BrandCard/BrandListCard";
 import EmptyCard from "@/components/EmptyCard";
 import { SearchIcon } from "@/components/icons";
@@ -35,7 +35,7 @@ export default function SearchModal() {
   } = useDisclosure();
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [results, setResults] = useState<IBrands[]>([]);
+  const [results, setResults] = useState<Brand[]>([]);
   const [error, setError] = useState<PostgrestError>();
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -46,7 +46,7 @@ export default function SearchModal() {
 
   useEffect(() => {
     const searchBrands = async () => {
-      let results: IBrands[] = [];
+      let results: Brand[] = [];
 
       if (debouncedSearchTerm) {
         // const data = await searchHackerNews(debouncedSearchTerm);
@@ -164,12 +164,12 @@ export default function SearchModal() {
                       results.map((eachItem) => (
                         <BrandListCard
                           key={eachItem.name}
-                          avatarUrl={eachItem.brandImage}
-                          description={eachItem.description}
-                          feedbackCount={eachItem.feedbackCount}
+                          avatarUrl={eachItem.brand_image!}
+                          description={eachItem.description!}
+                          feedbackCount={eachItem.feedback_count!}
                           isLoading={isSearching}
                           name={eachItem.name}
-                          rawName={eachItem.rawName}
+                          rawName={eachItem.raw_name}
                         />
                       ))}
 

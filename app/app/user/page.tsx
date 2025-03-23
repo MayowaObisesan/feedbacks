@@ -12,16 +12,19 @@ import {
   LucideUserPlus2,
 } from "lucide-react";
 import React, { useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 
 import EmptyCard from "@/components/EmptyCard";
 import FeedbackCard from "@/components/FeedbackCard";
 import { TrendingBrandCard } from "@/components/TrendingCard";
 import { useFeedbacksContext } from "@/context";
-import { IBrands } from "@/types";
+import { Brand, IBrands } from "@/types";
 import { DBTables, E_ProfileAction } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
 import { CreateProfileModal } from "@/components/profileModal";
 import { useMySentFeedbacks } from "@/hooks/useFeedbacks";
+import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
+import { formatDateString } from "@/utils";
 
 const accordionItemClasses = {
   base: "py-0 w-full",
@@ -36,10 +39,12 @@ const ProfileCard = ({
   followedBrands,
   isFollowed,
 }: {
-  followedBrands: IBrands[];
+  followedBrands: Brand[];
   isFollowed: boolean;
 }) => {
-  const { user, userDB } = useFeedbacksContext();
+  const { user } = useUser();
+  const { data: userAndUserDB } = useUserAndUserDBQuery();
+  const { userDB } = userAndUserDB || {};
 
   return (
     <Card className="min-w-[340px] max-w-[340px]">
@@ -49,22 +54,25 @@ const ProfileCard = ({
             isBordered
             radius="full"
             size="md"
-            src={userDB?.dp || user?.user_metadata.avatar_url}
+            src={userDB?.dp || user?.imageUrl}
           />
           <div className="flex flex-col gap-1 items-start justify-center">
-            {!user?.email ? (
+            {!user?.primaryEmailAddress?.emailAddress ? (
               <Skeleton
                 className="w-5/6 h-6 rounded-full"
-                isLoaded={!!user?.email}
+                isLoaded={!!user?.primaryEmailAddress?.emailAddress}
               />
             ) : (
               <h4 className="text-small font-semibold leading-none text-default-600">
-                {user?.user_metadata.full_name}
+                {user?.fullName}
               </h4>
             )}
-            <Skeleton className="rounded-full" isLoaded={!!user?.email}>
+            <Skeleton
+              className="rounded-full"
+              isLoaded={!!user?.primaryEmailAddress?.emailAddress}
+            >
               <h5 className="text-small tracking-tight text-default-400">
-                @{user?.email}
+                @{user?.primaryEmailAddress?.emailAddress}
               </h5>
             </Skeleton>
           </div>
@@ -124,12 +132,14 @@ const ProfileCard = ({
 };
 
 export default function Page() {
-  const { myEventsData, mySentFeedbacksData, user, userDB } =
-    useFeedbacksContext();
+  const { mySentFeedbacksData } = useFeedbacksContext();
+  const { user } = useUser();
+  const { data: userAndUserDB } = useUserAndUserDBQuery();
+  const { userDB } = userAndUserDB || {};
   const { data: mySentFeedbacks } = useMySentFeedbacks(userDB?.email!);
   const [isFollowed, setIsFollowed] = React.useState(false);
-  const [myBrandsData, setMyBrandsData] = React.useState<IBrands[]>([]);
-  const [followedBrandsData, setFollowedBrandsData] = React.useState<IBrands[]>(
+  const [myBrandsData, setMyBrandsData] = React.useState<Brand[]>([]);
+  const [followedBrandsData, setFollowedBrandsData] = React.useState<Brand[]>(
     [],
   );
   // const [sentFeedbacks, setSentFeedbacks] = React.useState<IFeedbacks[]>([]);
@@ -144,7 +154,7 @@ export default function Page() {
         const { data, error } = await supabase
           .from(DBTables.Brand)
           .select("*")
-          .eq("ownerEmail", user?.email);
+          .eq("owner_email", user?.primaryEmailAddress?.emailAddress);
 
         if (error) {
           // console.error("Error fetching your brands", error);
@@ -167,7 +177,7 @@ export default function Page() {
       const { data, error } = await supabase
         .from(DBTables.Brand)
         .select("*")
-        .contains("followers", [user?.email!]);
+        .contains("followers", [user?.primaryEmailAddress?.emailAddress!]);
 
       if (error) {
         // console.error("Error fetching followed brands", error);
@@ -177,7 +187,9 @@ export default function Page() {
         setFollowedBrandsData(data);
         setIsFollowed(
           data.filter((eachBrand: IBrands) =>
-            eachBrand.followers.includes(user?.email!),
+            eachBrand.followers.includes(
+              user?.primaryEmailAddress?.emailAddress!,
+            ),
           ).length > 0,
         );
       }
@@ -251,13 +263,13 @@ export default function Page() {
         <Card>
           <CardHeader>Other details</CardHeader>
           <CardBody className="text-default-500 text-sm space-y-2">
-            <div className="flex flex-row items-center gap-x-2">
+            {/*<div className="flex flex-row items-center gap-x-2">
               <span>Events:</span>
               <span>
                 {myEventsData?.length}{" "}
                 {myEventsData?.length !== 1 ? "events" : "event"}
               </span>
-            </div>
+            </div>*/}
             <div className="flex flex-row items-center gap-x-2">
               <span>Feedback:</span>
               <span>
@@ -267,7 +279,7 @@ export default function Page() {
             </div>
             <div className="flex flex-row items-center gap-x-2">
               <span>Joined at:</span>
-              <span>{user?.created_at}</span>
+              <span>{formatDateString(user?.createdAt?.toString()!)}</span>
             </div>
           </CardBody>
         </Card>
@@ -283,15 +295,15 @@ export default function Page() {
             <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
               {!isMyBrandsDataFetching ? (
                 <>
-                  {(myBrandsData as IBrands[])?.length > 0 ? (
-                    (myBrandsData as IBrands[])?.map((eachBrand) => (
+                  {myBrandsData?.length > 0 ? (
+                    myBrandsData?.map((eachBrand) => (
                       <TrendingBrandCard
                         key={eachBrand.name}
                         avatarUrl={""}
                         description={""}
-                        feedbackCount={Number(eachBrand.feedbackCount)}
+                        feedbackCount={Number(eachBrand.feedback_count)}
                         name={eachBrand.name}
-                        rawName={eachBrand.rawName}
+                        rawName={eachBrand.raw_name}
                       />
                     ))
                   ) : (
@@ -335,15 +347,15 @@ export default function Page() {
             Brands you follow
           </header>
           <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
-            {(followedBrandsData as IBrands[])?.length > 0 ? (
-              (followedBrandsData as IBrands[])?.map((eachBrand) => (
+            {followedBrandsData?.length > 0 ? (
+              followedBrandsData?.map((eachBrand) => (
                 <TrendingBrandCard
                   key={eachBrand.id}
                   avatarUrl={""}
                   description={""}
-                  feedbackCount={eachBrand.feedbackCount}
+                  feedbackCount={eachBrand.feedback_count!}
                   name={eachBrand.name}
-                  rawName={eachBrand.rawName}
+                  rawName={eachBrand.raw_name}
                 />
               ))
             ) : (

@@ -16,6 +16,7 @@ import { Button, ButtonGroup } from "@heroui/button";
 import { LucideThumbsDown, LucideThumbsUp } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
 
 import { StarItem } from "../RatingStars/RatingComponent";
 
@@ -53,14 +54,15 @@ export default function FeedbackCard(
   props: ExtendFeedback & Partial<FeedbackLikes>,
 ) {
   const { theme } = useTheme();
+  const { user } = useUser();
   // const [brandData, setBrandData] = React.useState<IBrands>();
   const isMounted = useIsMounted();
   const [userData, setUserData] = React.useState<IUser>();
   // const [isFollowed, setIsFollowed] = React.useState(false);
   // const { user, userDB } = useFeedbacksContext();
   const { data: userAndUserDB } = useUserAndUserDBQuery();
-  const { user, userDB } = userAndUserDB || {};
-  const { data: brandData } = useBrandById(props.recipientId);
+  const { userDB } = userAndUserDB || {};
+  const { data: brandData } = useBrandById(props.recipient_id);
   const updateFeedbackLikes = useUpdateFeedbackLikes();
   const [clickedHelpfulResponses, setClickedHelpfulResponses] = React.useState<
     boolean | undefined
@@ -107,9 +109,9 @@ export default function FeedbackCard(
     try {
       await updateFeedbackLikes.mutateAsync({
         id: props?.id,
-        brand_id: props.recipientId,
+        brand_id: props.recipient_id,
         feedback_id: props.id,
-        likes: [...feedbackLikes, user?.email!],
+        likes: [...feedbackLikes, user?.primaryEmailAddress?.emailAddress!],
       });
       setCachedAdder(1);
     } catch (error) {
@@ -124,13 +126,13 @@ export default function FeedbackCard(
     // setIsSubmit(true);
     const feedbackLikes = props?.likes ?? [];
     const updatedFeedbackLikes = feedbackLikes.filter(
-      (email) => email !== user?.email,
+      (email) => email !== user?.primaryEmailAddress?.emailAddress,
     );
 
     try {
       await updateFeedbackLikes.mutateAsync({
         id: props?.id,
-        brand_id: props.recipientId,
+        brand_id: props.recipient_id,
         feedback_id: props.id,
         likes: updatedFeedbackLikes,
       });
@@ -150,9 +152,12 @@ export default function FeedbackCard(
     try {
       await updateFeedbackLikes.mutateAsync({
         id: props?.id,
-        brand_id: props.recipientId,
+        brand_id: props.recipient_id,
         feedback_id: props.id,
-        dislikes: [...feedbackDislikes, user?.email!],
+        dislikes: [
+          ...feedbackDislikes,
+          user?.primaryEmailAddress?.emailAddress!,
+        ],
       });
       setCachedAdder(1);
     } catch (error) {
@@ -167,13 +172,13 @@ export default function FeedbackCard(
     // setIsSubmit(true);
     const feedbackDislikes = props?.dislikes ?? [];
     const updatedFeedbackDislikes = feedbackDislikes.filter(
-      (email) => email !== user?.email,
+      (email) => email !== user?.primaryEmailAddress?.emailAddress,
     );
 
     try {
       await updateFeedbackLikes.mutateAsync({
         id: props?.id,
-        brand_id: props.recipientId,
+        brand_id: props.recipient_id,
         feedback_id: props.id,
         dislikes: updatedFeedbackDislikes,
       });
@@ -207,7 +212,7 @@ export default function FeedbackCard(
         // }
       >
         <div className="flex gap-5">
-          {props?.beAnonymous ? (
+          {props?.be_anonymous ? (
             <Avatar isBordered icon={<AvatarIcon />} size={"sm"} />
           ) : (
             <Avatar
@@ -215,9 +220,9 @@ export default function FeedbackCard(
               radius="full"
               size="sm"
               src={
-                props?.email === user?.email
-                  ? userDB?.dp || user?.user_metadata.avatar_url
-                  : userData?.dp || userData?.userData?.user_metadata.avatar_url
+                props?.email === user?.primaryEmailAddress?.emailAddress
+                  ? userDB?.dp || user?.imageUrl
+                  : userData?.dp || userData?.userData?.imageUrl
               }
             />
           )}
@@ -229,14 +234,14 @@ export default function FeedbackCard(
               isLoaded={!!userData}
             >
               <h4 className="text-small font-semibold leading-none text-default-700">
-                {props?.email === user?.email
+                {props?.email === user?.primaryEmailAddress?.emailAddress
                   ? "You"
-                  : props.beAnonymous
+                  : props.be_anonymous
                     ? hashFullName(
-                        userData?.userData?.user_metadata.full_name,
-                        user?.email!,
+                        userData?.userData?.fullName!,
+                        user?.primaryEmailAddress?.emailAddress!,
                       )
-                    : userData?.userData?.user_metadata.full_name}
+                    : userData?.userData?.fullName}
               </h4>
             </Skeleton>
             {props?.showBrand && (
@@ -246,17 +251,17 @@ export default function FeedbackCard(
                   className={"font-bold text-xs"}
                   href={`/app/brand/${brandData?.name}`}
                 >
-                  {brandData?.rawName}
+                  {brandData?.raw_name}
                 </Link>
               </span>
             )}
             <Skeleton className="rounded-full" isLoaded={!!props.email}>
               <h5 className="flex flex-col text-xs leading-none tracking-normal text-default-500">
-                {formatDateString(props.createdAt)}
+                {formatDateString(props.created_at)}
               </h5>
             </Skeleton>
           </div>
-          {props.beAnonymous && (
+          {props.be_anonymous && (
             <div className={"absolute right-2"}>
               <Chip
                 className={"leading-none"}
@@ -354,16 +359,17 @@ export default function FeedbackCard(
                 key={index + 1}
                 rating={index + 1}
                 // @ts-ignore
-                selectedRating={props.starRating}
+                selectedRating={props.star_rating}
                 setSelectedRating={() => null}
+                size={"sm"}
               />
             </>
           ))}
         </div>
 
         <div className={"flex flex-row items-center gap-x-2"}>
-          {props.recipientId !== brandData?.id ? (
-            // {brandData?.ownerEmail !== user?.email ? (
+          {props.recipient_id !== brandData?.id ? (
+            // {brandData?.ownerEmail !== user?.primaryEmailAddress?.emailAddress ? (
             <div className={"flex flex-row items-center gap-x-2"}>
               {clickedHelpfulResponses && (
                 <>
@@ -431,7 +437,8 @@ export default function FeedbackCard(
           )}
           {!props.hideReplyButton &&
             !props.replyData?.reply &&
-            brandData?.ownerEmail === user?.email && (
+            brandData?.owner_email ===
+              user?.primaryEmailAddress?.emailAddress && (
               <ReplyFeedbackModal brandData={brandData!} feedbackData={props} />
             )}
         </div>

@@ -3,8 +3,7 @@
 import { Listbox, ListboxItem, ListboxSection } from "@heroui/listbox";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Image } from "@heroui/image";
-import { useEffect, useState } from "react";
-import { Divider } from "@heroui/divider";
+import { useState } from "react";
 import { Spacer } from "@heroui/spacer";
 import { Button } from "@heroui/button";
 import { toast } from "sonner";
@@ -17,11 +16,12 @@ import { ListboxWrapper } from "../homeNav/ListboxWrapper";
 
 import { DBTables } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
-import { useFeedbacksContext } from "@/context";
 import EmbedFeedbacksGenerator from "@/components/sdk/EmbedFeedbacksGenerator";
 import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
 import { BrandNavSkeleton } from "@/components/Skeletons/BrandNavSkeleton";
 import { Brand } from "@/types";
+import { useRealTimeBrands } from "@/hooks/useBrands";
+import { useRealTimeFeedbacks } from "@/hooks/useFeedbacks";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // const iconClasses =
@@ -58,15 +58,15 @@ export default function BrandNav({
   brandData: Brand;
   isBrandDataSuccessful: boolean;
 }) {
-  const {
-    myEventInvites,
-    isMyEventInvitesFetching,
-    isMyEventInvitesSuccessful,
-  } = useFeedbacksContext();
+  useRealTimeBrands();
+  useRealTimeFeedbacks();
+
   const { data: userAndUserDB, isFetched: userAndUserDBFetched } =
     useUserAndUserDBQuery();
   const { user } = userAndUserDB || {};
-  const isFollowingBrand = brandData?.followers?.includes(user?.email!);
+  const isFollowingBrand = brandData?.followers?.includes(
+    user?.primaryEmailAddress?.emailAddress!,
+  );
   const [isFollowLoading, setIsFollowLoading] = useState<boolean>(false);
 
   // Subscribe to updates on Brand Table
@@ -141,7 +141,7 @@ export default function BrandNav({
     setIsFollowLoading(true);
 
     if (isFollowingBrand) {
-      toast.info(`You are already following ${brandData?.rawName}`, {
+      toast.info(`You are already following ${brandData?.raw_name}`, {
         richColors: true,
         duration: 3000,
       });
@@ -157,7 +157,10 @@ export default function BrandNav({
       const { data, error } = await supabase
         .from(DBTables.Brand)
         .update({
-          followers: [...brandFollowers, user?.email],
+          followers: [
+            ...brandFollowers,
+            user?.primaryEmailAddress?.emailAddress,
+          ],
           followersCount: brandFollowers.length + 1,
         })
         .eq("id", brandData?.id)
@@ -165,7 +168,7 @@ export default function BrandNav({
 
       if (error) {
         // console.error("Error following brand", error);
-        toast.error(`Unable to follow ${brandData?.rawName}`, {
+        toast.error(`Unable to follow ${brandData?.raw_name}`, {
           richColors: true,
           duration: 3000,
         });
@@ -173,7 +176,7 @@ export default function BrandNav({
       }
 
       if (data) {
-        toast.success(`You are now following ${brandData?.rawName}`, {
+        toast.success(`You are now following ${brandData?.raw_name}`, {
           richColors: true,
           duration: 3000,
         });
@@ -181,7 +184,7 @@ export default function BrandNav({
       }
     } catch (error) {
       // console.error("Error following brand", error);
-      toast.error(`Unable to follow ${brandData?.rawName}`, {
+      toast.error(`Unable to follow ${brandData?.raw_name}`, {
         richColors: true,
         duration: 3000,
       });
@@ -194,7 +197,7 @@ export default function BrandNav({
     setIsFollowLoading(true);
 
     if (!isFollowingBrand) {
-      toast.info(`You are not following ${brandData?.rawName}`, {
+      toast.info(`You are not following ${brandData?.raw_name}`, {
         richColors: true,
         duration: 3000,
       });
@@ -206,7 +209,7 @@ export default function BrandNav({
     try {
       const brandFollowers = brandData?.followers ?? [];
       const updatedBrandFollowers = brandFollowers.filter(
-        (email) => email !== user?.email,
+        (email) => email !== user?.primaryEmailAddress?.emailAddress,
       );
 
       const { data, error } = await supabase
@@ -220,7 +223,7 @@ export default function BrandNav({
 
       if (error) {
         // console.error("Error unfollowing brand", error);
-        toast.error(`Unable to unfollow ${brandData?.rawName}`, {
+        toast.error(`Unable to unfollow ${brandData?.raw_name}`, {
           richColors: true,
           duration: 3000,
         });
@@ -228,7 +231,7 @@ export default function BrandNav({
       }
 
       if (data) {
-        toast.success(`You have unfollowed ${brandData?.rawName}`, {
+        toast.success(`You have unfollowed ${brandData?.raw_name}`, {
           richColors: true,
           duration: 3000,
         });
@@ -236,7 +239,7 @@ export default function BrandNav({
       }
     } catch (error) {
       // console.error("Error unfollowing brand", error);
-      toast.error(`Unable to unfollow ${brandData?.rawName}`, {
+      toast.error(`Unable to unfollow ${brandData?.raw_name}`, {
         richColors: true,
         duration: 3000,
       });
@@ -246,7 +249,7 @@ export default function BrandNav({
   };
 
   const actionsList =
-    brandData?.ownerEmail === user?.email
+    brandData?.owner_email === user?.primaryEmailAddress?.emailAddress
       ? [
           {
             text: "Update Brand",
@@ -263,7 +266,7 @@ export default function BrandNav({
             description: "Embed Feedbacks to your App",
             modal: (
               <EmbedFeedbacksGenerator
-                apiKey={brandData?.userApiKey!}
+                apiKey={brandData?.user_api_key!}
                 fullWidth={true}
               />
             ),
@@ -306,11 +309,6 @@ export default function BrandNav({
           },
         ];
 
-  useEffect(() => {
-    if (!isMyEventInvitesFetching) {
-    }
-  }, [isMyEventInvitesSuccessful]);
-
   return (
     <ListboxWrapper>
       {/*<ScrollShadow hideScrollBar>*/}
@@ -329,11 +327,11 @@ export default function BrandNav({
               isPressable={false}
             >
               <CardBody className="overflow-visible px-2">
-                {brandData?.brandImage && (
+                {brandData?.brand_image && (
                   <Image
                     alt="Card background"
                     className="object-cover rounded-xl size-32 lg:size-72"
-                    src={brandData && brandData?.brandImage}
+                    src={brandData && brandData?.brand_image}
                     // width={size.width <= E_DeviceWidth.phone ? 120 : 270}
                     // height={size.width <= E_DeviceWidth.phone ? 120 : 270}
                   />
@@ -347,20 +345,20 @@ export default function BrandNav({
                   isLoaded={isBrandDataSuccessful}
                 >
                   <h4 className="font-bold text-3xl leading-normal">
-                    {brandData && brandData?.rawName}
+                    {brandData && brandData?.raw_name}
                   </h4>
                 </Skeleton>
                 {brandData?.description}
                 <div className="flex items-center gap-1 py-2">
                   <DynamicText
-                    data={brandData?.followersCount}
+                    data={brandData?.followers_count}
                     isLoaded={isBrandDataSuccessful}
                     textPlural="Followers"
                     textSingular="Follower"
                   />
                   <DotSpacer />
                   <DynamicText
-                    data={brandData?.feedbackCount}
+                    data={brandData?.feedback_count}
                     isLoaded={isBrandDataSuccessful}
                     textPlural="Feedbacks"
                     textSingular="Feedback"
@@ -376,7 +374,8 @@ export default function BrandNav({
                       : () => {}
                   }*/
                   >
-                    {user?.email !== brandData?.ownerEmail &&
+                    {user?.primaryEmailAddress?.emailAddress !==
+                      brandData?.owner_email &&
                       (isFollowingBrand ? (
                         <Button
                           color={"danger"}
@@ -389,7 +388,7 @@ export default function BrandNav({
                       ) : (
                         <Button
                           color={"primary"}
-                          isDisabled={!user?.email}
+                          isDisabled={!user?.primaryEmailAddress?.emailAddress}
                           isLoading={isFollowLoading}
                           onPress={handleFollowBrand}
                         >
@@ -398,7 +397,7 @@ export default function BrandNav({
                       ))}
                   </div>
                 )}
-                {myEventInvites?.length > 0 && (
+                {/*{myEventInvites?.length > 0 && (
                   <section className="space-y-3 w-full">
                     <Spacer y={4} />
                     <Divider />
@@ -417,16 +416,16 @@ export default function BrandNav({
                         ? "Pending Invites"
                         : "Pending Invite"}
                     </Button>
-                    {/* <div className="text-danger text-medium">
+                     <div className="text-danger text-medium">
                       <span className="font-bold">
                         {myEventInvites?.length}{" "}
                       </span>
                       {myEventInvites?.length > 1
                         ? "Pending Invites"
                         : "Pending Invite"}
-                    </div> */}
+                    </div>
                   </section>
-                )}
+                )}*/}
                 <Spacer y={4} />
               </CardHeader>
             </Card>

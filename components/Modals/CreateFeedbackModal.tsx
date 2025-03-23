@@ -139,14 +139,14 @@ export function CreateFeedbackModal({
 
       // @ts-ignore
       const response = await createFeedback.mutateAsync({
-        recipientId: brandId!,
+        recipient_id: brandId!,
         title: feedbackTitle.trim(),
-        email: user?.email!,
+        email: user?.primaryEmailAddress?.emailAddress!,
         description: feedbackContent.trim(),
-        eventId: null,
-        productId: null,
-        starRating: rating,
-        beAnonymous: beAnonymous,
+        event_id: null,
+        product_id: null,
+        star_rating: rating,
+        be_anonymous: beAnonymous,
         screenshots: screenshotUrls.join(","),
       });
 
@@ -270,7 +270,7 @@ export function CreateFeedbackModal({
         className={"invert"}
         color="default"
         fullWidth={fullWidth}
-        isDisabled={!user?.email}
+        isDisabled={!user?.primaryEmailAddress?.emailAddress}
         startContent={<LucidePlus size={16} strokeWidth={4} />}
         variant="solid"
         onPress={onOpen}
