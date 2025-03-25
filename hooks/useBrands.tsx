@@ -3,8 +3,42 @@ import { useEffect } from "react";
 
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";
-import { Brand, BrandInsert } from "@/types";
+import {
+  Brand,
+  BrandFollowersInsert,
+  BrandInsert,
+  ExtendedBrand,
+} from "@/types";
 import { useFeedbacksContext } from "@/context";
+
+async function brandExtendedQuery(brandData: Brand, user_id?: string) {
+  const [
+    feedbackCountResponse,
+    brandFollowersCountResponse,
+    brandFollowersResponse,
+  ] = await Promise.all([
+    supabase
+      .from(DBTables.Feedback)
+      .select("*", { count: "exact", head: true })
+      .eq("recipient_id", brandData?.id),
+
+    supabase
+      .from(DBTables.BrandFollowers)
+      .select("*", { count: "exact", head: true })
+      .eq("brand_id", brandData?.id),
+
+    supabase
+      .from(DBTables.BrandFollowers)
+      .select("*", { count: "exact", head: true })
+      .match({ brand_id: brandData?.id, user_id: user_id }),
+  ]);
+
+  return [
+    feedbackCountResponse,
+    brandFollowersCountResponse,
+    brandFollowersResponse,
+  ];
+}
 
 export const useRealTimeBrands = () => {
   const queryClient = useQueryClient();
@@ -37,6 +71,37 @@ export const useRealTimeBrands = () => {
   }, [queryClient]);
 };
 
+export const useRealTimeBrandsFollowers = () => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    supabase
+      .channel("brand-followers-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: DBTables.BrandFollowers,
+        },
+        (payload) => {
+          queryClient.invalidateQueries({
+            predicate: (query) => {
+              const queryKey = query.queryKey[0];
+
+              return typeof queryKey === "string" && queryKey === "brands";
+            },
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.channel("brand-followers-changes").unsubscribe();
+    };
+  }, [queryClient]);
+};
+
 // Fetch trending brands based on multiple criteria
 export const useTrendingBrands = (
   limit: number = 5,
@@ -56,8 +121,9 @@ export const useTrendingBrands = (
         .from(DBTables.Brand)
         .select("*")
         // .gte("createdAt", pastDate.toISOString())
-        .order("feedback_count", { ascending: false })
-        .order("followers_count", { ascending: false })
+        // .order("feedback_count", { ascending: false })
+        // .order("followers_count", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(limit);
 
       if (error) throw error;
@@ -253,33 +319,31 @@ export const useMyBrands = (email: string, page: number = 1) => {
 };
 
 // Fetch my brands
-export const useFollowedBrands = (email: string, page: number = 1) => {
+export const useFollowedBrands = (user_id: string, page: number = 1) => {
   const DEFAULT_LOAD_COUNT = 10;
   const startRange = DEFAULT_LOAD_COUNT * (page - 1);
   const endRange = DEFAULT_LOAD_COUNT * page - 1;
 
   return useQuery({
-    queryKey: ["followedBrands", email],
+    queryKey: ["followedBrands", user_id],
     queryFn: async (): Promise<Brand[]> => {
-      const { data, error } = await supabase
-        .from(DBTables.Brand)
-        .select("*")
-        .contains("followers", [email])
+      const { data: brandsFollowed, error } = await supabase
+        .from(DBTables.BrandFollowers)
+        .select("brand_id")
+        .eq("user_id", user_id)
         .order("created_at", { ascending: false })
         .range(startRange, endRange);
 
-      console.log("Followed brands query", email, data);
-
       if (error) throw error;
 
-      const isFollowed =
-        data.filter((eachBrand: Brand) => eachBrand.followers?.includes(email))
-          .length > 0;
+      const { data } = await supabase
+        .from(DBTables.Brand)
+        .select("*")
+        .in("id", Object.values(brandsFollowed));
 
-      // return [...data, isFollowed];
-      return data;
+      return data || [];
     },
-    enabled: !!email,
+    enabled: !!user_id,
   });
 };
 
@@ -308,10 +372,10 @@ export const useBrandById = (id: number) => {
 };
 
 // Fetch single brand using brandName
-export const useBrandByName = (name: string) => {
+export const useBrandByName = (name: string, user_id?: string) => {
   return useQuery({
     queryKey: ["brands", name],
-    queryFn: async (): Promise<Brand> => {
+    queryFn: async (): Promise<ExtendedBrand> => {
       const { data, error } = await supabase
         .from(DBTables.Brand)
         .select("*")
@@ -320,14 +384,22 @@ export const useBrandByName = (name: string) => {
 
       if (error) throw error;
 
-      const { count } = await supabase
-        .from(DBTables.Feedback)
-        .select("*", { count: "exact", head: true })
-        .eq("recipient_id", data?.id);
+      const [
+        feedbackCountResponse,
+        brandFollowersCountResponse,
+        brandFollowersResponse,
+      ] = await brandExtendedQuery(data, user_id);
 
-      return { ...data, feedback_count: count };
+      return {
+        ...data,
+        feedback_count: feedbackCountResponse.count || 0,
+        followers_count: brandFollowersCountResponse.count || 0,
+        is_following: !!brandFollowersResponse?.count,
+      };
     },
     enabled: !!name,
+    gcTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 60,
   });
 };
 
@@ -343,6 +415,69 @@ export const useCreateBrand = () => {
         .insert(newBrand)
         .select()
         .single();
+
+      if (error) throw error;
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["brands"] });
+      queryClient.invalidateQueries({ queryKey: ["myBrands"] });
+      // Invalidate all brand-related queries
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey[0];
+
+          return typeof queryKey === "string" && queryKey === "brands";
+        },
+      });
+    },
+  });
+};
+
+// Follow Brand
+export const useFollowBrand = () => {
+  const queryClient = useQueryClient();
+  const { supabaseClient } = useFeedbacksContext();
+
+  return useMutation({
+    mutationFn: async (newBrand: BrandFollowersInsert) => {
+      const { data, error } = await supabaseClient
+        .from(DBTables.BrandFollowers)
+        .insert(newBrand)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["brands"] });
+      queryClient.invalidateQueries({ queryKey: ["myBrands"] });
+      // Invalidate all brand-related queries
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey[0];
+
+          return typeof queryKey === "string" && queryKey === "brands";
+        },
+      });
+    },
+  });
+};
+
+// Unfollow Brand
+export const useUnfollowBrand = () => {
+  const queryClient = useQueryClient();
+  const { supabaseClient } = useFeedbacksContext();
+
+  return useMutation({
+    mutationFn: async (updates: Partial<BrandFollowersInsert>) => {
+      const { data, error } = await supabaseClient
+        .from(DBTables.BrandFollowers)
+        .delete()
+        .match({ brand_id: updates.brand_id, user_id: updates.user_id });
 
       if (error) throw error;
 

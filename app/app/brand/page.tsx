@@ -1,19 +1,16 @@
 "use client";
 
-import { Card } from "@heroui/card";
-import { Avatar } from "@heroui/avatar";
 import { Skeleton } from "@heroui/skeleton";
-import { useRouter } from "next/navigation";
 import { LucideHome, LucideLayoutTemplate } from "lucide-react";
 import { BreadcrumbItem, Breadcrumbs } from "@heroui/breadcrumbs";
 import { useState } from "react";
 
 import { useBrands } from "@/hooks/useBrands";
 import BrandFilter from "@/components/BrandFilter";
+import { BrandListCard } from "@/components/BrandCard/BrandListCard";
 // import { PageHeader } from "@/components/PageHeader";
 
 export default function BrandsPage() {
-  const router = useRouter();
   const { data: brands, isLoading } = useBrands();
   const [filter, setFilter] = useState<string>("");
 
@@ -48,35 +45,44 @@ export default function BrandsPage() {
         title="Brands"
       />*/}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4 px-2">
         {isLoading
           ? Array.from({ length: 6 }).map((_, i) => (
               <Skeleton key={i} className="h-[120px] rounded-lg" />
             ))
           : filteredBrands?.map((brand) => (
-              <Card
-                key={brand.id}
-                isPressable
-                className="p-4"
-                onPress={() => router.push(`/app/brand/${brand.name}`)}
-              >
-                <div className="flex items-center gap-4">
-                  <div>
-                    <Avatar
-                      name={brand.raw_name}
-                      size="lg"
-                      src={brand.brand_image!}
-                    />
-                  </div>
-                  <div className={"text-left"}>
-                    <h3 className="text-lg font-semibold">{brand.raw_name}</h3>
-                    <p className="text-sm text-default-500">
-                      {brand.description?.substring(0, 100)}
-                      {brand.description?.length! > 100 ? "..." : ""}
-                    </p>
-                  </div>
+              /*<Card
+              key={brand.id}
+              isPressable
+              className="p-4"
+              onPress={() => router.push(`/app/brand/${brand.name}`)}
+            >
+              <div className="flex items-center gap-4">
+                <div>
+                  <Avatar
+                    name={brand.raw_name}
+                    size="lg"
+                    src={brand.brand_image!}
+                  />
                 </div>
-              </Card>
+                <div className={"text-left"}>
+                  <h3 className="text-lg font-semibold">{brand.raw_name}</h3>
+                  <p className="text-sm text-default-500">
+                    {brand.description?.substring(0, 100)}
+                    {brand.description?.length! > 100 ? "..." : ""}
+                  </p>
+                </div>
+              </div>
+            </Card>*/
+              <BrandListCard
+                key={brand.name}
+                avatarUrl={brand.brand_image!}
+                description={brand.description!}
+                feedbackCount={brand.feedback_count!}
+                isLoading={isLoading}
+                name={brand.name}
+                rawName={brand.raw_name}
+              />
             ))}
       </div>
     </div>

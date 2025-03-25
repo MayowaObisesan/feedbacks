@@ -1,6 +1,7 @@
 export enum DBTables {
   User = "user",
   Brand = "brand",
+  BrandFollowers = "brand_followers",
   Feedback = "feedback",
   FeedbackLikes = "feedback_likes",
   FeedbackReplies = "feedback_replies",

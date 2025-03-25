@@ -32,8 +32,10 @@ import { CameraIcon } from "../icons/CameraIcon";
 
 // import { BRAND_ABI, BRAND_ADDRESS } from "@/constant";
 import { E_ProfileAction } from "@/types/enums";
-import { useFeedbacksContext } from "@/context";
-import { useCreateOrUpdateUser } from "@/hooks/useFeedbackUser";
+import {
+  useCreateOrUpdateUser,
+  useUserAndUserDBQuery,
+} from "@/hooks/useFeedbackUser";
 
 export function CreateProfileModal({
   action = E_ProfileAction.update,
@@ -47,7 +49,8 @@ export function CreateProfileModal({
   buttonProps?: any;
 }) {
   const { user } = useUser();
-  const { userDB } = useFeedbacksContext();
+  const { data: userAndUserDB } = useUserAndUserDBQuery();
+  const { userDB } = userAndUserDB || {};
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const createOrUpdateUser = useCreateOrUpdateUser();
   // const { writeContract, isPending, isSuccess, isError } = useWriteContract();
@@ -370,7 +373,7 @@ export function CreateProfileModal({
                                       <LucideUpload size={16} strokeWidth={4} />
                                     )
                                   }
-                                  onClick={handleImageUpload}
+                                  onPress={handleImageUpload}
                                 >
                                   {!isDpUploading ? "Upload Image" : ""}
                                 </Button>

@@ -28,10 +28,17 @@ import { DBTables, E_ProfileAction } from "@/types/enums";
 import { CreateProfileModal } from "@/components/profileModal";
 import { DotSpacer } from "@/components/TextSkeleton";
 import CreateBrandModal from "@/components/Modals/CreateBrandModal";
-import { useFollowedBrands } from "@/hooks/useBrands";
+import {
+  useRealTimeBrands,
+  useRealTimeBrandsFollowers,
+} from "@/hooks/useBrands";
 import TrendingBrandCardSkeleton from "@/components/Skeletons/TrendingBrandCardSkeleton";
 import { formatDateString } from "@/utils";
-import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
+import {
+  useRealTimeUsers,
+  useUserAndUserDBQuery,
+} from "@/hooks/useFeedbackUser";
+import { useRealTimeFeedbacks } from "@/hooks/useFeedbacks";
 
 type Brand = Tables<DBTables.Brand>;
 
@@ -60,6 +67,10 @@ const ProfileCard = ({
 }) => {
   // const [userData, setUserData] = React.useState<IUser>();
   // const { user, userDB } = useFeedbacksContext();
+  useRealTimeUsers();
+  useRealTimeBrands();
+  useRealTimeFeedbacks();
+  useRealTimeBrandsFollowers();
 
   return (
     <Card className="lg:min-w-[340px] lg:max-w-[340px]">
@@ -152,7 +163,7 @@ const ProfileCard = ({
             </div>
           </div>
 
-          <Divider className={"shadow bg-default-100"} />
+          <Divider className={"bg-default-100"} />
 
           <div className="flex flex-col gap-2 px-1 w-full text-default-600 text-small">
             <div className="flex flex-row items-center gap-x-2">
@@ -179,17 +190,26 @@ const ProfileCard = ({
   );
 };
 
-function FollowedBrands({ followerEmail }: { followerEmail: string }) {
-  const { data: followedBrands, isFetched: followedBrandsFetched } =
-    useFollowedBrands(followerEmail);
+function FollowedBrands({
+  followerUserId,
+  followedBrands,
+}: {
+  followerUserId: string;
+  followedBrands: Brand[];
+}) {
+  useRealTimeBrands();
+  useRealTimeBrandsFollowers();
+
+  /*const { data: followedBrands, isFetched: followedBrandsFetched } =
+    useFollowedBrands(followerUserId);*/
 
   return (
-    <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
-      {!followerEmail &&
+    <div className="flex flex-row justify-center gap-x-8 px-2 py-4 w-full overflow-x-auto">
+      {/*{!followerUserId &&
         !followedBrandsFetched &&
         [1, 2, 3, 4].map((_) => (
           <TrendingBrandCardSkeleton key={_ as number} />
-        ))}
+        ))}*/}
       {followedBrands?.length === 0 && (
         <EmptyCard>
           <div className={"flex flex-col items-center gap-y-5"}>
@@ -200,9 +220,8 @@ function FollowedBrands({ followerEmail }: { followerEmail: string }) {
           </div>
         </EmptyCard>
       )}
-      {followerEmail
-        ? followedBrandsFetched &&
-          followedBrands?.map((eachBrand) => (
+      {followerUserId
+        ? followedBrands?.map((eachBrand) => (
             <TrendingBrandCard
               key={eachBrand.id}
               avatarUrl={eachBrand.brand_image!}
@@ -218,22 +237,28 @@ function FollowedBrands({ followerEmail }: { followerEmail: string }) {
 }
 
 export default function Page() {
+  useRealTimeUsers();
+  useRealTimeBrands();
+  useRealTimeBrandsFollowers();
+  useRealTimeFeedbacks();
+
   const { user } = useUser();
   // const { onOpen } = useDisclosure();
   const { mySentFeedbacksData } = useFeedbacksContext();
   const { data: userAndUserDB, isFetched: userAndUserDBFetched } =
     useUserAndUserDBQuery();
 
-  const { userDB, myBrands } = userAndUserDB || {};
+  const { userDB, myBrands, followedBrands } = userAndUserDB || {};
+
   /*const {
     data: myBrands,
     isLoading: myBrandsLoading,
     isFetched: myBrandsFetched,
   } = useMyBrands(user?.email!);*/
 
-  const { data: followedBrands } = useFollowedBrands(
+  /*const { data: followedBrands } = useFollowedBrands(
     user?.primaryEmailAddress?.emailAddress!,
-  );
+  );*/
 
   // const [isFollowed, setIsFollowed] = React.useState(false);
   // const [myBrandsData, setMyBrandsData] = React.useState<IBrands[]>([]);
@@ -386,11 +411,11 @@ export default function Page() {
           </CardBody>
         </Card>*/}
       </section>
-      <section className="space-y-12 py-4 px-3 lg:px-8 lg:overflow-y-hidden w-full">
+      <section className="space-y-12 py-4 lg:px-8 lg:overflow-y-hidden w-full">
         {
           <section>
             {
-              <header className="font-bold text-xl lg:text-3xl leading-normal">
+              <header className="font-bold text-xl lg:text-3xl leading-normal px-3">
                 Your Brands
               </header>
             }
@@ -448,13 +473,14 @@ export default function Page() {
         }
 
         <section>
-          <header className="font-bold text-xl lg:text-3xl leading-normal">
+          <header className="font-bold text-xl lg:text-3xl leading-normal px-3">
             Brands you follow
           </header>
           <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
             {user?.primaryEmailAddress?.emailAddress ? (
               <FollowedBrands
-                followerEmail={user?.primaryEmailAddress?.emailAddress}
+                followedBrands={followedBrands!}
+                followerUserId={user?.primaryEmailAddress?.emailAddress}
               />
             ) : (
               [1, 2, 3, 4].map((_) => (
@@ -465,10 +491,10 @@ export default function Page() {
         </section>
 
         <section>
-          <header className="font-mono font-bold text-xl lg:text-3xl leading-normal">
+          <header className="font-mono font-bold text-xl lg:text-3xl leading-normal px-3">
             Your Feedbacks
           </header>
-          <div className="flex flex-col gap-4 px-2 py-4">
+          <div className="flex flex-col gap-4 lg:px-2 py-4">
             {
               !!mySentFeedbacksData && (
                 <>

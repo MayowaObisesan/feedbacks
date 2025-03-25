@@ -4,7 +4,7 @@ import { Card, CardBody } from "@heroui/card";
 import { ScrollShadow } from "@heroui/scroll-shadow";
 import { Button } from "@heroui/button";
 import { Alert } from "@heroui/alert";
-import { useUser } from "@clerk/nextjs";
+import { SignedIn } from "@clerk/nextjs";
 
 import FeedbackCard from "@/components/FeedbackCard";
 import HomeNav from "@/components/homeNav";
@@ -26,22 +26,38 @@ import {
 export default function Home() {
   useRealTimeBrands();
   useRealTimeFeedbacks();
-  const { user } = useUser();
+
   const {
     data: trendingBrands,
     error: trendingBrandsError,
     isLoading: trendingBrandsLoading,
+    isRefetching: trendingBrandsRefetching,
+    refetch: trendingBrandsRefetch,
   } = useTrendingBrands();
   const {
     data: trendingFeedbacks,
     error: trendingFeedbacksError,
     isLoading: trendingFeedbacksLoading,
+    refetch: trendingFeedbacksRefetch,
   } = useTrendingFeedbacks(10);
   const {
     data: allFeedbacks,
     error: allFeedbacksError,
     isLoading: allFeedbacksLoading,
+    refetch: allFeedbacksRefetch,
   } = useAllFeedbacks(10);
+
+  async function handleTrendingBrandsRefetch() {
+    await trendingBrandsRefetch();
+  }
+
+  async function handleTrendingFeedbacksRefetch() {
+    await trendingFeedbacksRefetch();
+  }
+
+  async function handleAllFeedbacksRefetch() {
+    await allFeedbacksRefetch();
+  }
 
   // Listen for user SIGNIN event
   /*supabase.auth.onAuthStateChange(async (event, session) => {
@@ -80,7 +96,7 @@ export default function Home() {
       <div className={"hidden"}>
         <SearchModal />
       </div>
-      <section className="flex-1 space-y-12 px-2 lg:px-8 lg:overflow-x-hidden">
+      <section className="flex-1 space-y-12 md:px-2 lg:px-8 lg:overflow-x-hidden">
         {trendingBrandsError && (
           <div>
             <Alert
@@ -91,14 +107,15 @@ export default function Home() {
           </div>
         )}
         {/* Only show create brand modal for signed-in users */}
-        {user?.primaryEmailAddress?.emailAddress && (
-          <div className={""}>
+        {/*@ts-ignore*/}
+        <SignedIn>
+          <div className={"px-2"}>
             <CreateBrandModal />
           </div>
-        )}
+        </SignedIn>
 
         <section>
-          <header className="font-bold text-xl md:text-3xl leading-normal">
+          <header className="font-bold text-xl md:text-3xl leading-normal px-2">
             Trending Brands
           </header>
           {trendingBrandsLoading && (
@@ -134,12 +151,17 @@ export default function Home() {
           {trendingBrandsError && (
             <Card className="bg-transparent shadow-none">
               <CardBody className="flex items-center justify-center h-[200px]">
-                <div className="text-lg lg:text-2xl text-gray-600 text-center text-pretty leading-loose">
+                <div className="text-base lg:text-2xl text-gray-600 text-center text-pretty leading-loose">
                   Unable to fetch Brands.
                   <br />
                   Please check network connection.
                   <br />
-                  <Button variant={"flat"}>Try again</Button>
+                  <Button
+                    variant={"flat"}
+                    onPress={handleTrendingBrandsRefetch}
+                  >
+                    Try again
+                  </Button>
                 </div>
               </CardBody>
             </Card>
@@ -147,12 +169,12 @@ export default function Home() {
         </section>
 
         <section className="">
-          <header className="font-bold text-xl md:text-3xl leading-normal">
+          <header className="font-bold text-xl md:text-3xl leading-normal px-2">
             Trending Feedbacks
           </header>
           <ScrollShadow hideScrollBar orientation={"horizontal"} size={40}>
             <div className="flex flex-row gap-x-8 gap-y-2 px-2 py-4">
-              {trendingFeedbacksLoading &&
+              {(trendingFeedbacksLoading || trendingBrandsRefetching) &&
                 Array.from({ length: 5 })?.map((_, index) => (
                   <FeedbackCardSkeleton key={index} />
                 ))}
@@ -177,12 +199,17 @@ export default function Home() {
               {trendingFeedbacksError && (
                 <Card className="w-full bg-transparent shadow-none">
                   <CardBody className="flex items-center justify-center h-[200px]">
-                    <div className="text-lg lg:text-2xl text-gray-600 text-center text-pretty leading-loose">
+                    <div className="text-base lg:text-2xl text-gray-600 text-center text-pretty leading-loose">
                       Unable to fetch trending feedbacks.
                       <br />
                       Please check network connection.
                       <br />
-                      <Button variant={"flat"}>Try again</Button>
+                      <Button
+                        variant={"flat"}
+                        onPress={handleTrendingFeedbacksRefetch}
+                      >
+                        Try again
+                      </Button>
                     </div>
                   </CardBody>
                 </Card>
@@ -192,11 +219,11 @@ export default function Home() {
         </section>
 
         <section className="">
-          <header className="font-bold text-xl md:text-3xl leading-normal">
+          <header className="font-bold text-xl md:text-3xl leading-normal px-2">
             Latest Feedbacks
           </header>
           <ScrollShadow hideScrollBar orientation={"vertical"} size={80}>
-            <div className="flex flex-col md:flex-row gap-x-8 gap-y-2 px-2 py-4">
+            <div className="flex flex-col md:flex-row md:gap-x-8 gap-y-2 md:px-2 py-4">
               {allFeedbacksLoading &&
                 Array.from({ length: 5 })?.map((_, index) => (
                   <FeedbackCardListSkeleton key={index} />
@@ -222,12 +249,17 @@ export default function Home() {
               {allFeedbacksError && (
                 <Card className="w-full bg-transparent shadow-none">
                   <CardBody className="flex items-center justify-center h-[200px]">
-                    <div className="text-lg lg:text-2xl text-gray-600 text-center text-pretty leading-loose">
+                    <div className="text-base lg:text-2xl text-gray-600 text-center text-pretty leading-loose">
                       Unable to fetch latest feedbacks.
                       <br />
                       Please check network connection.
                       <br />
-                      <Button variant={"flat"}>Try again</Button>
+                      <Button
+                        variant={"flat"}
+                        onPress={handleAllFeedbacksRefetch}
+                      >
+                        Try again
+                      </Button>
                     </div>
                   </CardBody>
                 </Card>

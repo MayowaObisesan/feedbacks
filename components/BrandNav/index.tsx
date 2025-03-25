@@ -8,19 +8,22 @@ import { Spacer } from "@heroui/spacer";
 import { Button } from "@heroui/button";
 import { toast } from "sonner";
 import { Skeleton } from "@heroui/skeleton";
+import { useUser } from "@clerk/nextjs";
 
 import UpdateBrandModal from "../Modals/UpdateBrandModal";
 import { CreateFeedbackModal } from "../Modals/CreateFeedbackModal";
 import { DotSpacer, DynamicText } from "../TextSkeleton";
 import { ListboxWrapper } from "../homeNav/ListboxWrapper";
 
-import { DBTables } from "@/types/enums";
-import { supabase } from "@/utils/supabase/supabase";
 import EmbedFeedbacksGenerator from "@/components/sdk/EmbedFeedbacksGenerator";
-import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
 import { BrandNavSkeleton } from "@/components/Skeletons/BrandNavSkeleton";
-import { Brand } from "@/types";
-import { useRealTimeBrands } from "@/hooks/useBrands";
+import { ExtendedBrand } from "@/types";
+import {
+  useFollowBrand,
+  useRealTimeBrands,
+  useRealTimeBrandsFollowers,
+  useUnfollowBrand,
+} from "@/hooks/useBrands";
 import { useRealTimeFeedbacks } from "@/hooks/useFeedbacks";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -55,19 +58,21 @@ export default function BrandNav({
   isBrandDataSuccessful,
 }: {
   brandName?: string;
-  brandData: Brand;
+  brandData: ExtendedBrand;
   isBrandDataSuccessful: boolean;
 }) {
   useRealTimeBrands();
   useRealTimeFeedbacks();
+  useRealTimeBrandsFollowers();
 
-  const { data: userAndUserDB, isFetched: userAndUserDBFetched } =
-    useUserAndUserDBQuery();
-  const { user } = userAndUserDB || {};
-  const isFollowingBrand = brandData?.followers?.includes(
+  const { user, isLoaded: userLoaded } = useUser();
+  /*const isFollowingBrand = brandData?.followers?.includes(
     user?.primaryEmailAddress?.emailAddress!,
-  );
+  );*/
+  const isFollowingBrand = brandData?.is_following;
   const [isFollowLoading, setIsFollowLoading] = useState<boolean>(false);
+  const followBrand = useFollowBrand();
+  const unfollowBrand = useUnfollowBrand();
 
   // Subscribe to updates on Brand Table
   /*const channels = supabase
@@ -151,7 +156,19 @@ export default function BrandNav({
     }
 
     try {
-      const brandFollowers = brandData?.followers ?? [];
+      const response = await followBrand.mutateAsync({
+        brand_id: brandData?.id!,
+        user_id: user?.id,
+      });
+
+      if (response) {
+        toast.success(`You are now following ${brandData?.raw_name}`, {
+          richColors: true,
+          duration: 3000,
+        });
+      }
+
+      /*const brandFollowers = brandData?.followers ?? [];
 
       // console.log("brand Followers", brandFollowers);
       const { data, error } = await supabase
@@ -181,7 +198,7 @@ export default function BrandNav({
           duration: 3000,
         });
         setIsFollowLoading(false);
-      }
+      }*/
     } catch (error) {
       // console.error("Error following brand", error);
       toast.error(`Unable to follow ${brandData?.raw_name}`, {
@@ -207,7 +224,17 @@ export default function BrandNav({
     }
 
     try {
-      const brandFollowers = brandData?.followers ?? [];
+      await unfollowBrand.mutateAsync({
+        brand_id: brandData?.id!,
+        user_id: user?.id,
+      });
+
+      toast.success(`You have unfollowed ${brandData?.raw_name}`, {
+        richColors: true,
+        duration: 3000,
+      });
+
+      /*const brandFollowers = brandData?.followers ?? [];
       const updatedBrandFollowers = brandFollowers.filter(
         (email) => email !== user?.primaryEmailAddress?.emailAddress,
       );
@@ -236,7 +263,7 @@ export default function BrandNav({
           duration: 3000,
         });
         setIsFollowLoading(false);
-      }
+      }*/
     } catch (error) {
       // console.error("Error unfollowing brand", error);
       toast.error(`Unable to unfollow ${brandData?.raw_name}`, {
@@ -318,26 +345,163 @@ export default function BrandNav({
         emptyContent="No Categories"
         variant="flat"
       >
-        <ListboxItem key={"brandProfile"} textValue="brandProfile">
+        <ListboxItem
+          key={"mobileBrandProfile"}
+          className={"md:hidden"}
+          textValue="brandProfile"
+        >
           {!isBrandDataSuccessful ? (
             <BrandNavSkeleton />
           ) : (
             <Card
-              className="max-sm:grid max-sm:grid-cols-3 lg:grid-cols-none py-0 bg-default-50/80 dark:bg-default-50 shadow-none"
+              className="py-0 bg-default-50/80 dark:bg-default-50 shadow-none"
               isPressable={false}
             >
-              <CardBody className="overflow-visible px-2">
+              <CardBody className="flex flex-row items-end gap-x-4 overflow-visible px-2">
                 {brandData?.brand_image && (
                   <Image
                     alt="Card background"
-                    className="object-cover rounded-xl size-32 lg:size-72"
+                    className="object-contain lg:object-cover rounded-xl size-28 lg:size-72"
+                    src={brandData && brandData?.brand_image}
+                    // width={size.width <= E_DeviceWidth.phone ? 120 : 270}
+                    // height={size.width <= E_DeviceWidth.phone ? 120 : 270}
+                  />
+                )}
+                <div>
+                  <Skeleton
+                    className={"rounded-xl"}
+                    isLoaded={isBrandDataSuccessful}
+                  >
+                    <h4 className="font-bold text-3xl leading-normal">
+                      {brandData && brandData?.raw_name}
+                    </h4>
+                  </Skeleton>
+                  <div className="flex items-center gap-1 py-1">
+                    <DynamicText
+                      data={brandData?.followers_count}
+                      isLoaded={isBrandDataSuccessful}
+                      textPlural="Followers"
+                      textSingular="Follower"
+                    />
+                    <DotSpacer />
+                    <DynamicText
+                      data={brandData?.feedback_count}
+                      isLoaded={isBrandDataSuccessful}
+                      textPlural="Feedbacks"
+                      textSingular="Feedback"
+                    />
+                  </div>
+                  <Spacer y={2} />
+                  {userLoaded && (
+                    <div className={"px-0"}>
+                      {user?.primaryEmailAddress?.emailAddress !==
+                        brandData?.owner_email &&
+                        (isFollowingBrand ? (
+                          <Button
+                            color={"danger"}
+                            isLoading={isFollowLoading}
+                            variant={"solid"}
+                            onPress={handleUnFollowBrand}
+                          >
+                            Unfollow
+                          </Button>
+                        ) : (
+                          <Button
+                            color={"primary"}
+                            isDisabled={
+                              !user?.primaryEmailAddress?.emailAddress
+                            }
+                            isLoading={isFollowLoading}
+                            onPress={handleFollowBrand}
+                          >
+                            Follow
+                          </Button>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </CardBody>
+              <CardHeader>{brandData?.description}</CardHeader>
+              {/*<CardHeader className="pb-0 px-4 flex-col max-sm:col-span-2 items-start">
+                <Skeleton
+                  className={"rounded-xl"}
+                  isLoaded={isBrandDataSuccessful}
+                >
+                  <h4 className="font-bold text-3xl leading-normal">
+                    {brandData && brandData?.raw_name}
+                  </h4>
+                </Skeleton>
+                {brandData?.description}
+                <div className="flex items-center gap-1 py-2">
+                  <DynamicText
+                    data={brandData?.followers_count}
+                    isLoaded={isBrandDataSuccessful}
+                    textPlural="Followers"
+                    textSingular="Follower"
+                  />
+                  <DotSpacer />
+                  <DynamicText
+                    data={brandData?.feedback_count}
+                    isLoaded={isBrandDataSuccessful}
+                    textPlural="Feedbacks"
+                    textSingular="Feedback"
+                  />
+                </div>
+                <Spacer y={2} />
+                {userLoaded && (
+                  <div className={"px-0"}>
+                    {user?.primaryEmailAddress?.emailAddress !==
+                      brandData?.owner_email &&
+                      (isFollowingBrand ? (
+                        <Button
+                          color={"danger"}
+                          isLoading={isFollowLoading}
+                          variant={"solid"}
+                          onPress={handleUnFollowBrand}
+                        >
+                          Unfollow
+                        </Button>
+                      ) : (
+                        <Button
+                          color={"primary"}
+                          isDisabled={!user?.primaryEmailAddress?.emailAddress}
+                          isLoading={isFollowLoading}
+                          onPress={handleFollowBrand}
+                        >
+                          Follow
+                        </Button>
+                      ))}
+                  </div>
+                )}
+                <Spacer y={4} />
+              </CardHeader>*/}
+            </Card>
+          )}
+        </ListboxItem>
+        <ListboxItem
+          key={"brandProfile"}
+          className={"max-md:hidden"}
+          textValue="brandProfile"
+        >
+          {!isBrandDataSuccessful ? (
+            <BrandNavSkeleton />
+          ) : (
+            <Card
+              className="max-lg:grid max-sm:grid-cols-3 md:grid-cols-none py-0 bg-default-50/80 dark:bg-default-50 shadow-none"
+              isPressable={false}
+            >
+              <CardBody className="flex flex-col justify-center items-center overflow-visible px-2">
+                {brandData?.brand_image && (
+                  <Image
+                    alt="Card background"
+                    className="object-cover rounded-xl size-32 md:size-72"
                     src={brandData && brandData?.brand_image}
                     // width={size.width <= E_DeviceWidth.phone ? 120 : 270}
                     // height={size.width <= E_DeviceWidth.phone ? 120 : 270}
                   />
                 )}
               </CardBody>
-              <CardHeader className="pb-0 px-4 flex-col max-sm:col-span-2 items-start">
+              <CardHeader className="pb-0 px-4 flex-col max-md:col-span-2 items-start">
                 {/* <p className="text-tiny uppercase font-bold">Brand Details</p> */}
                 {/* <small className="text-default-500">12 Tracks</small> */}
                 <Skeleton
@@ -365,7 +529,7 @@ export default function BrandNav({
                   />
                 </div>
                 <Spacer y={2} />
-                {userAndUserDBFetched && (
+                {userLoaded && (
                   <div
                     className={"px-0"}
                     /*onPress={
@@ -457,7 +621,7 @@ export default function BrandNav({
             >
               <Skeleton
                 className={"rounded-xl"}
-                isLoaded={isBrandDataSuccessful && userAndUserDBFetched}
+                isLoaded={isBrandDataSuccessful && userLoaded}
               >
                 {eachAction.modal}
               </Skeleton>

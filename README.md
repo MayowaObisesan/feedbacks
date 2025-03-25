@@ -7,6 +7,11 @@
 1. Brands you send your honest feedbacks cannot see your details. You can choose to send an anonymous feedback or an unanonymous feedback. Either way, the brands cannot access your information.
 
 
+HELPFUL LINKS:
+
+Google svg icon: 
+https://www.figma.com/community/file/1386104594751427405/google-g-logo
+
 # Next.js & NextUI Template
 
 This is a template for creating applications using Next.js 14 (app directory) and NextUI (v2).

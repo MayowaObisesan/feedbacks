@@ -2,12 +2,22 @@ import * as React from "react";
 
 import { IconSvgProps } from "@/types";
 
-export const FeedbacksLogo = (props: IconProps) => (
+export const FeedbacksLogo = ({
+  height,
+  size,
+  width,
+  props,
+}: {
+  height?: number;
+  size?: number;
+  width?: number;
+  props?: IconProps;
+}) => (
   <svg
     fill="none"
-    height="24"
+    height={size || height || "24"}
     viewBox="0 0 512 512"
-    width="24"
+    width={size || width || "24"}
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >

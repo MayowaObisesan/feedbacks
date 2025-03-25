@@ -53,6 +53,7 @@ export function Navbar() {
   }, []);
 */
 
+  // @ts-ignore
   async function handleSignOut() {
     try {
       // Sign out from Supabase
@@ -80,7 +81,7 @@ export function Navbar() {
         <Button
           color={"success"}
           variant="shadow"
-          onPress={() => router.push("/app/sign-in")}
+          onPress={() => router.push("/sign-in")}
         >
           Sign in
         </Button>
@@ -126,14 +127,14 @@ export function Navbar() {
             <DropdownItem key="help_and_feedback" showDivider>
               Help & Feedback
             </DropdownItem>
-            <DropdownItem
+            {/*<DropdownItem
               key="logout"
               color="danger"
               endContent={<DisconnectIcon size={20} strokeWidth={4} />}
               onPress={handleSignOut}
             >
               Log Out
-            </DropdownItem>
+            </DropdownItem>*/}
             <DropdownItem
               key="signout"
               as={Button}
