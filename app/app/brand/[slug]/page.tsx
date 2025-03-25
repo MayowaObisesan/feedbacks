@@ -18,7 +18,11 @@ import { useUser } from "@clerk/nextjs";
 import BrandNav from "@/components/BrandNav";
 import EmptyCard from "@/components/EmptyCard";
 import FeedbackCard from "@/components/FeedbackCard";
-import { useBrandByName, useRealTimeBrands } from "@/hooks/useBrands";
+import {
+  useBrandByName,
+  useRealTimeBrands,
+  useRealTimeBrandsFollowers,
+} from "@/hooks/useBrands";
 import { FeedbackCardListSkeleton } from "@/components/Skeletons/FeedbacksCardSkeleton";
 import {
   useBrandFeedbacks,
@@ -27,10 +31,12 @@ import {
 } from "@/hooks/useFeedbacks";
 import RatingAggregate from "@/components/RatingAggregate";
 import { InfiniteFlatList } from "@/components/FlatList/infiniteFlatList";
+import RatingAggregateSkeleton from "@/components/Skeletons/RatingAggregateSkeleton";
 
 function BrandPage({ params }: { params: any }) {
   useRealTimeFeedbacks();
   useRealTimeBrands();
+  useRealTimeBrandsFollowers();
 
   // @ts-ignore
   const { slug } = React.use(params);
@@ -45,7 +51,7 @@ function BrandPage({ params }: { params: any }) {
     data: brandData,
     error: brandError,
     isFetched: brandIsFetched,
-  } = useBrandByName(slug);
+  } = useBrandByName(slug, user?.id);
   const {
     data: brandFeedbacksData,
     isFetching: brandFeedbacksIsFetching,
@@ -56,10 +62,11 @@ function BrandPage({ params }: { params: any }) {
     pageRef.current,
     limit,
   );
-  const { data: starCounts } = useStarRatingCounts(brandData?.id!);
+  const { data: ratingData, isFetched: ratingDataFetched } =
+    useStarRatingCounts(brandData?.id!);
   const totalPages = Math.ceil(brandFeedbacksData?.count! / limit);
 
-  const distribution = [1, 2, 3].map((rating, index) => ({
+  /*const distribution = [1, 2, 3].map((rating, index) => ({
     rating,
     count: starCounts?.[index] || 0,
   }));
@@ -75,15 +82,15 @@ function BrandPage({ params }: { params: any }) {
     // averageRating: totalFeedbacks > 0 ? ratingSum / totalFeedbacks : 0,
     averageRating: averageRating,
     totalRatings: totalFeedbacks,
-    /*distribution: [
+    /!*distribution: [
       { rating: 5, count: 600 },
       { rating: 4, count: 400 },
       { rating: 3, count: 150 },
       { rating: 2, count: 50 },
       { rating: 1, count: 34 },
-    ],*/
+    ],*!/
     distribution,
-  };
+  };*/
 
   const renderFeedbackItem = (feedback: any) => (
     <FeedbackCard
@@ -253,47 +260,68 @@ function BrandPage({ params }: { params: any }) {
     // && (productData as IProduct[])?.length === 0
   ) {
     return (
-      <section className="flex flex-col lg:flex-row w-ful h-full py-4 overflow-hidden">
-        <div className="relative lg:h-full lg:overflow-y-auto">
-          <BrandNav
-            brandData={brandData!}
-            brandName={slug}
-            isBrandDataSuccessful={brandIsFetched}
-          />
+      <section className={"md:h-full md:overflow-hidden"}>
+        <div className={"sticky top-0 z-40 p-4 bg-background"}>
+          <Breadcrumbs>
+            <BreadcrumbItem
+              href={"/app"}
+              startContent={<LucideHome size={15} />}
+            >
+              Home
+            </BreadcrumbItem>
+            <BreadcrumbItem
+              href={"/app/brand"}
+              startContent={<LucideLayoutTemplate size={15} />}
+            >
+              Brands
+            </BreadcrumbItem>
+            <BreadcrumbItem>{brandData?.raw_name}</BreadcrumbItem>
+          </Breadcrumbs>
         </div>
-        <section className="flex flex-col justify-center items-center w-full h-full overflow-hidden">
-          {brandError && (
-            <Alert
-              color={"danger"}
-              description={"Error fetching brand. Pls check network Connection"}
+        <section className="flex flex-col md:flex-row w-ful h-full py-4 md:overflow-hidden">
+          <div className="flex-1 relative md:min-w-72 md:max-w-72 md:h-dvh">
+            <BrandNav
+              brandData={brandData!}
+              brandName={slug}
+              isBrandDataSuccessful={brandIsFetched}
             />
-          )}
-          <div className="text-center">
-            <div>Your brand page is a bit empty.</div>
-            <div>Start an engagement with some of these actions.</div>
           </div>
+          <section className="flex-1 flex flex-col justify-center items-center w-full h-full overflow-hidden">
+            {brandError && (
+              <Alert
+                color={"danger"}
+                description={
+                  "Error fetching brand. Pls check network Connection"
+                }
+              />
+            )}
+            <div className="text-center">
+              <div>Your brand page is a bit empty.</div>
+              <div>Start an engagement with some of these actions.</div>
+            </div>
 
-          {/*<section className="flex flex-col items-center gap-y-5">
-            <div>
-              {brandData?.owner_email === user?.primaryEmailAddress?.emailAddress && (
-                <UpdateBrandModal brandId={brandData ? brandData?.id : null} />
-              )}
-            </div>
-            <div className="my-4 space-x-4">
-              <CreateFeedbackModal brandId={brandData ? brandData?.id : null} />
-              {brandData?.owner_email !==
-                user?.primaryEmailAddress?.emailAddress && (
-                <>
-                  <CreateEventModal
-                    brandId={brandData ? brandData?.id : null}
-                  />
-                  <CreateProductModal
-                    brandId={brandData ? brandData?.id : null}
-                  />
-                </>
-              )}
-            </div>
-          </section>*/}
+            {/*<section className="flex flex-col items-center gap-y-5">
+              <div>
+                {brandData?.owner_email === user?.primaryEmailAddress?.emailAddress && (
+                  <UpdateBrandModal brandId={brandData ? brandData?.id : null} />
+                )}
+              </div>
+              <div className="my-4 space-x-4">
+                <CreateFeedbackModal brandId={brandData ? brandData?.id : null} />
+                {brandData?.owner_email !==
+                  user?.primaryEmailAddress?.emailAddress && (
+                  <>
+                    <CreateEventModal
+                      brandId={brandData ? brandData?.id : null}
+                    />
+                    <CreateProductModal
+                      brandId={brandData ? brandData?.id : null}
+                    />
+                  </>
+                )}
+              </div>
+            </section>*/}
+          </section>
         </section>
       </section>
     );
@@ -347,7 +375,11 @@ function BrandPage({ params }: { params: any }) {
             </div>*/}
 
             <section>
-              <RatingAggregate {...ratingData} />
+              {ratingDataFetched && ratingData ? (
+                <RatingAggregate {...ratingData} />
+              ) : (
+                <RatingAggregateSkeleton />
+              )}
               <header className="flex flex-row justify-between items-center px-4 font-bold text-base md:text-3xl leading-normal">
                 <div>Your Feedbacks</div>
                 <div className={"flex flex-row items-center md:px-4"}>

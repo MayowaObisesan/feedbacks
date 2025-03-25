@@ -43,6 +43,8 @@ export function BrandListCard({
             }
           >
             {description}
+            {/*{description?.substring(0, 100)}*/}
+            {/*{description?.length! > 100 ? "..." : ""}*/}
           </div>
           <div className="font-medium text-xs leading-normal">
             {Number(formatCount(feedbackCount))}{" "}

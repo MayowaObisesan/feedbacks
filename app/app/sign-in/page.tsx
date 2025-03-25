@@ -5,8 +5,12 @@ import { OAuthStrategy } from "@clerk/types";
 import { useSignIn } from "@clerk/nextjs";
 import { Button } from "@heroui/button";
 
+import { Icons } from "@/components/icons";
+import { LastUsed, useLastUsed } from "@/hooks/lastUsed";
+
 export default function OauthSignIn() {
   const { signIn } = useSignIn();
+  const [lastUsed, setLastUsed] = useLastUsed();
 
   if (!signIn) return null;
 
@@ -17,7 +21,7 @@ export default function OauthSignIn() {
         redirectUrl: "/app/sign-in/sso-callback",
         redirectUrlComplete: "/app",
       })
-      .then((res) => {
+      .then((res: any) => {
         // console.log(res);
       })
       .catch((err: any) => {
@@ -32,8 +36,9 @@ export default function OauthSignIn() {
   // you want to add to your app. This example uses only Google.
   return (
     <div>
-      <Button variant={"light"} onPress={() => signInWith("oauth_google")}>
-        Sign in with Google
+      <Button variant={"flat"} onPress={() => signInWith("oauth_google")}>
+        <Icons.google className="mr-2 h-4 w-4" />
+        Sign in with Google {lastUsed === "google" ? <LastUsed /> : null}
       </Button>
     </div>
   );

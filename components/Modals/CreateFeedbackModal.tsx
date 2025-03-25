@@ -197,8 +197,10 @@ export function CreateFeedbackModal({
         // console.error("error creating feedback", error);
         toast.error("Error creating your feedback. Kindly try again.");
       }*/
-    } catch (e) {
-      toast.error("Error creating your feedback. Kindly try again.");
+    } catch (e: any) {
+      toast.error("Error creating your feedback. Kindly try again.", {
+        description: e.message,
+      });
     } finally {
       setIsSubmitPending(false);
     }
@@ -339,6 +341,9 @@ export function CreateFeedbackModal({
 
                 <div>
                   <Input
+                    classNames={{
+                      label: "font-semibold",
+                    }}
                     label="Title"
                     labelPlacement="outside"
                     placeholder="A title for your feedback"
@@ -352,6 +357,7 @@ export function CreateFeedbackModal({
                   className=""
                   classNames={{
                     input: "placeholder:text-default-300",
+                    label: "font-semibold",
                   }}
                   label="Your Feedback"
                   labelPlacement="outside"
@@ -360,7 +366,7 @@ export function CreateFeedbackModal({
                   onValueChange={setFeedbackContent}
                 />
                 <div className="space-y-2">
-                  <div className="text-small">Set a Rating</div>
+                  <div className="font-semibold text-small">Set a Rating</div>
                   {/* <Rating setRating={setRating} /> */}
                   <RatingComponent
                     selectedRating={rating!}

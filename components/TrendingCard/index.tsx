@@ -7,6 +7,7 @@ import { Avatar } from "@heroui/avatar";
 
 import { formatCount } from "@/utils";
 import { ITrendingBrandCard } from "@/types";
+import { useRealTimeBrands } from "@/hooks/useBrands";
 
 export function TrendingBrandCard({
   name,
@@ -15,6 +16,8 @@ export function TrendingBrandCard({
   description,
   feedbackCount,
 }: ITrendingBrandCard) {
+  useRealTimeBrands();
+
   return (
     <Link href={`/app/brand/${name}`}>
       <Card

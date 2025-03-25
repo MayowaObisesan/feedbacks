@@ -23,11 +23,18 @@ import { StarItem } from "../RatingStars/RatingComponent";
 import { DBTables } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
 import { formatDateString, hashFullName } from "@/utils";
-import { useBrandById } from "@/hooks/useBrands";
-import { useUpdateFeedbackLikes } from "@/hooks/useFeedbacks";
-import { FeedbackReplies, IUser } from "@/types";
+import { useBrandById, useRealTimeBrands } from "@/hooks/useBrands";
+import {
+  useRealTimeFeedbackReplies,
+  useRealTimeFeedbacks,
+  useUpdateFeedbackLikes,
+} from "@/hooks/useFeedbacks";
+import { FeedbackReplies, User } from "@/types";
 import { ReplyFeedbackModal } from "@/components/Modals/ReplyFeedbackModal";
-import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
+import {
+  useRealTimeUsers,
+  useUserAndUserDBQuery,
+} from "@/hooks/useFeedbackUser";
 
 type Feedback = Tables<DBTables.Feedback>;
 type FeedbackLikes = Tables<DBTables.FeedbackLikes>;
@@ -53,16 +60,23 @@ type ExtendFeedback = Feedback & {
 export default function FeedbackCard(
   props: ExtendFeedback & Partial<FeedbackLikes>,
 ) {
+  useRealTimeFeedbacks();
+  useRealTimeFeedbackReplies();
+  useRealTimeBrands();
+  useRealTimeUsers();
+
   const { theme } = useTheme();
   const { user } = useUser();
   // const [brandData, setBrandData] = React.useState<IBrands>();
   const isMounted = useIsMounted();
-  const [userData, setUserData] = React.useState<IUser>();
+  const [userData, setUserData] = React.useState<User>();
   // const [isFollowed, setIsFollowed] = React.useState(false);
   // const { user, userDB } = useFeedbacksContext();
   const { data: userAndUserDB } = useUserAndUserDBQuery();
   const { userDB } = userAndUserDB || {};
-  const { data: brandData } = useBrandById(props.recipient_id);
+  const { data: brandData, isFetched: brandDataFetched } = useBrandById(
+    props.recipient_id,
+  );
   const updateFeedbackLikes = useUpdateFeedbackLikes();
   const [clickedHelpfulResponses, setClickedHelpfulResponses] = React.useState<
     boolean | undefined
@@ -222,7 +236,7 @@ export default function FeedbackCard(
               src={
                 props?.email === user?.primaryEmailAddress?.emailAddress
                   ? userDB?.dp || user?.imageUrl
-                  : userData?.dp || userData?.userData?.imageUrl
+                  : userData?.dp || (userData?.user_data as any)?.imageUrl
               }
             />
           )}
@@ -238,10 +252,10 @@ export default function FeedbackCard(
                   ? "You"
                   : props.be_anonymous
                     ? hashFullName(
-                        userData?.userData?.fullName!,
+                        (userData?.user_data as any)?.fullName!,
                         user?.primaryEmailAddress?.emailAddress!,
                       )
-                    : userData?.userData?.fullName}
+                    : (userData?.user_data as any)?.fullName}
               </h4>
             </Skeleton>
             {props?.showBrand && (
@@ -290,40 +304,42 @@ export default function FeedbackCard(
         </Button>*/}
       </CardHeader>
       <CardBody className="px-3 py-0 text-small text-default-600 leading-normal">
-        <span>{props.description}</span>
         {/*<span className="pt-2">
           #FrontendWithZoey
           <span className="py-2" aria-label="computer" role="img">
             💻
           </span>
         </span>*/}
+        <span>
+          {props.description}
 
-        {props.replyData && (
-          <Card
-            className={"bg-default-100 dark:bg-background/40 my-3"}
-            shadow={"none"}
-          >
-            <CardBody>
-              <div className={"flex flex-row justify-between items-center"}>
-                <div
-                  className={
-                    "font-medium text-default-400 text-[10px] leading-loose"
-                  }
-                >
-                  Reply
+          {props.replyData && (
+            <Card
+              className={"bg-default-100 dark:bg-background/40 my-3"}
+              shadow={"none"}
+            >
+              <CardBody>
+                <div className={"flex flex-row justify-between items-center"}>
+                  <div
+                    className={
+                      "font-medium text-default-400 text-[10px] leading-loose"
+                    }
+                  >
+                    Reply
+                  </div>
+                  <div
+                    className={
+                      "font-medium text-default-400 text-[10px] leading-loose"
+                    }
+                  >
+                    {formatDateString(props.replyData.created_at)}
+                  </div>
                 </div>
-                <div
-                  className={
-                    "font-medium text-default-400 text-[10px] leading-loose"
-                  }
-                >
-                  {formatDateString(props.replyData.created_at)}
-                </div>
-              </div>
-              <p>{props.replyData.reply}</p>
-            </CardBody>
-          </Card>
-        )}
+                <p>{props.replyData.reply}</p>
+              </CardBody>
+            </Card>
+          )}
+        </span>
 
         {props.screenshots && props.screenshots?.split(",")?.length > 0 && (
           <div className={"flex flex-row gap-x-2 py-2"}>
@@ -367,81 +383,86 @@ export default function FeedbackCard(
           ))}
         </div>
 
-        <div className={"flex flex-row items-center gap-x-2"}>
-          {props.recipient_id !== brandData?.id ? (
-            // {brandData?.ownerEmail !== user?.primaryEmailAddress?.emailAddress ? (
-            <div className={"flex flex-row items-center gap-x-2"}>
-              {clickedHelpfulResponses && (
-                <>
-                  <span className={"font-bold text-xs"}>
-                    {props?.likesCount! + cachedAdder || 0}
-                  </span>
-                  <Button
-                    isIconOnly
-                    color={"success"}
-                    radius={"lg"}
-                    size={"sm"}
-                    variant={"flat"}
-                    onPress={handleUnLikeResponse}
-                  >
-                    <LucideThumbsUp size={14} />
-                  </Button>
-                </>
-              )}
-              {clickedUnHelpfulResponses && (
-                <>
-                  <span className={"font-bold text-xs"}>
-                    {props?.dislikesCount! + cachedAdder || 0}
-                  </span>
-                  <Button
-                    isIconOnly
-                    color={"danger"}
-                    radius={"md"}
-                    size={"sm"}
-                    variant={"flat"}
-                    onPress={handleUnDislikeResponse}
-                  >
-                    <LucideThumbsDown size={14} />
-                  </Button>
-                </>
-              )}
-              {!clickedHelpfulResponses && !clickedUnHelpfulResponses && (
-                <ButtonGroup>
-                  <Button
-                    isIconOnly
-                    color={"default"}
-                    radius={"md"}
-                    size={"sm"}
-                    variant={theme === "dark" ? "flat" : "light"}
-                    onPress={handleLikeResponse}
-                    // onPress={() =>
-                    //   setClickedHelpfulResponses(!clickedHelpfulResponses)
-                    // }
-                  >
-                    <LucideThumbsUp size={14} />
-                  </Button>
-                  <Button
-                    isIconOnly
-                    radius={"md"}
-                    size={"sm"}
-                    variant={theme === "dark" ? "flat" : "light"}
-                    onPress={handleDislikeResponse}
-                  >
-                    <LucideThumbsDown size={14} />
-                  </Button>
-                </ButtonGroup>
-              )}
-            </div>
-          ) : (
-            <div />
-          )}
-          {!props.hideReplyButton &&
-            !props.replyData?.reply &&
-            brandData?.owner_email ===
-              user?.primaryEmailAddress?.emailAddress && (
-              <ReplyFeedbackModal brandData={brandData!} feedbackData={props} />
+        {brandDataFetched && (
+          <div className={"flex flex-row items-center gap-x-2"}>
+            {props.recipient_id !== brandData?.id ? (
+              // {brandData?.ownerEmail !== user?.primaryEmailAddress?.emailAddress ? (
+              <div className={"flex flex-row items-center gap-x-2"}>
+                {clickedHelpfulResponses && (
+                  <>
+                    <span className={"font-bold text-xs"}>
+                      {props?.likesCount! + cachedAdder || 0}
+                    </span>
+                    <Button
+                      isIconOnly
+                      color={"success"}
+                      radius={"lg"}
+                      size={"sm"}
+                      variant={"flat"}
+                      onPress={handleUnLikeResponse}
+                    >
+                      <LucideThumbsUp size={14} />
+                    </Button>
+                  </>
+                )}
+                {clickedUnHelpfulResponses && (
+                  <>
+                    <span className={"font-bold text-xs"}>
+                      {props?.dislikesCount! + cachedAdder || 0}
+                    </span>
+                    <Button
+                      isIconOnly
+                      color={"danger"}
+                      radius={"md"}
+                      size={"sm"}
+                      variant={"flat"}
+                      onPress={handleUnDislikeResponse}
+                    >
+                      <LucideThumbsDown size={14} />
+                    </Button>
+                  </>
+                )}
+                {!clickedHelpfulResponses && !clickedUnHelpfulResponses && (
+                  <ButtonGroup>
+                    <Button
+                      isIconOnly
+                      color={"default"}
+                      radius={"md"}
+                      size={"sm"}
+                      variant={theme === "dark" ? "flat" : "light"}
+                      onPress={handleLikeResponse}
+                      // onPress={() =>
+                      //   setClickedHelpfulResponses(!clickedHelpfulResponses)
+                      // }
+                    >
+                      <LucideThumbsUp size={14} />
+                    </Button>
+                    <Button
+                      isIconOnly
+                      radius={"md"}
+                      size={"sm"}
+                      variant={theme === "dark" ? "flat" : "light"}
+                      onPress={handleDislikeResponse}
+                    >
+                      <LucideThumbsDown size={14} />
+                    </Button>
+                  </ButtonGroup>
+                )}
+              </div>
+            ) : (
+              <div />
             )}
-        </div>
+            {!props.hideReplyButton &&
+              !props.replyData?.reply &&
+              brandData?.owner_email ===
+                user?.primaryEmailAddress?.emailAddress && (
+                <ReplyFeedbackModal
+                  brandData={brandData!}
+                  feedbackData={props}
+                />
+              )}
+          </div>
+        )}
       </CardFooter>
       {/*<div className={"text-xs"}>12 people found this review helpful</div>*/}
     </Card>

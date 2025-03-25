@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";
-import { Feedback, FeedbackLikes, FeedbackReplies } from "@/types";
+import { Feedback, FeedbackLikes, FeedbackReplies, RatingAggregateProps } from "@/types";
 import { useFeedbacksContext } from "@/context";
 
 export const useRealTimeFeedbacks = () => {
@@ -32,10 +32,44 @@ export const useRealTimeFeedbacks = () => {
         },
       )
       .subscribe();
-    console.log("Subscribing to feedback changes.");
 
     return () => {
       supabase.channel("feedback-changes").unsubscribe();
+    };
+  }, [queryClient]);
+};
+
+export const useRealTimeFeedbackReplies = () => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("feedback-replies-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: DBTables.FeedbackReplies,
+        },
+        (payload) => {
+          queryClient.invalidateQueries({ queryKey: ["all-feedbacks"] });
+          queryClient.invalidateQueries({ queryKey: ["trending-feedbacks"] });
+          queryClient.invalidateQueries({
+            predicate: (query) => {
+              const queryKey = query.queryKey[0];
+
+              return typeof queryKey === "string" && queryKey === "feedbacks";
+            },
+          });
+        },
+      )
+      .subscribe();
+
+    console.log("Subscribing to feedback replies changes.");
+
+    return () => {
+      supabase.channel("feedback-replies-changes").unsubscribe();
     };
   }, [queryClient]);
 };
@@ -59,7 +93,23 @@ export function useTrendingFeedbacks(limit: number = 5, daysAgo: number = 7) {
       throw new Error(error.message);
     }
 
-    return data as Feedback[];
+    const transformedData = await Promise.all(
+      data?.map(async (eachFeedback) => {
+        // Fetch all feedbacks count of this brand
+        const { data: replyData } = await supabase
+          .from(DBTables.FeedbackReplies)
+          .select("*")
+          .eq("feedback_id", eachFeedback.id)
+          .single();
+
+        return {
+          ...eachFeedback,
+          replyData: replyData,
+        };
+      }),
+    );
+
+    return transformedData || [];
   };
 
   return useQuery({
@@ -88,8 +138,24 @@ export function useAllFeedbacks(limit: number = 10, page: number = 1) {
       throw new Error(error.message);
     }
 
+    const transformedData = await Promise.all(
+      data?.map(async (eachFeedback) => {
+        // Fetch all feedbacks count of this brand
+        const { data: replyData } = await supabase
+          .from(DBTables.FeedbackReplies)
+          .select("*")
+          .eq("feedback_id", eachFeedback.id)
+          .single();
+
+        return {
+          ...eachFeedback,
+          replyData: replyData,
+        };
+      }),
+    );
+
     return {
-      data: data as Feedback[],
+      data: transformedData || [],
       count: count || 0,
     };
   };
@@ -499,7 +565,12 @@ export function useMySentFeedbacks(email: string, page: number = 1) {
 }
 
 export function useStarRatingCounts(brandId?: number | string) {
-  const fetchStarRatingCounts = async (): Promise<number[]> => {
+  const fetchStarRatingCounts = async (): Promise<RatingAggregateProps> => {
+    const { count: feedbackCount } = await supabase
+      .from(DBTables.Feedback)
+      .select("*", { count: "exact", head: true })
+      .eq("recipient_id", brandId);
+
     const queries = [1, 2, 3].map((rating) =>
       supabase
         .from(DBTables.Feedback)
@@ -510,9 +581,30 @@ export function useStarRatingCounts(brandId?: number | string) {
         }),
     );
 
+    // Call the database function to calculate the average of this brand rating
+    const { data: averageRating } = await supabase.rpc(
+      "get_average_feedback_rating",
+      {
+        brand_id: brandId,
+      },
+    );
+
     const results = await Promise.all(queries);
 
-    return results.map((result) => result.count || 0);
+    const res = results.map((result, index) => {
+      return {
+        starRating: index + 1,
+        starCount: result.count || 0,
+      };
+    });
+
+    // return results.map((result) => result.count || 0);
+
+    return {
+      averageRating: averageRating || 0,
+      distribution: res,
+      totalRatings: feedbackCount || 0,
+    };
   };
 
   return useQuery({

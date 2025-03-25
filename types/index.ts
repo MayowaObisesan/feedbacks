@@ -12,10 +12,17 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
 
 export type User = Tables<DBTables.User>;
 export type Brand = Tables<DBTables.Brand>;
+export type BrandFollowers = Tables<DBTables.BrandFollowers>;
 export type BrandInsert = TablesInsert<DBTables.Brand>;
+export type BrandFollowersInsert = TablesInsert<DBTables.BrandFollowers>;
 export type Feedback = Tables<DBTables.Feedback>;
 export type FeedbackLikes = Tables<DBTables.FeedbackLikes>;
 export type FeedbackReplies = Tables<DBTables.FeedbackReplies>;
+export type ExtendedBrand = Brand & {
+  feedbacks_count: number;
+  followers_count: number;
+  is_following: boolean;
+};
 
 export type IUser = {
   id: number;
@@ -135,4 +142,15 @@ export interface IBrandCard {
   feedbackCount: number;
   description: string;
   avatarUrl: string;
+}
+
+export interface RatingDistribution {
+  starRating: number;
+  starCount: number;
+}
+
+export interface RatingAggregateProps {
+  averageRating: number;
+  distribution: RatingDistribution[];
+  totalRatings: number;
 }

@@ -13,6 +13,8 @@ import { fontSans } from "@/config/fonts";
 // import Web3ModalProvider from "@/context/wagmi";
 import FeedbacksProvider from "@/context";
 
+const BASE_URL = "https://feedbacks-ten.vercel.app";
+
 export const metadata: Metadata = {
   title: {
     default: siteConfig.name,
@@ -21,6 +23,55 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   icons: {
     icon: "/favicon.ico",
+  },
+  applicationName: "Feedbacks",
+  referrer: "origin-when-cross-origin",
+  keywords: ["Next.js", "React", "JavaScript"],
+  authors: [
+    { name: "Blessed" },
+    { name: "Mayowa", url: "https://x.com/amdblessed" },
+  ],
+  creator: "Mayowa Obisesan (Blessed)",
+  publisher: "Mayowa Obisesan",
+  alternates: {
+    canonical: "/",
+    languages: {
+      "en-US": "/en-US",
+      "de-DE": "/de-DE",
+    },
+  },
+  openGraph: {
+    title: "Next.js",
+    description: "The React Framework for the Web",
+    url: "https://nextjs.org",
+    siteName: "Next.js",
+    images: [
+      {
+        url: `${BASE_URL}/feedbacks.png`, // Must be an absolute URL
+        width: 800,
+        height: 600,
+      },
+      {
+        url: `${BASE_URL}/feedback.svg`, // Must be an absolute URL
+        width: 1800,
+        height: 1600,
+        alt: "Feedbacks logo",
+      },
+    ],
+    videos: [
+      {
+        url: `${BASE_URL}/video.mp4`, // Must be an absolute URL
+        width: 800,
+        height: 600,
+      },
+    ],
+    audio: [
+      {
+        url: `${BASE_URL}/audio.mp3`, // Must be an absolute URL
+      },
+    ],
+    locale: "en_US",
+    type: "website",
   },
 };
 

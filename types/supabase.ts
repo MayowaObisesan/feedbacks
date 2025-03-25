@@ -88,6 +88,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      brand_followers: {
+        Row: {
+          brand_id: number | null;
+          created_at: string;
+          id: number;
+          user_id: string;
+        };
+        Insert: {
+          brand_id?: number | null;
+          created_at?: string;
+          id?: number;
+          user_id?: string;
+        };
+        Update: {
+          brand_id?: number | null;
+          created_at?: string;
+          id?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       feedback: {
         Row: {
           be_anonymous: boolean | null;
@@ -212,7 +233,7 @@ export type Database = {
           dp: string | null;
           email: string | null;
           id: number;
-          updated_at: string;
+          updated_at: string | null;
           user_data: Json;
           user_id: string;
         };
@@ -222,7 +243,7 @@ export type Database = {
           dp?: string | null;
           email?: string | null;
           id?: number;
-          updated_at: string;
+          updated_at?: string | null;
           user_data: Json;
           user_id?: string;
         };
@@ -232,7 +253,7 @@ export type Database = {
           dp?: string | null;
           email?: string | null;
           id?: number;
-          updated_at?: string;
+          updated_at?: string | null;
           user_data?: Json;
           user_id?: string;
         };

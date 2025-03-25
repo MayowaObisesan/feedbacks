@@ -2,12 +2,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession, useUser } from "@clerk/nextjs";
 import { UserResource } from "@clerk/types";
+import { useEffect } from "react";
 
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";
 import { Brand, IUser } from "@/types";
 import { useFeedbacksContext } from "@/context";
-import { useEffect } from "react";
 
 export const useRealTimeUsers = () => {
   const queryClient = useQueryClient();
@@ -89,6 +89,7 @@ interface BatchResponse {
   user: UserResource | null; // Replace 'any' with your User type from supabase.auth
   userDB: IUser | null;
   myBrands: Brand[] | null;
+  followedBrands: Brand[] | null;
 }
 
 export const useUserAndUserDBQuery = () => {
@@ -99,6 +100,7 @@ export const useUserAndUserDBQuery = () => {
       user: null,
       userDB: null,
       myBrands: [],
+      followedBrands: [],
     };
 
     // const {
@@ -116,12 +118,49 @@ export const useUserAndUserDBQuery = () => {
         .from(DBTables.Brand)
         .select("*")
         .eq("owner_email", user?.primaryEmailAddress?.emailAddress)
-        .order("createdAt", { ascending: false })
+        .order("created_at", { ascending: false })
         .range(0, 10);
+
+      const { data: brandsFollowedIds } = await supabase
+        .from(DBTables.BrandFollowers)
+        .select("brand_id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      // Fetch the brandsData for brands you follow
+      const { data: followedBrands } = await supabase
+        .from(DBTables.Brand)
+        .select("*")
+        .in("id", Object.values(brandsFollowedIds!));
+
+      const transformedData = myBrands
+        ? await Promise.all(
+            myBrands.map(async (eachBrand: Brand) => {
+              // Fetch all feedbacks count of this brand
+              const { count } = await supabase
+                .from(DBTables.Feedback)
+                .select("*", { count: "exact", head: true })
+                .eq("recipient_id", eachBrand.id);
+
+              // Fetch all followers count of this brand
+              const { count: followersCount } = await supabase
+                .from(DBTables.BrandFollowers)
+                .select("*", { count: "exact", head: true })
+                .eq("brand_id", eachBrand.id);
+
+              return {
+                ...eachBrand,
+                feedback_count: count || 0,
+                followers_count: followersCount || 0,
+              };
+            }),
+          )
+        : [];
 
       batchResponse.user = user;
       batchResponse.userDB = userDB;
-      batchResponse.myBrands = myBrands;
+      batchResponse.myBrands = transformedData;
+      batchResponse.followedBrands = followedBrands || [];
     }
 
     return batchResponse;
@@ -141,6 +180,7 @@ export const useUserAndUserDBQuery = () => {
       user: null,
       userDB: null,
       myBrands: [],
+      followedBrands: [],
     },
   });
 };

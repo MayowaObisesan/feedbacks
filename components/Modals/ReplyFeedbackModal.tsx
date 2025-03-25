@@ -60,6 +60,7 @@ export function ReplyFeedbackModal({
       <Button
         className={"dark:invert"}
         color="default"
+        radius={"md"}
         size={"sm"}
         startContent={<LucideReply size={16} strokeWidth={4} />}
         variant="solid"

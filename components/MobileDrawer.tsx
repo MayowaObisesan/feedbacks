@@ -23,17 +23,26 @@ import { useRouter } from "next/navigation";
 import { Chip } from "@heroui/chip";
 import { useUser } from "@clerk/nextjs";
 
-import { useFeedbacksContext } from "@/context";
-import { useMyBrands } from "@/hooks/useBrands";
 import { ThemeSwitch } from "@/components/theme-switch";
+import {
+  useRealTimeUsers,
+  useUserAndUserDBQuery,
+} from "@/hooks/useFeedbackUser";
+import { useRealTimeBrands } from "@/hooks/useBrands";
 
 export default function MobileDrawer() {
+  useRealTimeUsers();
+  useRealTimeBrands();
+
   const { user } = useUser();
+  const { data: userAndUserDB } = useUserAndUserDBQuery();
+
+  const { userDB, myBrands } = userAndUserDB || {};
   const router = useRouter();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { userDB } = useFeedbacksContext();
-  const email = userDB?.email;
-  const { data: myBrands } = useMyBrands(email!);
+  // const { userDB } = useFeedbacksContext();
+  // const email = userDB?.email;
+  // const { data: myBrands } = useMyBrands(email!);
 
   return (
     <div>

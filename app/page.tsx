@@ -2,6 +2,9 @@
 
 import { Link } from "@heroui/link";
 import { Button } from "@heroui/button";
+import * as React from "react";
+
+import { FeedbacksLogo } from "@/components/icons";
 
 declare global {
   interface Window {
@@ -12,20 +15,44 @@ declare global {
 export default function Page() {
   return (
     <section className="flex flex-col">
+      <div className={"flex flex-row items-center gap-x-1 z-10"}>
+        <FeedbacksLogo size={32} />
+        <p className="font-bold text-inherit">Feedbacks</p>
+      </div>
       {/*<section className="items-start">
         <HomeNav />
       </section>*/}
       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-        <section className={"text-left w-full px-3 space-y-2"}>
-          <div className={"font-bold text-2xl"}>All your</div>
+        <section className={"text-center w-full px-3 space-y-2"}>
+          <div className={"font-bold text-4xl"}>Let&apos;s send some</div>
+          {/*<div className="relative flex h-[50rem] w-full items-center justify-center bg-white dark:bg-black">*/}
+          {/*  <div*/}
+          {/*    className={cn(*/}
+          {/*      "absolute inset-0",*/}
+          {/*      "[background-size:40px_40px]",*/}
+          {/*      "[background-image:linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)]",*/}
+          {/*      "dark:[background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]",*/}
+          {/*    )}*/}
+          {/*  />*/}
+          {/*  /!* Radial gradient for the container to give a faded look *!/*/}
+          {/*  <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"></div>*/}
+          {/*  <p className="relative z-20 bg-gradient-to-b from-neutral-200 to-neutral-500 bg-clip-text py-8 text-4xl font-bold text-transparent sm:text-7xl">*/}
+          {/*    Backgrounds*/}
+          {/*  </p>*/}
+          {/*</div>*/}
+
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black" />
+          <p className="relative z-20 bg-gradient-to-b from-neutral-200 to-neutral-500 bg-clip-text py-8 text-3xl font-bold text-transparent sm:text-7xl">
+            Let&apos;s send
+          </p>
           <div
             className={
               "font-extrabold text-7xl lg:text-9xl tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-[#000000] to-[#4b4b4b] dark:from-[#FFFFFF] dark:to-[#4B4B4B]"
             }
           >
-            Feedbacks
+            Feedback
           </div>
-          <div className={"font-bold text-5xl"}>in one place</div>
+          {/*<div className={"font-bold text-5xl"}>All in one place</div>*/}
         </section>
 
         {/*<div className={title({ color: "foreground", size: "3xl" })}>
@@ -78,7 +105,7 @@ export default function Page() {
         </div>*/}
       </section>
 
-      <footer className="w-full flex items-center justify-center py-3">
+      {/*<footer className="w-full flex items-center justify-center py-3">
         <Link
           isExternal
           className="flex items-center gap-1 text-current"
@@ -88,7 +115,7 @@ export default function Page() {
           <span className="text-default-600">Powered by</span>
           <p className="text-primary">NextUI</p>
         </Link>
-      </footer>
+      </footer>*/}
     </section>
   );
 }
