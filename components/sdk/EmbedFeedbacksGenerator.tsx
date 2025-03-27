@@ -18,7 +18,7 @@ import { Switch } from "@heroui/switch";
 import { cn } from "@heroui/theme";
 
 import FeedbacksForm from "@/components/sdk/index";
-import { APIKEY_PREFIX } from "@/constant";
+import { APIKEY_PREFIX, FEEDBACKS_URL } from "@/constant";
 
 const EmbedFeedbacksGenerator: React.FC<{
   apiKey: string;
@@ -26,17 +26,44 @@ const EmbedFeedbacksGenerator: React.FC<{
 }> = ({ apiKey, fullWidth = false }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   // const [theme, setTheme] = useState("light");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [width, setWidth] = useState<string>("400");
-  const [height, setHeight] = useState<string>("720");
+  // const [height, setHeight] = useState<string>("720");
+  const [height, setHeight] = useState<string>("4");
   const [showPreview, setShowPreview] = useState<boolean>(false);
+  const [showTitle, setShowTitle] = React.useState(false);
+  const [showScreenshots, setShowScreenshots] = React.useState(false);
   // const embedURL = `http://localhost:3000/embed?fdb=${apiKey?.replace(APIKEY_PREFIX,"")}&theme=${theme}&width=${width}&height=${height}`;
-  const embedURL = `http://localhost:3000/embed?fdb=${apiKey?.replace(APIKEY_PREFIX, "")}`;
+  const embedURL = `${FEEDBACKS_URL}/embed?fdb=${apiKey?.replace(APIKEY_PREFIX, "")}`;
 
   const handleCopyEmbedCode = () => {
-    navigator.clipboard.writeText(
-      `<iframe src="${embedURL}" width="${width}" height="${height}" frameborder="0"></iframe>`,
-    );
-    toast.success("Embed code copied successfully.");
+    const embedCode = `<iframe src="${embedURL}" width="${width}" height="${height}" frameborder="0"></iframe>`;
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(embedCode)
+        .then(() => toast.success("Embed code copied successfully."))
+        .catch(() => fallbackCopyToClipboard(embedCode));
+    } else {
+      fallbackCopyToClipboard(embedCode);
+    }
+  };
+
+  const fallbackCopyToClipboard = (text: string) => {
+    const textarea = document.createElement("textarea");
+
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand("copy");
+      toast.success("Embed code copied successfully.");
+    } catch (err) {
+      toast.error("Failed to copy embed code.");
+    }
+    document.body.removeChild(textarea);
   };
 
   return (
@@ -119,12 +146,35 @@ const EmbedFeedbacksGenerator: React.FC<{
                           base: "gap-x-4",
                         }}
                         description={
-                          "Configure how the Feedbacks page will look like on your site."
+                          "Configure how the Feedbacks form will look like on your site."
                         }
-                        title={"Embed Configuration"}
+                        title={"Form Configuration"}
                       />
                     </div>
-                    <div
+
+                    <Switch isSelected={showTitle} onValueChange={setShowTitle}>
+                      Show Title
+                    </Switch>
+
+                    <Switch
+                      isSelected={showScreenshots}
+                      onValueChange={setShowScreenshots}
+                    >
+                      Show Screenshots
+                    </Switch>
+
+                    <Input
+                      label="Height"
+                      labelPlacement="outside"
+                      // min={560}
+                      min={2}
+                      placeholder="4"
+                      type="number"
+                      value={height}
+                      onValueChange={setHeight}
+                    />
+
+                    {/*<div
                       className={
                         "flex flex-row justify-evenly items-center gap-x-4"
                       }
@@ -144,13 +194,14 @@ const EmbedFeedbacksGenerator: React.FC<{
                         className="max-w-xs"
                         label="Height"
                         labelPlacement="outside"
-                        min={560}
-                        placeholder="720"
+                        // min={560}
+                        min={2}
+                        placeholder="4"
                         type="number"
                         value={height}
                         onValueChange={setHeight}
                       />
-                    </div>
+                    </div>*/}
 
                     <div>
                       <Textarea
@@ -158,14 +209,14 @@ const EmbedFeedbacksGenerator: React.FC<{
                         isDisabled
                         label="Copy this Embed code:"
                         labelPlacement="outside"
-                        minRows={6}
+                        maxRows={3}
                         placeholder="Feedbacks Embed content"
                         size={"lg"}
                         value={`<iframe src="${embedURL}" width="${width}" title="Send Feedbacks" height="${height}" frameborder="0"></iframe>`}
                       />
                     </div>
 
-                    <Button color={"success"} onClick={handleCopyEmbedCode}>
+                    <Button color={"success"} onPress={handleCopyEmbedCode}>
                       Copy Code
                     </Button>
                   </Card>
@@ -180,7 +231,7 @@ const EmbedFeedbacksGenerator: React.FC<{
                   >
                     <Alert
                       classNames={{
-                        base: "gap-x-4",
+                        base: "gap-x-4 grow-0",
                       }}
                       color={"success"}
                       description={
@@ -188,10 +239,12 @@ const EmbedFeedbacksGenerator: React.FC<{
                       }
                       title={"Feedbacks Form"}
                     />
-                    <Card>
+                    <Card className={"grow shrink-0"}>
                       <FeedbacksForm
                         height={Number(height)}
                         isPreview={true}
+                        showScreenshots={showScreenshots}
+                        showTitle={showTitle}
                         width={Number(width)}
                       />
                     </Card>

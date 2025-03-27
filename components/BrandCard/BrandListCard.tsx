@@ -23,6 +23,7 @@ export function BrandListCard({
       className="flex flex-row h-20"
       fullWidth={true}
       href={`/app/brand/${name}`}
+      shadow={"none"}
     >
       <div className="relative flex flex-row justify-start items-center gap-x-4 px-4 w-full">
         <Avatar

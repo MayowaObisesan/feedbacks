@@ -53,6 +53,7 @@ export const useRealTimeBrands = () => {
           schema: "public",
           table: DBTables.Brand,
         },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (payload) => {
           queryClient.invalidateQueries({
             predicate: (query) => {
@@ -84,6 +85,7 @@ export const useRealTimeBrandsFollowers = () => {
           schema: "public",
           table: DBTables.BrandFollowers,
         },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (payload) => {
           queryClient.invalidateQueries({
             predicate: (query) => {
@@ -242,8 +244,8 @@ export const useLatestBrandsByCategory = (
 };
 
 // Fetch all brands
-export const useBrands = (page: number = 1) => {
-  const DEFAULT_LOAD_COUNT = 10;
+export const useBrands = (limit = 10, page: number = 1) => {
+  const DEFAULT_LOAD_COUNT = limit;
   const startRange = DEFAULT_LOAD_COUNT * (page - 1);
   const endRange = DEFAULT_LOAD_COUNT * page - 1;
 

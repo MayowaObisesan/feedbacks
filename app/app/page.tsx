@@ -31,7 +31,6 @@ export default function Home() {
     data: trendingBrands,
     error: trendingBrandsError,
     isLoading: trendingBrandsLoading,
-    isRefetching: trendingBrandsRefetching,
     refetch: trendingBrandsRefetch,
   } = useTrendingBrands();
   const {
@@ -174,7 +173,7 @@ export default function Home() {
           </header>
           <ScrollShadow hideScrollBar orientation={"horizontal"} size={40}>
             <div className="flex flex-row gap-x-8 gap-y-2 px-2 py-4">
-              {(trendingFeedbacksLoading || trendingBrandsRefetching) &&
+              {trendingFeedbacksLoading &&
                 Array.from({ length: 5 })?.map((_, index) => (
                   <FeedbackCardSkeleton key={index} />
                 ))}

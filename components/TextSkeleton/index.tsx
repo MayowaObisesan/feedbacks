@@ -2,6 +2,7 @@ import { Skeleton } from "@heroui/skeleton";
 import { Spacer } from "@heroui/spacer";
 
 import { capitalize } from "@/utils";
+import { useRealTimeFeedbacks } from "@/hooks/useFeedbacks";
 
 interface I_FollowersText {
   isLoaded: boolean;
@@ -16,6 +17,8 @@ export function DynamicText({
   textSingular,
   textPlural,
 }: I_FollowersText) {
+  useRealTimeFeedbacks();
+
   return (
     <>
       <Skeleton className="rounded-full" isLoaded={isLoaded}>

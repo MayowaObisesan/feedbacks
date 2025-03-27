@@ -487,7 +487,7 @@ export default function BrandNav({
             <BrandNavSkeleton />
           ) : (
             <Card
-              className="max-lg:grid max-sm:grid-cols-3 md:grid-cols-none py-0 bg-default-50/80 dark:bg-default-50 shadow-none"
+              className="max-lg:grid max-sm:grid-cols-3 md:grid-cols-none max-sm:w-full py-0 bg-default-500/80 dark:bg-default-50 shadow-none"
               isPressable={false}
             >
               <CardBody className="flex flex-col justify-center items-center overflow-visible px-2">

@@ -13,6 +13,7 @@ export const useRealTimeUsers = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const channel = supabase
       .channel("user-changes")
       .on(
@@ -22,6 +23,7 @@ export const useRealTimeUsers = () => {
           schema: "public",
           table: DBTables.User,
         },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (payload) => {
           // Invalidate user-related queries
           queryClient.invalidateQueries({
@@ -41,7 +43,6 @@ export const useRealTimeUsers = () => {
       .subscribe();
 
     return () => {
-      console.log("removing user-changes");
       supabase.channel("user-changes").unsubscribe();
     };
   }, [queryClient]);

@@ -1,12 +1,8 @@
 "use client";
 
-import { Button } from "@heroui/button";
 // import { useSession } from "next-auth/react";
-import { Provider, SignInWithOAuthCredentials } from "@supabase/auth-js";
 
-import { LastUsed, useLastUsed } from "@/hooks/lastUsed";
-import { GithubIcon, Icons } from "@/components/icons";
-import { supabase } from "@/utils/supabase/supabase";
+import { Link } from "@heroui/link";
 
 export default function UserAuthForm() {
   /*const [_, setDbUser] = useState<UserResponse["data"]>();
@@ -14,7 +10,7 @@ export default function UserAuthForm() {
     url: string;
     provider: Provider;
   }>();*/
-  const [lastUsed, setLastUsed] = useLastUsed();
+  // const [lastUsed, setLastUsed] = useLastUsed();
   // const { data: sessionData } = useSession();
 
   /*useEffect(() => {
@@ -59,7 +55,7 @@ export default function UserAuthForm() {
     }
   };*/
 
-  const handleSupabaseOauthSignIn = async (provider: Provider) => {
+  /*const handleSupabaseOauthSignIn = async (provider: Provider) => {
     setLastUsed(provider === "google" ? "google" : "github");
 
     const getURL = () => {
@@ -76,12 +72,12 @@ export default function UserAuthForm() {
       return url;
     };
 
-    /*// @ts-ignore
+    /!*!// @ts-ignore
     console.log("NEXT PUBLIC SITE URL::", process.env.NEXT_PUBLIC_SITE_URL);
     // @ts-ignore
     console.log("NEXT PUBLIC VERCEL URL::", process.env.NEXT_PUBLIC_VERCEL_URL);
     // @ts-ignore
-    console.log("redirect URL::", getURL());*/
+    console.log("redirect URL::", getURL());*!/
 
     await supabase.auth.signInWithOAuth({
       provider: provider,
@@ -89,7 +85,7 @@ export default function UserAuthForm() {
         redirectTo: getURL(),
       },
     } as SignInWithOAuthCredentials);
-  };
+  };*/
 
   return (
     <div
@@ -98,61 +94,66 @@ export default function UserAuthForm() {
       }
     >
       {/*<div>{sessionData && <div>Welcome {sessionData.user?.name}</div>}</div>*/}
-      <div className={"text-xl text-balance font-bold"}>
-        Continue using your Social Accounts
-      </div>
-      {/*<div>
-        {JSON.stringify(sessionData, null, 2)}
-      </div>*/}
-      <div className={"flex flex-row justify-center items-center gap-3"}>
-        {/*<Button
-          variant="solid"
-          type="button"
-          // disabled={isLoading}
-          onClick={() => handleOauthSignIn("github")}
-        >
-          {isLoading ? (
-            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Icons.gitHub className="mr-2 h-4 w-4" />
-          )}{" "}
-          <GithubIcon />
-          GitHub {lastUsed === "github" ? <LastUsed /> : null}
-        </Button>
-        <Button
-          variant="solid"
-          type="button"
-          // disabled={isLoading}
-          onClick={() => handleOauthSignIn("google")}
-        >
-          {isLoading ? (
-            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Icons.google className="mr-2 h-4 w-4" />
-          )}{" "}
+      {/*<div className={"text-xl text-balance font-bold"}>*/}
+      {/*  Continue using your Social Accounts*/}
+      {/*</div>*/}
+      {/*/!*<div>*/}
+      {/*  {JSON.stringify(sessionData, null, 2)}*/}
+      {/*</div>*!/*/}
+      {/*<div className={"flex flex-row justify-center items-center gap-3"}>*/}
+      {/*  /!*<Button*/}
+      {/*    variant="solid"*/}
+      {/*    type="button"*/}
+      {/*    // disabled={isLoading}*/}
+      {/*    onClick={() => handleOauthSignIn("github")}*/}
+      {/*  >*/}
+      {/*    {isLoading ? (*/}
+      {/*      <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />*/}
+      {/*    ) : (*/}
+      {/*      <Icons.gitHub className="mr-2 h-4 w-4" />*/}
+      {/*    )}{" "}*/}
+      {/*    <GithubIcon />*/}
+      {/*    GitHub {lastUsed === "github" ? <LastUsed /> : null}*/}
+      {/*  </Button>*/}
+      {/*  <Button*/}
+      {/*    variant="solid"*/}
+      {/*    type="button"*/}
+      {/*    // disabled={isLoading}*/}
+      {/*    onClick={() => handleOauthSignIn("google")}*/}
+      {/*  >*/}
+      {/*    {isLoading ? (*/}
+      {/*      <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />*/}
+      {/*    ) : (*/}
+      {/*      <Icons.google className="mr-2 h-4 w-4" />*/}
+      {/*    )}{" "}*/}
 
-          <Icons.google className="mr-2 h-4 w-4" />
-          Google {lastUsed === "google" ? <LastUsed /> : null}
-        </Button>*/}
+      {/*    <Icons.google className="mr-2 h-4 w-4" />*/}
+      {/*    Google {lastUsed === "google" ? <LastUsed /> : null}*/}
+      {/*  </Button>*!/*/}
 
-        <Button
-          type="button"
-          variant="solid"
-          // disabled={isLoading}
-          onPress={() => handleSupabaseOauthSignIn("github")}
-        >
-          <GithubIcon />
-          GitHub {lastUsed === "github" ? <LastUsed /> : null}
-        </Button>
-        <Button
-          type="button"
-          variant="solid"
-          // disabled={isLoading}
-          onPress={() => handleSupabaseOauthSignIn("google")}
-        >
-          <Icons.google className="mr-2 h-4 w-4" />
-          Google {lastUsed === "google" ? <LastUsed /> : null}
-        </Button>
+      {/*  <Button*/}
+      {/*    type="button"*/}
+      {/*    variant="solid"*/}
+      {/*    // disabled={isLoading}*/}
+      {/*    onPress={() => handleSupabaseOauthSignIn("github")}*/}
+      {/*  >*/}
+      {/*    <GithubIcon />*/}
+      {/*    GitHub {lastUsed === "github" ? <LastUsed /> : null}*/}
+      {/*  </Button>*/}
+      {/*  <Button*/}
+      {/*    type="button"*/}
+      {/*    variant="solid"*/}
+      {/*    // disabled={isLoading}*/}
+      {/*    onPress={() => handleSupabaseOauthSignIn("google")}*/}
+      {/*  >*/}
+      {/*    <Icons.google className="mr-2 h-4 w-4" />*/}
+      {/*    Google {lastUsed === "google" ? <LastUsed /> : null}*/}
+      {/*  </Button>*/}
+      {/*</div>*/}
+
+      <div>
+        Kindly Continue from the home page.
+        <Link href={"/app/app"}>Home Page. 👋</Link>
       </div>
     </div>
   );
