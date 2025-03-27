@@ -1,10 +1,9 @@
 import { SVGProps } from "react";
 import { Address } from "viem";
-import { User as S_User } from "@supabase/auth-js";
+import { UserResource } from "@clerk/types";
 
 import { Tables, type TablesInsert } from "@/types/supabase";
 import { DBTables } from "@/types/enums";
-import { UserResource } from "@clerk/types";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
   size?: number;

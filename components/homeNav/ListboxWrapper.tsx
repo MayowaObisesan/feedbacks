@@ -16,6 +16,6 @@ export const ListboxWrapper = ({
     )}
     hideScrollBar={false}
   >
-    <div>{children}</div>
+    <div className={"w-full"}>{children}</div>
   </ScrollShadow>
 );

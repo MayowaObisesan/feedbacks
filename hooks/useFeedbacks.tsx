@@ -3,13 +3,19 @@ import { useEffect } from "react";
 
 import { supabase } from "@/utils/supabase/supabase";
 import { DBTables } from "@/types/enums";
-import { Feedback, FeedbackLikes, FeedbackReplies, RatingAggregateProps } from "@/types";
+import {
+  Feedback,
+  FeedbackLikes,
+  FeedbackReplies,
+  RatingAggregateProps,
+} from "@/types";
 import { useFeedbacksContext } from "@/context";
 
 export const useRealTimeFeedbacks = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const channel = supabase
       .channel("feedback-changes")
       .on(
@@ -19,14 +25,34 @@ export const useRealTimeFeedbacks = () => {
           schema: "public",
           table: DBTables.Feedback,
         },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (payload) => {
           queryClient.invalidateQueries({ queryKey: ["all-feedbacks"] });
           queryClient.invalidateQueries({ queryKey: ["trending-feedbacks"] });
+          queryClient.invalidateQueries({ queryKey: ["star-rating-counts"] });
+          queryClient.invalidateQueries({ queryKey: ["brands"] });
+          queryClient.invalidateQueries({ queryKey: ["myBrands"] });
           queryClient.invalidateQueries({
             predicate: (query) => {
               const queryKey = query.queryKey[0];
 
               return typeof queryKey === "string" && queryKey === "feedbacks";
+            },
+          });
+          // Invalidate all brand-related queries
+          queryClient.invalidateQueries({
+            predicate: (query) => {
+              const queryKey = query.queryKey[0];
+
+              return typeof queryKey === "string" && queryKey === "brands";
+            },
+          });
+          // Invalidate all star-rating-counts queries
+          queryClient.invalidateQueries({
+            predicate: (query) => {
+              const queryKey = query.queryKey[0];
+
+              return typeof queryKey === "string" && queryKey === "star-rating-counts";
             },
           });
         },
@@ -43,6 +69,7 @@ export const useRealTimeFeedbackReplies = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const channel = supabase
       .channel("feedback-replies-changes")
       .on(
@@ -52,6 +79,7 @@ export const useRealTimeFeedbackReplies = () => {
           schema: "public",
           table: DBTables.FeedbackReplies,
         },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (payload) => {
           queryClient.invalidateQueries({ queryKey: ["all-feedbacks"] });
           queryClient.invalidateQueries({ queryKey: ["trending-feedbacks"] });
@@ -65,8 +93,6 @@ export const useRealTimeFeedbackReplies = () => {
         },
       )
       .subscribe();
-
-    console.log("Subscribing to feedback replies changes.");
 
     return () => {
       supabase.channel("feedback-replies-changes").unsubscribe();

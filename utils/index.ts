@@ -6,6 +6,7 @@ import CryptoJS from "crypto-js";
 import { IProfile } from "@/types";
 import { useBrandRead } from "@/hooks/useRead";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface I_SendToIPFSProps {
   dp: string | Blob;
   setisDpUploading: (
@@ -154,6 +155,7 @@ export const formatDateStringShort = (date: string) => {
   });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const sendFileToIPFS = async (
   dp: string,
   setisDpUploading: React.Dispatch<React.SetStateAction<boolean>>,
@@ -184,7 +186,6 @@ const sendFileToIPFS = async (
 
       const ImgHash = `https://moccasin-many-grasshopper-363.mypinata.cloud/ipfs/${resFile.data.IpfsHash}`;
 
-      console.log(ImgHash);
       imageHashRef.current = resFile?.data?.IpfsHash;
       setImageHash(resFile?.data?.IpfsHash);
       setImageUploadSuccessful(true);
@@ -192,8 +193,6 @@ const sendFileToIPFS = async (
       //Take a look at your Pinata Pinned section, you will see a new file added to you list.
       toast.success("Dp uploaded successfully");
     } catch (error) {
-      console.log("Error sending File to IPFS: ");
-      console.log(error);
       toast.error("Error uploading display picture");
       setImageUploadSuccessful(false);
     } finally {

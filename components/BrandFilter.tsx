@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Input } from "@heroui/input";
 import { LucideSearch } from "lucide-react";
+import { Tab, Tabs } from "@heroui/tabs";
 
 interface BrandFilterProps {
   onFilterChange: (filter: string) => void;
 }
 
-export default function BrandFilter({ onFilterChange }: BrandFilterProps) {
+export function BrandSearchFilter({ onFilterChange }: BrandFilterProps) {
   const [filter, setFilter] = useState("");
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -15,7 +16,7 @@ export default function BrandFilter({ onFilterChange }: BrandFilterProps) {
   };
 
   return (
-    <div className="mb-4">
+    <div className="mb-4 px-2">
       {/*<input
         className="p-2 border border-gray-300 rounded"
         placeholder="Filter brands by name"
@@ -31,6 +32,35 @@ export default function BrandFilter({ onFilterChange }: BrandFilterProps) {
         value={filter}
         onChange={handleFilterChange}
       />
+    </div>
+  );
+}
+
+interface SegmentedFilterProps {
+  selectedFilter: string;
+  onFilterChange: (filter: string) => void;
+}
+
+export function SegmentedFilter({
+  selectedFilter,
+  onFilterChange,
+}: SegmentedFilterProps) {
+  return (
+    <div className="px-2">
+      <Tabs
+        fullWidth
+        aria-label="Brand filters"
+        selectedKey={selectedFilter}
+        size="sm"
+        variant="solid"
+        // @ts-ignore
+        onSelectionChange={onFilterChange}
+      >
+        <Tab key="my_brands" title="My Brands" />
+        {/*<Tab key="trending" title="Trending" />*/}
+        <Tab key="latest" title="Latest" />
+        <Tab key="all" title="All Brands" />
+      </Tabs>
     </div>
   );
 }

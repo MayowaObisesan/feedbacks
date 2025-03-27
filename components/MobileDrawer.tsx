@@ -5,7 +5,6 @@ import {
   LucideBarChart,
   LucideChartNoAxesGantt,
   LucideHome,
-  LucideLayoutDashboard,
   LucideLayoutTemplate,
 } from "lucide-react";
 import {
@@ -86,7 +85,7 @@ export default function MobileDrawer() {
                 </div>
               </DrawerHeader>
 
-              <DrawerBody className="px-2">
+              <DrawerBody className="pl-0 pr-1">
                 <Listbox
                   aria-label="Main Menu"
                   className="mt-2 gap-y-8 space-y-16"
@@ -117,13 +116,13 @@ export default function MobileDrawer() {
                     >
                       Brands
                     </ListboxItem>
-                    <ListboxItem
+                    {/*<ListboxItem
                       key="dashboard"
                       href={"/app/dashboard"}
                       startContent={<LucideLayoutDashboard size={16} />}
                     >
                       Dashboard
-                    </ListboxItem>
+                    </ListboxItem>*/}
                     <ListboxItem
                       key="analytics"
                       className={"justify-between"}
@@ -178,7 +177,6 @@ export default function MobileDrawer() {
                             }
                           >
                             <Avatar
-                              isBordered
                               className={"w-5 h-5"}
                               color="primary"
                               name="Profile Pic"

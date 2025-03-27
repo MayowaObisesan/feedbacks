@@ -49,41 +49,25 @@ const FeedbacksContext = createContext<IFeedbacksContext>({
   trendingBrandsData: undefined as unknown as IBrands[],
 });
 
-function reconstructMyProfile(myProfileData: any) {
-  if (myProfileData) {
-    return {
-      name: myProfileData[0],
-      email: myProfileData[1],
-      bio: myProfileData[2],
-      profilePictureHash: myProfileData[3],
-    };
-  } else {
-    return {};
-  }
-}
-
 const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
-  useRealTimeUsers();
-  useRealTimeBrands();
-  useRealTimeFeedbacks();
   const [supabaseClient, setSupabaseClient] = useState<SupabaseClient>();
   // For the w2 version of Feedbacks
   const [userSessionData, setUserSessionData] = useState();
   // const [user, setUser] = useState<I_User>();
   const [userDB, setUserDB] = useState<IUser>();
-  const [allBrandsData, setAllBrandsData] = useState<Brand[]>([]);
-  const [trendingBrandsData, setTrendingBrandsData] = useState<IBrands[]>([]);
-  const [mySentFeedbacksData, setMySentFeedbacksData] = React.useState<
-    Feedback[]
-  >([]);
-  const [profileExist, setProfileExist] = React.useState<boolean>(false);
+  // const [allBrandsData, setAllBrandsData] = useState<Brand[]>([]);
+  // const [trendingBrandsData, setTrendingBrandsData] = useState<IBrands[]>([]);
+  // const [mySentFeedbacksData, setMySentFeedbacksData] = React.useState<
+  //   Feedback[]
+  // >([]);
+  // const [profileExist, setProfileExist] = React.useState<boolean>(false);
   // const { address: myAddress } = useAccount();
   const isFirstRender = useIsFirstRender();
 
   // The `useUser()` hook will be used to ensure that Clerk has loaded data about the logged in user
   const { user } = useUser();
   // The `useSession()` hook will be used to get the Clerk session object
-  const { isSignedIn, session } = useSession();
+  const { session } = useSession();
 
   // Create a custom supabase client that injects the Clerk Supabase token into the request headers
   function createClerkSupabaseClient() {
@@ -121,74 +105,74 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
   useEffect(() => {
     setSupabaseClient(client);
 
-    async function getAllBrands() {
-      const { data: brands } = await client
-        .from(DBTables.Brand)
-        .select("*")
-        .range(0, 10);
-
-      if (brands && brands.length > 0) {
-        setAllBrandsData(brands);
-      }
-    }
-
-    getAllBrands();
-
-    // Fetch trending brands
-    /*
-    // Criteria for Trending Brand
-    1. The Brand which has the most feedback within a certain duration usually 5 minutes.
-      i.e., the brand with the most feedback within the last 5 minutes.
-          => This can be achieved by querying the feedback table and grouping by brandId and then sorting by count.
-    */
-    async function getTrendingBrands() {
-      const { data: trendingBrands } = await client
-        .from(DBTables.Brand)
-        .select("*")
-        .range(0, 10);
-
-      if (trendingBrands && trendingBrands.length > 0) {
-        setTrendingBrandsData(trendingBrands);
-      }
-    }
-
-    getTrendingBrands();
-
-    async function getMySentFeedbacks() {
-      const { data, error } = await client
-        .from(DBTables.Feedback)
-        .select("*")
-        .eq("email", user?.primaryEmailAddress?.emailAddress!)
-        .order("created_at", { ascending: false })
-        .range(0, 10);
-
-      if (error) {
-        console.error("Error occurred when fetching userFeedbacks", error);
-      }
-
-      if (data && data.length > 0) {
-        setMySentFeedbacksData(data);
-      }
-    }
-
-    async function getProfile() {
-      const { data, error } = await client
-        .from(DBTables.User)
-        .select("*")
-        .eq("email", user?.primaryEmailAddress?.emailAddress);
-
-      if (error) {
-        console.error("Unable to fetch userProfile", error);
-      }
-      if (data && data.length > 0) {
-        setProfileExist(data[0]);
-      }
-    }
-
-    if (isSignedIn) {
-      getMySentFeedbacks();
-      getProfile();
-    }
+    // async function getAllBrands() {
+    //   const { data: brands } = await client
+    //     .from(DBTables.Brand)
+    //     .select("*")
+    //     .range(0, 10);
+    //
+    //   if (brands && brands.length > 0) {
+    //     setAllBrandsData(brands);
+    //   }
+    // }
+    //
+    // getAllBrands();
+    //
+    // // Fetch trending brands
+    // /*
+    // // Criteria for Trending Brand
+    // 1. The Brand which has the most feedback within a certain duration usually 5 minutes.
+    //   i.e., the brand with the most feedback within the last 5 minutes.
+    //       => This can be achieved by querying the feedback table and grouping by brandId and then sorting by count.
+    // */
+    // async function getTrendingBrands() {
+    //   const { data: trendingBrands } = await client
+    //     .from(DBTables.Brand)
+    //     .select("*")
+    //     .range(0, 10);
+    //
+    //   if (trendingBrands && trendingBrands.length > 0) {
+    //     setTrendingBrandsData(trendingBrands);
+    //   }
+    // }
+    //
+    // getTrendingBrands();
+    //
+    // async function getMySentFeedbacks() {
+    //   const { data, error } = await client
+    //     .from(DBTables.Feedback)
+    //     .select("*")
+    //     .eq("email", user?.primaryEmailAddress?.emailAddress!)
+    //     .order("created_at", { ascending: false })
+    //     .range(0, 10);
+    //
+    //   if (error) {
+    //     console.error("Error occurred when fetching userFeedbacks", error);
+    //   }
+    //
+    //   if (data && data.length > 0) {
+    //     setMySentFeedbacksData(data);
+    //   }
+    // }
+    //
+    // /*async function getProfile() {
+    //   const { data, error } = await client
+    //     .from(DBTables.User)
+    //     .select("*")
+    //     .eq("email", user?.primaryEmailAddress?.emailAddress);
+    //
+    //   if (error) {
+    //     console.error("Unable to fetch userProfile", error);
+    //   }
+    //   if (data && data.length > 0) {
+    //     setProfileExist(data[0]);
+    //   }
+    // }*/
+    //
+    // if (isSignedIn) {
+    //   getMySentFeedbacks();
+    //   // getProfile();
+    // }
   }, [user]);
 
   /*const { data: allBrandsData } = useBrandRead({
@@ -320,8 +304,6 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
     }
   };
 
-  const getInvitesForAddress = useCallback(() => {}, []);
-
   useEffect(() => {}, [isFirstRender]);
 
   return (
@@ -330,8 +312,8 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
       value={{
         supabaseClient,
         // myAddress,
-        allBrandsData,
-        trendingBrandsData,
+        // allBrandsData,
+        // trendingBrandsData,
         /*myProfileData,
         isMyProfileDataFetching,
         myEventInvites,
@@ -372,7 +354,7 @@ const FeedbacksProvider: React.FC<FeedbacksProviderProps> = ({ children }) => {
         updateSessionData,
         SetUser,
         userDB,
-        mySentFeedbacksData,
+        // mySentFeedbacksData,
       }}
     >
       {children}

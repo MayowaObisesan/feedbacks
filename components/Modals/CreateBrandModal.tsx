@@ -117,8 +117,6 @@ export default function CreateBrandModal() {
         raw_name: brandName,
         description: brandDescription,
         category: Array.from(categoryValues).join(", "),
-        followers_count: 0,
-        feedback_count: 0,
         brand_image: imageHash,
         api: createdAPI.result?.apiId,
         user_api_key: createdKey.result?.key,

@@ -1,8 +1,6 @@
 import { toast } from "sonner";
-import { Provider, SignInWithOAuthCredentials } from "@supabase/auth-js";
 import { Button } from "@heroui/button";
-import { Suspense, useEffect, useState } from "react";
-import { type User as I_User } from "@supabase/supabase-js";
+import React, { Suspense, useEffect, useState } from "react";
 import { Input, Textarea } from "@heroui/input";
 import { Card, CardBody, CardFooter } from "@heroui/card";
 import { Divider } from "@heroui/divider";
@@ -17,16 +15,23 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@heroui/dropdown";
+import { LucideFileImage, LucideX } from "lucide-react";
+import { useSignIn, useUser } from "@clerk/nextjs";
+import { OAuthStrategy } from "@clerk/types";
+import { Image } from "@heroui/image";
 
 import { unkey } from "@/utils/unkey";
-import { IBrands, IUser } from "@/types";
+import { Brand } from "@/types";
 import { APIKEY_PREFIX, FEEDBACKS_URL } from "@/constant";
 import { RatingTag } from "@/utils";
 import RatingComponent from "@/components/RatingStars/RatingComponent";
-import { LastUsed, useLastUsed } from "@/hooks/lastUsed";
-import { DisconnectIcon, GithubIcon, Icons } from "@/components/icons";
+import { DisconnectIcon, FeedbacksLogo } from "@/components/icons";
 import { DBTables } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
+import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
+import { GoogleLogo } from "@/components/icons/GoogleLogo";
+import { useCreateFeedback } from "@/hooks/useFeedbacks";
+
 // import { useIsMobile } from "@heroui/use-is-mobile";
 
 /*export interface FeedbackInput {
@@ -41,52 +46,34 @@ export interface FeedbackOutput {
   sentiment: string;
 }*/
 
-const feedbackSampleList = [
-  "The course content was well-structured, and the instructor clearly had a deep understanding of Rust. I loved how practical examples were integrated throughout, which made the learning process smoother!",
-  "The course covered all the key areas I was hoping for, but I felt that the pacing was a bit fast, especially during the concurrency section. It would be great to have a few more detailed breakdowns of complex topics.",
-  "Great job overall! However, I think adding more quizzes or hands-on projects at the end of each module would really help solidify the knowledge and give students more confidence in applying what they've learned.",
-  "The tutorial videos were clear and engaging. One suggestion would be to include more real-world case studies to show how Rust is used in production-level applications.",
-  "The project was a good proof of concept. However, I noticed some inconsistencies in the documentation and code comments. Clarifying these areas could help future collaborators understand the project better.",
-  "The design of the project is sleek and functional, but I believe it could be optimized for performance. Consider running some benchmarks or profiling the code to see where improvements can be made.",
-  "Fantastic job on meeting the requirements! The code quality is excellent, and your attention to detail really shows. Adding some unit tests would take this project to the next level.",
-  "The final product turned out great, and I was impressed by the innovative features you added. However, I think you could improve error handling in edge cases to make it even more robust.",
-  "The new update has brought a lot of improvements! The user interface is smoother, and the features are more intuitive. However, I did experience a few crashes during use, so it might be worth investigating potential stability issues.",
-  "This product has been a game-changer for me! It's easy to use and packed with features. My only suggestion would be to add more customization options for advanced users who want to tweak settings further.",
-  "The product's functionality is top-notch, and I appreciate how seamlessly it integrates with my existing setup. That said, the customer support response times could be faster.",
-  "I'm really happy with the product overall. It works exactly as described, and the installation was a breeze. One minor improvement could be offering a more detailed user manual for those less tech-savvy.",
-  "The team worked well together and met the project deadline, which was fantastic. However, there were times when task ownership was unclear. Establishing clear roles upfront could help avoid confusion in the future.",
-  "Great job on delivering such high-quality work under tight deadlines. One suggestion for improvement would be to schedule more regular check-ins to ensure everyone stays on track and issues can be addressed early.",
-  "The collaboration between the different team members was impressive. I appreciated how everyone was proactive in solving problems. If we could document the decisions made during meetings, it would help keep track of progress more effectively.",
-  "I'm really pleased with how the team handled the project. The communication was strong, and everyone contributed valuable insights. A small area for improvement would be speeding up response times on certain critical tasks.",
-];
-
-function getRandomFeedback(feedbackList: string[]) {
-  const randomIndex = Math.floor(Math.random() * feedbackList.length);
-
-  return feedbackList[randomIndex];
-}
-
 function FeedbacksFormContent({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   width,
   height,
-  isPreview = true,
+  isPreview,
+  showScreenshots,
+  showTitle,
 }: {
   width?: number;
   height?: number;
   isPreview: boolean;
+  showScreenshots: boolean;
+  showTitle: boolean;
 }) {
   const searchParams = useSearchParams();
   // const searchParams = new URLSearchParams(window.location.search);
 
   const apiKey = APIKEY_PREFIX + searchParams.get("fdb") || ""; // returns 'bar' when ?foo=bar
   const theme = searchParams.get("theme") || "";
-  const queryWidth = searchParams.get("width") || width || 400;
-  const queryHeight = searchParams.get("height") || height || 720;
+  // const queryWidth = searchParams.get("width") || width || 400;
+  // const queryHeight = searchParams.get("height") || height || 720;
+  // const queryWidth = searchParams.get("width") || width || 400;
+  const queryHeight = searchParams.get("height") || height || 7;
 
   // const isMobile = useIsMobile()
-  const [lastUsed, setLastUsed] = useLastUsed();
-  const [user, setUser] = useState<I_User>();
-  const [userDB, setUserDB] = useState<IUser>();
+  // const [lastUsed, setLastUsed] = useLastUsed();
+  // const [user, setUser] = useState<I_User>();
+  // const [userDB, setUserDB] = useState<IUser>();
 
   // Extract query parameters for customization
   // const params = new URLSearchParams(window.location.search);
@@ -103,7 +90,15 @@ function FeedbacksFormContent({
   const [feedbackTitle, setFeedbackTitle] = useState<string>("");
   const [feedbackContent, setFeedbackContent] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [thisBrandData, setThisBrandData] = useState<IBrands>();
+  const [thisBrandData, setThisBrandData] = useState<Brand>();
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+  const { user } = useUser();
+  const { signIn } = useSignIn();
+  const { data: userAndUserDB } = useUserAndUserDBQuery();
+  const { userDB } = userAndUserDB || {};
+  const createFeedback = useCreateFeedback();
 
   // Apply theme styles dynamically
   useEffect(() => {
@@ -111,16 +106,16 @@ function FeedbacksFormContent({
   }, [theme]);
 
   useEffect(() => {
-    const getUser = async () => {
+    /*const getUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
       setUser(user!);
       getUserDB(user!);
-    };
+    };*/
 
-    const getUserDB = async (userData: I_User) => {
+    /*const getUserDB = async (userData: I_User) => {
       const { data, error } = await supabase
         .from(DBTables.User)
         .select("*")
@@ -134,13 +129,13 @@ function FeedbacksFormContent({
       if (data && data.length > 0) {
         setUserDB(data[0]);
       }
-    };
+    };*/
 
     const getBrand = async () => {
       const { data: brandData, error: brandError } = await supabase
         .from(DBTables.Brand)
         .select("*")
-        .eq("userApiKey", apiKey);
+        .eq("user_api_key", apiKey);
 
       if (brandData && brandData.length > 0) {
         setThisBrandData(brandData[0]);
@@ -152,40 +147,128 @@ function FeedbacksFormContent({
       }
     };
 
-    getUser();
+    // getUser();
     getBrand();
   }, []);
 
-  const handleSupabaseOauthSignIn = async (provider: Provider) => {
-    setLastUsed(provider === "google" ? "google" : "github");
+  // check that signin is available. i.e., not null nor not undefined
+  if (!signIn) return null;
+  const signInWith = (strategy: OAuthStrategy) => {
+    return (
+      signIn
+        .authenticateWithRedirect({
+          strategy,
+          redirectUrl: "/app/sign-in/sso-callback",
+          redirectUrlComplete: "/app",
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .then((res: any) => {
+          // console.log(res);
+          // setLastUsed("google");
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch((err: any) => {
+          // See https://clerk.com/docs/custom-flows/error-handling
+          // for more info on error handling
+          // console.log(err.errors);
+          // console.error(err, null, 2);
+        })
+    );
+  };
 
-    await supabase.auth.signInWithOAuth({
-      provider: provider,
-      options: {
-        redirectTo: "http://localhost:3000/home",
-      },
-    } as SignInWithOAuthCredentials);
+  const resetForm = () => {
+    setFeedbackTitle("");
+    setFeedbackContent("");
+    setSelectedImages([]);
+    setImagePreviews([]);
   };
 
   const onCreateFeedback = async () => {
     setIsSubmitting(true);
 
+    const uploadScreenshots = async (files: File[]) => {
+      try {
+        const uploadPromises = files.map(async (file) => {
+          const formData = new FormData();
+
+          formData.append("file", file);
+          formData.append("upload_preset", "feedbacks_preset");
+
+          try {
+            const res = await fetch(
+              process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_URL!,
+              {
+                method: "POST",
+                body: formData,
+              },
+            );
+
+            if (!res.ok) {
+              throw new Error(`Failed to upload ${file.name}`);
+            }
+
+            const data = await res.json();
+
+            return data.secure_url;
+          } catch (error) {
+            toast.error(
+              `Error uploading ${file.name}: ${(error as any).message}`,
+            );
+            throw error;
+          }
+        });
+
+        const uploadedUrls = await Promise.all(uploadPromises);
+
+        toast.success("Screenshots uploaded successfully");
+
+        return uploadedUrls;
+      } catch (error) {
+        toast.error("Error uploading screenshots");
+        throw error;
+      }
+    };
+
     try {
       // get the brandId from the API-Key provided.
       if (thisBrandData) {
         const brandId = thisBrandData.id;
-        const { data, error } = await supabase
+        const screenshotUrls =
+          selectedImages.length > 0
+            ? await uploadScreenshots(selectedImages)
+            : [];
+
+        // @ts-ignore
+        const response = await createFeedback.mutateAsync({
+          recipient_id: brandId!,
+          title: feedbackTitle.trim(),
+          email: user?.primaryEmailAddress?.emailAddress!,
+          description: feedbackContent.trim(),
+          event_id: null,
+          product_id: null,
+          star_rating: rating,
+          // be_anonymous: beAnonymous,
+          screenshots: screenshotUrls.join(","),
+        });
+
+        if (response) {
+          // onClose();
+          toast.success("Feedback created successfully.");
+          resetForm();
+        }
+
+        /*const { data, error } = await supabase
           .from(DBTables.Feedback)
           .insert([
             {
-              recipientId: brandId,
+              recipient_id: brandId,
               title: feedbackTitle,
-              email: user?.email,
+              email: user?.primaryEmailAddress?.emailAddress,
               description: feedbackContent,
-              eventId: null,
-              productId: null,
-              starRating: rating,
-              fromEmbed: true,
+              event_id: null,
+              product_id: null,
+              star_rating: rating,
+              from_embed: true,
             },
           ])
           .select();
@@ -208,9 +291,9 @@ function FeedbacksFormContent({
               feedbackCount: count,
             })
             .eq("id", brandId);
-        }
+        }*/
 
-        if (data) {
+        if (response) {
           toast.success("Feedback created successfully.");
 
           // Verify the apiKey after the feedback is sent,
@@ -245,21 +328,69 @@ function FeedbacksFormContent({
           // console.log("Feedback sent and verified successfully", verifyResult);
         }
 
-        if (error) {
+        /*if (error) {
           // console.error("error creating feedback", error);
           toast.error("Error creating your feedback. Kindly try again.");
-        }
+        }*/
       }
     } catch (error) {
       setIsSubmitting(false);
       // console.error("Unable to submit feedback", error);
       toast.error("Error submitting feedback", {
-        description:
-          "An error occurred trying to submit feedback. Pls try again.",
+        description: "We were unable to submit your feedback. Pls try again.",
       });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleAddScreenshots = () => {
+    const input = document.createElement("input");
+
+    input.type = "file";
+    input.multiple = true;
+    input.accept = "image/*";
+
+    input.onchange = (e) => {
+      const files = Array.from((e.target as HTMLInputElement).files || []);
+
+      // Check number of files
+      if (files.length + selectedImages.length > 2) {
+        toast.error("Maximum 2 images allowed");
+
+        return;
+      }
+
+      // Validate each file
+      const validFiles = files.filter((file) => {
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`${file.name} exceeds 5MB limit`);
+
+          return false;
+        }
+        if (!file.type.startsWith("image/")) {
+          toast.error(`${file.name} is not an image`);
+
+          return false;
+        }
+
+        return true;
+      });
+
+      // Create preview URLs and update state
+      validFiles.forEach((file) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+          setImagePreviews((prev) => [...prev, e.target?.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      setSelectedImages((prev) => [...prev, ...validFiles]);
+    };
+
+    input.click();
   };
 
   if (!apiKey) {
@@ -303,68 +434,34 @@ function FeedbacksFormContent({
 
   if (!isPreview && !user) {
     return (
-      <div
+      <section
         className={
-          "fixed top-0 left-0 right-0 flex flex-col justify-center items-center gap-8 h-dvh w-full"
+          "relative flex flex-col justify-center items-center gap-y-4 h-dvh w-full"
         }
       >
-        <div className={"text-xl font-bold"}>
-          Continue with your Social Accounts
+        <div className={"absolute top-8 py-2"}>
+          <div className={"flex flex-col items-center gap-x-1"}>
+            <FeedbacksLogo size={32} />
+            <p className="font-bold text-inherit">Welcome to Feedbacks</p>
+          </div>
+          {/*<div className={"text-lg text-balance"}>
+          <span className={"text-small font-semibold"}>Sign in using your</span>
+          <span className={"font-medium"}>Social Accounts</span>
+        </div>*/}
         </div>
-        {/*<div>
-        {JSON.stringify(sessionData, null, 2)}
-      </div>*/}
         <div className={"flex flex-row justify-center items-center gap-3"}>
-          {/*<Button
-          variant="solid"
-          type="button"
-          // disabled={isLoading}
-          onClick={() => handleOauthSignIn("github")}
-        >
-          {isLoading ? (
-            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Icons.gitHub className="mr-2 h-4 w-4" />
-          )}{" "}
-          <GithubIcon />
-          GitHub {lastUsed === "github" ? <LastUsed /> : null}
-        </Button>
-        <Button
-          variant="solid"
-          type="button"
-          // disabled={isLoading}
-          onClick={() => handleOauthSignIn("google")}
-        >
-          {isLoading ? (
-            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Icons.google className="mr-2 h-4 w-4" />
-          )}{" "}
-
-          <Icons.google className="mr-2 h-4 w-4" />
-          Google {lastUsed === "google" ? <LastUsed /> : null}
-        </Button>*/}
-
           <Button
-            type="button"
-            variant="solid"
-            // disabled={isLoading}
-            onPress={() => handleSupabaseOauthSignIn("github")}
+            className={"font-semibold"}
+            size={"md"}
+            variant={"flat"}
+            onPress={() => signInWith("oauth_google")}
           >
-            <GithubIcon />
-            GitHub {lastUsed === "github" ? <LastUsed /> : null}
-          </Button>
-          <Button
-            type="button"
-            variant="solid"
-            // disabled={isLoading}
-            onPress={() => handleSupabaseOauthSignIn("google")}
-          >
-            <Icons.google className="mr-2 h-4 w-4" />
-            Google {lastUsed === "google" ? <LastUsed /> : null}
+            <GoogleLogo size={16} />
+            Sign in with Google
+            {/*{lastUsed === "google" ? <LastUsed /> : null}*/}
           </Button>
         </div>
-      </div>
+      </section>
     );
   }
 
@@ -372,8 +469,8 @@ function FeedbacksFormContent({
     <Suspense fallback={<div>Loading...</div>}>
       <ScrollShadow>
         <div
-          className={"p-4 space-y-8"}
-          style={{ width: `${queryWidth}px`, height: `${queryHeight}px` }}
+          className={"p-4 space-y-8 rounded-2xl"}
+          // style={{ width: `${queryWidth}px`, height: `${queryHeight}px` }}
         >
           {/*<User
           avatarProps={{
@@ -391,7 +488,7 @@ function FeedbacksFormContent({
             <div className={""}>
               Send Feedback to
               <div className={"font-bold text-2xl"}>
-                {thisBrandData?.rawName}
+                {thisBrandData?.raw_name}
               </div>
             </div>
             <Dropdown isDisabled={isPreview} placement="bottom-start">
@@ -400,7 +497,7 @@ function FeedbacksFormContent({
                   as="button"
                   avatarProps={{
                     isBordered: true,
-                    src: userDB?.dp || user?.user_metadata.avatar_url,
+                    src: userDB?.dp || user?.imageUrl,
                   }}
                   className="transition-transform"
                   description={""}
@@ -419,9 +516,7 @@ function FeedbacksFormContent({
                     Signed in as
                   </p>
                   <div>
-                    <div className="font-bold">
-                      {user?.user_metadata.full_name}
-                    </div>
+                    <div className="font-bold">{user?.fullName}</div>
                     <div className="text-sm text-default-500 overflow-ellipsis overflow-x-hidden whitespace-nowrap">
                       ({userDB?.email})
                     </div>
@@ -450,37 +545,47 @@ function FeedbacksFormContent({
           </div>
 
           <div className="form-container flex flex-col gap-y-6">
-            <Input
-              classNames={{
-                input: "placeholder:text-default-300",
-              }}
-              label="Title"
-              labelPlacement="outside"
-              name="title"
-              placeholder="Your Feedback title"
-              readOnly={isPreview}
-              size={"lg"}
-              type="text"
-              value={feedbackTitle}
-              onValueChange={setFeedbackTitle}
-            />
+            {showTitle && (
+              <Input
+                classNames={{
+                  input: "placeholder:text-default-300",
+                  label: "font-semibold",
+                }}
+                label="Title"
+                labelPlacement="outside"
+                name="title"
+                placeholder="Your Feedback title"
+                readOnly={isPreview}
+                size={"lg"}
+                type="text"
+                value={feedbackTitle}
+                onValueChange={setFeedbackTitle}
+              />
+            )}
             <Textarea
               isRequired
               className=""
               classNames={{
                 input: "placeholder:text-default-300",
+                label: "font-semibold",
               }}
+              disableAutosize={true}
               label="Your Feedback"
               labelPlacement="outside"
-              maxRows={16}
-              minRows={12}
-              placeholder={`e.g., ${getRandomFeedback(feedbackSampleList)}`}
+              // maxRows={16}
+              // minRows={12}
+              // minRows={16}
+              // rows={Math.round(Number(queryHeight) / 60)} // 60 is the default height of a textarea row
+              placeholder={
+                "Write your feedback content here. Express yourself."
+              }
               readOnly={isPreview}
+              rows={Number(queryHeight)}
               value={feedbackContent}
               onValueChange={setFeedbackContent}
             />
             <div className="space-y-2">
-              <div className="text-small">Set a Rating</div>
+              <div className="font-semibold text-small">Set a Rating</div>
               {/* <Rating setRating={setRating} /> */}
               <RatingComponent
                 selectedRating={rating!}
@@ -493,14 +598,74 @@ function FeedbacksFormContent({
               <div>No rating selected</div>
             )}
 
-            <Button
+            <div className={""}>
+              {imagePreviews.length > 0 && (
+                <div className="flex gap-3 px-4 py-2 overflow-x-auto">
+                  {imagePreviews.map((preview, index) => (
+                    <div key={index} className="relative w-16 h-16 ">
+                      <Image
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-full object-cover rounded-lg"
+                        height={"64px"}
+                        src={preview}
+                        width={"64px"}
+                      />
+                      <Button
+                        isIconOnly
+                        className="absolute -top-2 -right-2 z-10 bg-danger-500 text-white rounded-full flex items-center justify-center"
+                        size={"sm"}
+                        onPress={() => {
+                          setImagePreviews((prev) =>
+                            prev.filter((_, i) => i !== index),
+                          );
+                          setSelectedImages((prev) =>
+                            prev.filter((_, i) => i !== index),
+                          );
+                        }}
+                      >
+                        <LucideX size={16} />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {imagePreviews.length > 0 && <Divider className={"my-2"} />}
+            </div>
+
+            <div
+              className={"flex flex-row justify-between items-center w-full"}
+            >
+              {showScreenshots && (
+                <Button
+                  isDisabled={imagePreviews.length === 2}
+                  variant={"flat"}
+                  onPress={handleAddScreenshots}
+                >
+                  <span className={"flex flex-row gap-x-2 text-small"}>
+                    <LucideFileImage size={20} />
+                    Add Screenshots
+                  </span>
+                </Button>
+              )}
+              <Button
+                color="primary"
+                fullWidth={!showScreenshots}
+                isDisabled={!isPreview && feedbackContent === ""}
+                isLoading={isSubmitting}
+                onPress={onCreateFeedback}
+              >
+                Submit
+              </Button>
+            </div>
+
+            {/*<Button
               color="primary"
               isDisabled={!isPreview || feedbackContent === ""}
               isLoading={isSubmitting}
               onPress={onCreateFeedback}
             >
               {isSubmitting ? "Submitting..." : "Submit"}
-            </Button>
+            </Button>*/}
 
             {/*<h2>Feedback Form</h2>
           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" required />
@@ -520,16 +685,22 @@ export default function FeedbacksForm({
   width,
   height,
   isPreview = true,
+  showScreenshots = true,
+  showTitle = true,
 }: {
   width?: number;
   height?: number;
   isPreview: boolean;
+  showScreenshots?: boolean;
+  showTitle?: boolean;
 }) {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <FeedbacksFormContent
         height={height}
         isPreview={isPreview}
+        showScreenshots={showScreenshots}
+        showTitle={showTitle}
         width={width}
       />
     </Suspense>

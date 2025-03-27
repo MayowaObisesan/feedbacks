@@ -26,7 +26,6 @@ import * as React from "react";
 
 import SearchModal from "@/components/Modals/SearchModal";
 import { useFeedbacksContext } from "@/context";
-import { supabase } from "@/utils/supabase/supabase";
 import { DisconnectIcon, FeedbacksLogo, SearchIcon } from "@/components/icons";
 import { siteConfig } from "@/config/site";
 import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
@@ -57,7 +56,7 @@ export function Navbar() {
   async function handleSignOut() {
     try {
       // Sign out from Supabase
-      await supabase.auth.signOut();
+      // await supabase.auth.signOut();
 
       // Clear user context
       SetUser(null);
@@ -119,12 +118,14 @@ export function Navbar() {
             {/*<DropdownItem key="settings" href={"/app/me"}>
               My Profile
             </DropdownItem>*/}
-            <DropdownItem key="settings">Settings</DropdownItem>
+            {/*<DropdownItem key="settings">Settings</DropdownItem>*/}
             {/*<DropdownItem key="team_settings">Team Settings</DropdownItem>*/}
-            <DropdownItem key="analytics">Analytics</DropdownItem>
+            <DropdownItem key="analytics" isDisabled>
+              Analytics
+            </DropdownItem>
             {/*<DropdownItem key="system">System</DropdownItem>*/}
             {/*<DropdownItem key="configurations">Configurations</DropdownItem>*/}
-            <DropdownItem key="help_and_feedback" showDivider>
+            <DropdownItem key="help_and_feedback" showDivider href={"/app/brand/feedbacks"}>
               Help & Feedback
             </DropdownItem>
             {/*<DropdownItem
@@ -142,6 +143,7 @@ export function Navbar() {
               color="danger"
               endContent={<DisconnectIcon size={20} strokeWidth={4} />}
               variant={"light"}
+              onPress={handleSignOut}
             >
               <SignOutButton />
             </DropdownItem>

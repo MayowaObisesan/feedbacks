@@ -9,6 +9,7 @@ export const createClient = (request: NextRequest) => {
     },
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const supabase = createServerClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_KEY!,
@@ -18,6 +19,7 @@ export const createClient = (request: NextRequest) => {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           cookiesToSet.forEach(({ name, value, options }) =>
             request.cookies.set(name, value),
           );

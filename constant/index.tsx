@@ -7,8 +7,8 @@ import productsABI from "../abis/productsTestnet.abi.json";
 
 export const FEEDBACKS_URL =
   process.env.NODE_ENV === "development"
-    ? process.env.FEEDBACKS_DEV_URL
-    : process.env.FEEDBACKS_PROD_URL;
+    ? process.env.NEXT_PUBLIC_FEEDBACKS_DEV_URL
+    : process.env.NEXT_PUBLIC_FEEDBACKS_PROD_URL;
 
 export const APIKEY_PREFIX = "fdb_";
 

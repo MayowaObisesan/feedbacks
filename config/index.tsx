@@ -12,12 +12,12 @@ if (!projectId) {
 }
 
 // Create a metadata object
-const metadata = {
+/*const metadata = {
   name: "Feedback",
   description: "AppKit Example",
   url: "https://web3modal.com", // origin must match your domain & subdomain
   icons: ["https://avatars.githubusercontent.com/u/37784886"],
-};
+};*/
 
 // Create wagmiConfig
 // const chains = [mainnet, sepolia, base, baseSepolia] as const;
