@@ -5,6 +5,9 @@ import { ScrollShadow } from "@heroui/scroll-shadow";
 import { Button } from "@heroui/button";
 import { Alert } from "@heroui/alert";
 import { SignedIn } from "@clerk/nextjs";
+import { LucideArrowRight, LucideMessagesSquare } from "lucide-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Spinner } from "@heroui/spinner";
 
 import FeedbackCard from "@/components/FeedbackCard";
 import HomeNav from "@/components/homeNav";
@@ -22,10 +25,19 @@ import {
   FeedbackCardListSkeleton,
   FeedbackCardSkeleton,
 } from "@/components/Skeletons/FeedbacksCardSkeleton";
+import EmptyCard from "@/components/EmptyCard";
+import { InfiniteFlatList } from "@/components/FlatList/infiniteFlatList";
+import Link from "next/link";
 
 export default function Home() {
   useRealTimeBrands();
   useRealTimeFeedbacks();
+  const allFeedbacksLimit = 10;
+  const allFeedbacksPageRef = useRef(1);
+  const [allFeedbacksPage, setAllFeedbacksPage] = useState<number>(
+    allFeedbacksPageRef.current,
+  );
+  const [allFeedbacksList, setAllFeedbacksList] = useState<any[]>([]);
 
   const {
     data: trendingBrands,
@@ -43,8 +55,51 @@ export default function Home() {
     data: allFeedbacks,
     error: allFeedbacksError,
     isLoading: allFeedbacksLoading,
+    isFetched: allFeedbacksIsFetched,
     refetch: allFeedbacksRefetch,
-  } = useAllFeedbacks(10);
+  } = useAllFeedbacks(10, allFeedbacksPage);
+  const allFeedbackstotalPages = Math.ceil(
+    allFeedbacks?.count! / allFeedbacksLimit,
+  );
+
+  const renderAllFeedbacksItem = (feedback: any) => (
+    <FeedbackCard
+      key={feedback.id}
+      isLoaded={allFeedbacksIsFetched}
+      {...feedback}
+      showBrand={true}
+    />
+  );
+
+  const updateFeedbacks = useCallback((newData: any[], currentPage: number) => {
+    if (currentPage === 1) {
+      // setHasMore(true);
+
+      return setAllFeedbacksList(newData);
+    }
+
+    setAllFeedbacksList((prev) => {
+      // Create a map of existing IDs for faster lookup
+      const existingIds = new Map(prev.map((item) => [item.id, true]));
+
+      // Filter out duplicates while maintaining order
+      const uniqueNewData = newData.filter((item) => !existingIds.has(item.id));
+
+      return [...prev, ...uniqueNewData];
+    });
+  }, []);
+
+  useEffect(() => {
+    if (allFeedbacks?.data) {
+      updateFeedbacks(allFeedbacks.data, allFeedbacksPageRef.current);
+      // setHasMore(pageRef.current < totalPages);
+    }
+  }, [
+    allFeedbacks?.data,
+    allFeedbacksPageRef.current,
+    allFeedbackstotalPages,
+    updateFeedbacks,
+  ]);
 
   async function handleTrendingBrandsRefetch() {
     await trendingBrandsRefetch();
@@ -114,8 +169,29 @@ export default function Home() {
         </SignedIn>
 
         <section>
-          <header className="font-bold text-xl md:text-3xl leading-normal px-2">
-            Trending Brands
+          <header className="flex flex-row justify-between items-center font-bold text-xl md:text-2xl lg:text-3xl leading-normal px-2">
+            <div>Top Brands</div>
+            <div className={"flex flex-row items-center md:px-4"}>
+              {/*{(brandFeedbacksData as IFeedbacks[])?.length}*/}
+              <Button
+                as={Link}
+                className={"max-sm:hidden"}
+                endContent={<LucideArrowRight size={16} />}
+                href={`/app/brand`}
+                variant={"light"}
+              >
+                View more
+              </Button>
+              <Button
+                isIconOnly
+                as={Link}
+                className={"md:hidden"}
+                href={`/app/brand`}
+                variant={"light"}
+              >
+                <LucideArrowRight size={20} strokeWidth={4} />
+              </Button>
+            </div>
           </header>
           {trendingBrandsLoading && (
             <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
@@ -169,7 +245,7 @@ export default function Home() {
 
         <section className="">
           <header className="font-bold text-xl md:text-3xl leading-normal px-2">
-            Trending Feedbacks
+            Top Feedbacks
           </header>
           <ScrollShadow hideScrollBar orientation={"horizontal"} size={40}>
             <div className="flex flex-row gap-x-8 gap-y-2 px-2 py-4">
@@ -237,14 +313,14 @@ export default function Home() {
                   </CardBody>
                 </Card>
               )}
-              {allFeedbacks?.data?.map((eachFeedback) => (
+              {/*{allFeedbacks?.data?.map((eachFeedback) => (
                 <FeedbackCard
                   key={eachFeedback.id}
                   isLoaded={!allFeedbacksLoading}
                   {...eachFeedback}
                   showBrand={true}
                 />
-              ))}
+              ))}*/}
               {allFeedbacksError && (
                 <Card className="w-full bg-transparent shadow-none">
                   <CardBody className="flex items-center justify-center h-[200px]">
@@ -264,6 +340,66 @@ export default function Home() {
                 </Card>
               )}
             </div>
+
+            <InfiniteFlatList
+              ListEmptyComponent={
+                <EmptyCard>
+                  <div className={"flex flex-col items-center gap-y-5"}>
+                    <LucideMessagesSquare
+                      size={40}
+                      strokeWidth={1}
+                      width={"100%"}
+                    />
+                    <div className={"text-base lg:text-2xl text-balance"}>
+                      Wow. No feedback to fetch.
+                    </div>
+                  </div>
+                </EmptyCard>
+              }
+              ListFooterComponent={
+                <>
+                  {!allFeedbacksIsFetched && (
+                    <div className={"p-4 text-center"}>
+                      <Spinner size={"lg"} />
+                    </div>
+                  )}
+                  {allFeedbacksIsFetched &&
+                    allFeedbacksPage === allFeedbackstotalPages && (
+                      <div className="p-4 text-center">
+                        <p>No more feedbacks to load</p>
+                      </div>
+                    )}
+                  {/*{allFeedbacksPage < allFeedbackstotalPages ? (
+                    allFeedbacksLoading ? (
+                      <div className="p-4 text-center">
+                        <p>Loading more...</p>
+                      </div>
+                    ) : null
+                  ) : (
+                    <div className="p-4 text-center">
+                      <p>No more feedbacks to load</p>
+                    </div>
+                  )}*/}
+                </>
+              }
+              contentContainerClassName="flex flex-col gap-y-2 lg:px-2 py-4"
+              // initialNumToRender={10}
+              keyExtractor={(item) => item.id.toString()}
+              // maxToRenderPerBatch={10}
+              renderItem={renderAllFeedbacksItem}
+              renderedData={allFeedbacksList}
+              onEndReached={() => {
+                // Only fetch more if we're not already fetching and there are more pages
+                if (
+                  allFeedbacksIsFetched &&
+                  allFeedbacksPageRef.current < allFeedbackstotalPages
+                ) {
+                  allFeedbacksPageRef.current += 1;
+                  setAllFeedbacksPage(allFeedbacksPageRef.current);
+                }
+              }}
+              onEndReachedThreshold={0.5}
+            />
           </ScrollShadow>
         </section>
       </section>

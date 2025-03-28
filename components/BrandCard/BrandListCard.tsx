@@ -29,7 +29,7 @@ export function BrandListCard({
         <Avatar
           isBordered
           className={"grow shrink-0"}
-          fallback={"B"}
+          fallback={""}
           radius="full"
           size="md"
           src={avatarUrl}
