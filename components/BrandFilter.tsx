@@ -52,13 +52,13 @@ export function SegmentedFilter({
         aria-label="Brand filters"
         selectedKey={selectedFilter}
         size="sm"
-        variant="solid"
+        variant="underlined"
         // @ts-ignore
         onSelectionChange={onFilterChange}
       >
         <Tab key="my_brands" title="My Brands" />
-        {/*<Tab key="trending" title="Trending" />*/}
-        <Tab key="latest" title="Latest" />
+        <Tab key="trending" title="Top Brands" />
+        <Tab key="latest" title="Latest Brands" />
         <Tab key="all" title="All Brands" />
       </Tabs>
     </div>

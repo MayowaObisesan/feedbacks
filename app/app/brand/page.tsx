@@ -5,7 +5,7 @@ import { LucideHome, LucideLayoutTemplate } from "lucide-react";
 import { BreadcrumbItem, Breadcrumbs } from "@heroui/breadcrumbs";
 import { useMemo, useState } from "react";
 
-import { useBrands, useLatestBrands } from "@/hooks/useBrands";
+import { useBrands, useLatestBrands, useTrendingBrands } from "@/hooks/useBrands";
 import { SegmentedFilter } from "@/components/BrandFilter";
 import { BrandListCard } from "@/components/BrandCard/BrandListCard";
 import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
@@ -28,9 +28,11 @@ export default function BrandsPage() {
   const { data: brands, isLoading } = useBrands(30);
   const { data: latestBrands, isLoading: latestBrandsLoading } =
     useLatestBrands(30);
+  const { data: trendingBrands, isLoading: trendingBrandsLoading } =
+    useTrendingBrands(30);
   // const [filter, setFilter] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<BrandFilterType>(
-    BRAND_FILTERS.ALL,
+    BRAND_FILTERS.MY_BRANDS,
   );
 
   /*const filteredBrands = brands?.filter((brand) => {
@@ -58,12 +60,14 @@ export default function BrandsPage() {
     switch (categoryFilter) {
       case BRAND_FILTERS.LATEST:
         return latestBrands;
+      case BRAND_FILTERS.TRENDING:
+        return trendingBrands;
       case BRAND_FILTERS.MY_BRANDS:
         return myBrands;
       default:
         return brands;
     }
-  }, [categoryFilter, brands, latestBrands, myBrands]);
+  }, [categoryFilter, brands, trendingBrands, latestBrands, myBrands]);
 
   // Apply search filter to the selected dataset
   // const filteredBrands = currentBrands?.filter((brand) =>

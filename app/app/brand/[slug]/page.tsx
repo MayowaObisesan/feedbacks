@@ -41,7 +41,6 @@ function BrandPage({ params }: { params: any }) {
   // @ts-ignore
   const { slug } = React.use(params);
   const { user } = useUser();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pageRef = useRef(1);
   const [page, setPage] = useState<number>(pageRef.current);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
