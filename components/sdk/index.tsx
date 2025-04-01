@@ -16,16 +16,15 @@ import {
   DropdownTrigger,
 } from "@heroui/dropdown";
 import { LucideFileImage, LucideX } from "lucide-react";
-import { useSignIn, useUser } from "@clerk/nextjs";
-import { OAuthStrategy } from "@clerk/types";
+import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import { Image } from "@heroui/image";
+import { cn } from "@heroui/theme";
 
 import { unkey } from "@/utils/unkey";
 import { Brand } from "@/types";
 import { APIKEY_PREFIX, FEEDBACKS_URL } from "@/constant";
 import { RatingTag } from "@/utils";
 import RatingComponent from "@/components/RatingStars/RatingComponent";
-import { DisconnectIcon, FeedbacksLogo } from "@/components/icons";
 import { DBTables } from "@/types/enums";
 import { supabase } from "@/utils/supabase/supabase";
 import { useUserAndUserDBQuery } from "@/hooks/useFeedbackUser";
@@ -94,8 +93,8 @@ function FeedbacksFormContent({
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
-  const { user } = useUser();
-  const { signIn } = useSignIn();
+  const { user, isSignedIn } = useUser();
+  // const { signIn } = useSignIn();
   const { data: userAndUserDB } = useUserAndUserDBQuery();
   const { userDB } = userAndUserDB || {};
   const createFeedback = useCreateFeedback();
@@ -152,7 +151,7 @@ function FeedbacksFormContent({
   }, []);
 
   // check that signin is available. i.e., not null nor not undefined
-  if (!signIn) return null;
+  /*if (!signIn) return null;
   const signInWith = (strategy: OAuthStrategy) => {
     return (
       signIn
@@ -174,7 +173,7 @@ function FeedbacksFormContent({
           // console.error(err, null, 2);
         })
     );
-  };
+  };*/
 
   const resetForm = () => {
     setFeedbackTitle("");
@@ -432,7 +431,7 @@ function FeedbacksFormContent({
     );
   }
 
-  if (!isPreview && !user) {
+  /*if (!isPreview && !user) {
     return (
       <section
         className={
@@ -444,10 +443,10 @@ function FeedbacksFormContent({
             <FeedbacksLogo size={32} />
             <p className="font-bold text-inherit">Welcome to Feedbacks</p>
           </div>
-          {/*<div className={"text-lg text-balance"}>
+          {/!*<div className={"text-lg text-balance"}>
           <span className={"text-small font-semibold"}>Sign in using your</span>
           <span className={"font-medium"}>Social Accounts</span>
-        </div>*/}
+        </div>*!/}
         </div>
         <div className={"flex flex-row justify-center items-center gap-3"}>
           <Button
@@ -458,12 +457,12 @@ function FeedbacksFormContent({
           >
             <GoogleLogo size={16} />
             Sign in with Google
-            {/*{lastUsed === "google" ? <LastUsed /> : null}*/}
+            {/!*{lastUsed === "google" ? <LastUsed /> : null}*!/}
           </Button>
         </div>
       </section>
     );
-  }
+  }*/
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -484,6 +483,33 @@ function FeedbacksFormContent({
           name={user?.user_metadata?.full_name}
         />*/}
 
+          {/* @ts-ignore */}
+          <SignedOut>
+            <Card className={"sticky top-0"}>
+              <CardBody>
+                <div className={"flex flex-col gap-2"}>
+                  <div className={"text-center text-default-400"}>
+                    Kindly sign in to send your feedback.
+                    <br />
+                    It&apos;ll take less than a minute.
+                  </div>
+                  <Button
+                    as={Link}
+                    className={"font-semibold"}
+                    href={"/sign-in"}
+                    size={"md"}
+                    target={"_blank"}
+                    variant={"flat"}
+                    // onPress={() => signInWith("oauth_google")}
+                  >
+                    <GoogleLogo size={16} />
+                    Sign in with Google
+                    {/*{lastUsed === "google" ? <LastUsed /> : null}*/}
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
+          </SignedOut>
           <div className={"flex flex-row justify-between items-center gap-x-2"}>
             <div className={""}>
               Send Feedback to
@@ -511,7 +537,10 @@ function FeedbacksFormContent({
                 }}
                 variant="flat"
               >
-                <DropdownItem key="profile" className="h-14 gap-2">
+                <DropdownItem
+                  key="profile"
+                  className={cn(!isSignedIn ? "hidden" : "h-14 gap-2")}
+                >
                   <p className="font-medium text-xs text-default-400">
                     Signed in as
                   </p>
@@ -532,14 +561,17 @@ function FeedbacksFormContent({
                     Visit Feedbacks app
                   </Link>
                 </DropdownItem>
-                <DropdownItem
-                  key="logout"
+                {/*<DropdownItem
+                  key="signout"
+                  as={Button}
+                  className={cn(!isSignedIn ? "hidden" : "text-left")}
                   color="danger"
                   endContent={<DisconnectIcon size={20} strokeWidth={4} />}
-                  onPress={async () => await supabase.auth.signOut()}
+                  variant={"light"}
+                  onPress={handleSignOut}
                 >
                   Log Out
-                </DropdownItem>
+                </DropdownItem>*/}
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -647,15 +679,24 @@ function FeedbacksFormContent({
                   </span>
                 </Button>
               )}
-              <Button
-                color="primary"
-                fullWidth={!showScreenshots}
-                isDisabled={!isPreview && feedbackContent === ""}
-                isLoading={isSubmitting}
-                onPress={onCreateFeedback}
-              >
-                Submit
-              </Button>
+              {/* @ts-ignore */}
+              <SignedIn>
+                <Button
+                  color="primary"
+                  fullWidth={!showScreenshots}
+                  isDisabled={!isPreview && feedbackContent === ""}
+                  isLoading={isSubmitting}
+                  onPress={onCreateFeedback}
+                >
+                  Submit
+                </Button>
+              </SignedIn>
+              {/* @ts-ignore */}
+              <SignedOut>
+                <Button isDisabled color="primary" fullWidth={!showScreenshots}>
+                  Sign in to submit
+                </Button>
+              </SignedOut>
             </div>
 
             {/*<Button
