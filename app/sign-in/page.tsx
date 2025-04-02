@@ -22,7 +22,7 @@ export default function Page() {
     return signIn
       .authenticateWithRedirect({
         strategy,
-        redirectUrl: "/sso-callback",
+        redirectUrl: "sso-callback",
         redirectUrlComplete: "/app",
       })
       .then((res) => {
