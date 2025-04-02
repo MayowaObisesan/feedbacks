@@ -20,6 +20,16 @@ const features = [
       "Our AI analyzes feedback sentiment, categorizes responses, and provides actionable insights automatically.",
   },
   {
+    title: "Brand Accountability",
+    description:
+      "Welcome to the era of brand accountability, where customers have a voice over the decisions and actions brand make.",
+  },
+  {
+    title: "Get Feedback from humans not bots",
+    description:
+      "Trust that the feedbacks from customers are from humans, not bots.",
+  },
+  {
     title: "Real-Time Engagement",
     description:
       "Instant notifications and live updates when customers leave feedback, with immediate response capabilities.",
