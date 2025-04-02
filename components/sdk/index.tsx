@@ -1,3 +1,5 @@
+"use client";
+
 import { toast } from "sonner";
 import { Button } from "@heroui/button";
 import React, { Suspense, useEffect, useState } from "react";
@@ -16,7 +18,7 @@ import {
   DropdownTrigger,
 } from "@heroui/dropdown";
 import { LucideFileImage, LucideX } from "lucide-react";
-import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { Image } from "@heroui/image";
 import { cn } from "@heroui/theme";
 
@@ -98,6 +100,32 @@ function FeedbacksFormContent({
   const { data: userAndUserDB } = useUserAndUserDBQuery();
   const { userDB } = userAndUserDB || {};
   const createFeedback = useCreateFeedback();
+
+  // components/sdk/index.tsx
+  // Add this at the start of your FeedbacksFormContent component
+
+  useEffect(() => {
+    // Send height updates to parent
+    const sendHeight = () => {
+      window.parent.postMessage(
+        {
+          type: "resize",
+          height: document.documentElement.scrollHeight,
+        },
+        "*",
+      );
+    };
+
+    // Send initial height
+    sendHeight();
+
+    // Send height on content changes
+    const observer = new ResizeObserver(sendHeight);
+
+    observer.observe(document.documentElement);
+
+    return () => observer.disconnect();
+  }, []);
 
   // Apply theme styles dynamically
   useEffect(() => {
