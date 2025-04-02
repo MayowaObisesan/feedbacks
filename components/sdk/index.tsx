@@ -18,9 +18,9 @@ import {
   DropdownTrigger,
 } from "@heroui/dropdown";
 import { LucideFileImage, LucideX } from "lucide-react";
-import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { Image } from "@heroui/image";
 import { cn } from "@heroui/theme";
+import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 
 import { unkey } from "@/utils/unkey";
 import { Brand } from "@/types";
