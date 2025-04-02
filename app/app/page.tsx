@@ -143,14 +143,18 @@ export default function Home() {
   // useContractEvent({ eventName: "BrandRegistered" });
 
   return (
-    <section className="flex flex-col lg:flex-row w-full h-full gap-y-8 py-4">
-      <section className="lg:h-full">
+    <section className="flex flex-col lg:flex-row w-full h-full gap-y-4 overflow-y-auto">
+      <header className={"space-y-2 px-2 py-2 bg-background"}>
+        <div className={"font-bold text-2xl bg-clip-text text-transparent bg-gradient-to-r from-danger-600 via-foreground to-foreground"}>For You</div>
+        <div className={"font-medium text-small text-foreground-500"}>
+          Brands and Consumers in one place
+        </div>
+      </header>
+
+      <section className="hidden lg:h-full">
         <HomeNav />
       </section>
-      <div className={"hidden"}>
-        <SearchModal />
-      </div>
-      <section className="flex-1 space-y-12 md:px-2 lg:px-8 lg:overflow-x-hidden">
+      <section className="flex-1 space-y-8 md:px-2 lg:px-8 lg:overflow-x-hidden">
         {trendingBrandsError && (
           <div>
             <Alert
@@ -163,13 +167,29 @@ export default function Home() {
         {/* Only show create brand modal for signed-in users */}
         {/*@ts-ignore*/}
         <SignedIn>
-          <div className={"px-2"}>
-            <CreateBrandModal />
+          <div className={"px-1"}>
+            <Alert
+              hideIcon
+              className={"px-2"}
+              color="default"
+              description="Create a brand to get started."
+              endContent={
+                // <Button color="warning" size="sm" variant="flat">
+                //   Upgrade
+                // </Button>
+                <CreateBrandModal />
+              }
+              title="Get real-time feedback"
+              variant="faded"
+            />
           </div>
+          {/*<div className={"px-2"}>
+            <CreateBrandModal />
+          </div>*/}
         </SignedIn>
 
         <section>
-          <header className="flex flex-row justify-between items-center font-bold text-xl md:text-2xl lg:text-3xl leading-normal px-2">
+          <header className="flex flex-row justify-between items-center font-bold text-lg md:text-2xl lg:text-3xl leading-normal px-2">
             <div>Top Brands</div>
             <div className={"flex flex-row items-center md:px-4"}>
               {/*{(brandFeedbacksData as IFeedbacks[])?.length}*/}
@@ -201,18 +221,20 @@ export default function Home() {
             </div>
           )}
           {trendingBrands && (
-            <div className="flex flex-row gap-x-8 px-2 py-4 overflow-x-auto">
-              {trendingBrands?.map((eachTrendingBrand) => (
-                <TrendingBrandCard
-                  key={eachTrendingBrand.name}
-                  avatarUrl={eachTrendingBrand.brand_image!}
-                  description={eachTrendingBrand.description!}
-                  feedbackCount={Number(eachTrendingBrand.feedback_count)}
-                  name={eachTrendingBrand.name}
-                  rawName={eachTrendingBrand.raw_name}
-                />
-              ))}
-            </div>
+            <ScrollShadow hideScrollBar orientation={"horizontal"} size={40}>
+              <div className="flex flex-row gap-x-8 px-2 py-4">
+                {trendingBrands?.map((eachTrendingBrand) => (
+                  <TrendingBrandCard
+                    key={eachTrendingBrand.name}
+                    avatarUrl={eachTrendingBrand.brand_image!}
+                    description={eachTrendingBrand.description!}
+                    feedbackCount={Number(eachTrendingBrand.feedback_count)}
+                    name={eachTrendingBrand.name}
+                    rawName={eachTrendingBrand.raw_name}
+                  />
+                ))}
+              </div>
+            </ScrollShadow>
           )}
           {trendingBrands?.length === 0 && (
             <Card className="bg-transparent shadow-none">
@@ -244,7 +266,7 @@ export default function Home() {
         </section>
 
         <section className="">
-          <header className="font-bold text-xl md:text-3xl leading-normal px-2">
+          <header className="font-bold text-lg md:text-3xl leading-normal px-2">
             Top Feedbacks
           </header>
           <ScrollShadow hideScrollBar orientation={"horizontal"} size={40}>
@@ -294,7 +316,7 @@ export default function Home() {
         </section>
 
         <section className="">
-          <header className="font-bold text-xl md:text-3xl leading-normal px-2">
+          <header className="font-bold text-lg md:text-3xl leading-normal px-2">
             Latest Feedbacks
           </header>
           <ScrollShadow hideScrollBar orientation={"vertical"} size={80}>

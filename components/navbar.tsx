@@ -166,12 +166,12 @@ export function Navbar() {
       position={"sticky"}
     >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-        <Button isIconOnly className={"hidden max-md:flex"} variant={"light"}>
-          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-          <label htmlFor={"id-mobile-drawer"}>
-            <LucideChartNoAxesGantt />
-          </label>
-        </Button>
+        {/*<Button isIconOnly className={"hidden max-md:flex"} variant={"light"}>*/}
+        {/*  /!* eslint-disable-next-line jsx-a11y/label-has-associated-control *!/*/}
+        {/*  <label htmlFor={"id-mobile-drawer"}>*/}
+        {/*    <LucideChartNoAxesGantt />*/}
+        {/*  </label>*/}
+        {/*</Button>*/}
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
             <FeedbacksLogo />

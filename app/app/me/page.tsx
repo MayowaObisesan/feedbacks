@@ -7,11 +7,11 @@ import { Avatar } from "@heroui/avatar";
 import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 import { Skeleton } from "@heroui/skeleton";
 import {
-  LucideCheck,
+  LucideCheck, LucideHome,
   LucideInfo,
   LucideLayoutTemplate,
   LucideMessagesSquare,
-  LucideUserPlus2,
+  LucideUserPlus2
 } from "lucide-react";
 import React from "react";
 import { Tooltip } from "@heroui/tooltip";
@@ -39,6 +39,7 @@ import {
   useUserAndUserDBQuery,
 } from "@/hooks/useFeedbackUser";
 import { useRealTimeFeedbacks } from "@/hooks/useFeedbacks";
+import { BreadcrumbItem, Breadcrumbs } from "@heroui/breadcrumbs";
 
 type Brand = Tables<DBTables.Brand>;
 
@@ -73,7 +74,7 @@ const ProfileCard = ({
   useRealTimeBrandsFollowers();
 
   return (
-    <Card className="lg:min-w-[340px] lg:max-w-[340px]">
+    <Card className="lg:min-w-[340px] lg:max-w-[340px]" shadow={"md"}>
       <CardHeader className="justify-between">
         <div className="flex gap-5">
           <Avatar
@@ -339,7 +340,30 @@ export default function Page() {
 
   return (
     <section className="flex flex-col lg:flex-row flex-nowrap gap-4">
-      <section className="relative lg:sticky lg:top-4 h-full space-y-2 px-2 py-5">
+      <div className={"sticky top-0 z-40 p-4 bg-background"}>
+        <Breadcrumbs>
+          <BreadcrumbItem
+            key={"home"}
+            href={"/app"}
+            startContent={<LucideHome size={15} />}
+          >
+            Home
+          </BreadcrumbItem>
+          <BreadcrumbItem
+            key={"brands"}
+            href={"/app/brand"}
+            startContent={<LucideLayoutTemplate size={15} />}
+          >
+            Brands
+          </BreadcrumbItem>
+          <BreadcrumbItem
+            key={"profile"}
+          >
+            My Page
+          </BreadcrumbItem>
+        </Breadcrumbs>
+      </div>
+      <section className="relative lg:sticky lg:top-4 h-full space-y-2 px-2 pt-0 pb-5">
         <ProfileCard
           followedBrands={followedBrands!}
           isFollowed={false}

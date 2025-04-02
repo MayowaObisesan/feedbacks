@@ -46,7 +46,7 @@ export function SegmentedFilter({
   onFilterChange,
 }: SegmentedFilterProps) {
   return (
-    <div className="px-2">
+    <div className="">
       <Tabs
         fullWidth
         aria-label="Brand filters"

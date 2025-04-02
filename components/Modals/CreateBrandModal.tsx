@@ -282,7 +282,8 @@ export default function CreateBrandModal() {
   return (
     <>
       <Button
-        color="success"
+        className={"invert"}
+        color="default"
         startContent={<LucideLayoutTemplate size={16} strokeWidth={2} />}
         variant="shadow"
         onPress={onOpen}

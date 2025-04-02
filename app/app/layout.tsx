@@ -6,6 +6,7 @@ import { siteConfig } from "@/config/site";
 import { Navbar } from "@/components/navbar";
 import SearchModal from "@/components/Modals/SearchModal";
 import MobileDrawer from "@/components/MobileDrawer";
+import { BottomNavbar } from "@/components/BottomNavbar";
 
 export const metadata: Metadata = {
   title: {
@@ -37,11 +38,14 @@ export default function RootLayout({
         <Navbar />
       </Suspense>
       {/*</div>*/}
+      <SearchModal />
+      <MobileDrawer />
       <div className="relative w-full h-full overflow-auto mx-auto flex-grow">
         {/*<ModalContainer />*/}
-        <SearchModal />
-        <MobileDrawer />
         {children}
+      </div>
+      <div className={"w-full h-16"}>
+        <BottomNavbar />
       </div>
       {/*<footer className="w-full flex items-center justify-center py-3">
           Footer 2

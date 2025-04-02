@@ -3,7 +3,7 @@
 import { Skeleton } from "@heroui/skeleton";
 import { LucideHome, LucideLayoutTemplate } from "lucide-react";
 import { BreadcrumbItem, Breadcrumbs } from "@heroui/breadcrumbs";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import { useBrands, useLatestBrands, useTrendingBrands } from "@/hooks/useBrands";
 import { SegmentedFilter } from "@/components/BrandFilter";
@@ -77,8 +77,8 @@ export default function BrandsPage() {
   const isLoadingBrands = isLoading || latestBrandsLoading;
 
   return (
-    <div className="w-full max-w-7xl mx-auto">
-      <div className={"sticky top-0 z-40 p-4 bg-background"}>
+    <div className="w-full lg:max-w-7xl mx-auto">
+      <div className={"max-md:hidden sticky top-0 z-40 p-4 bg-background"}>
         <Breadcrumbs>
           <BreadcrumbItem
             key={"home"}
