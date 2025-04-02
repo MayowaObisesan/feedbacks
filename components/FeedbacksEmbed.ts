@@ -47,9 +47,9 @@ export class FeedbacksEmbed extends HTMLElement {
       const container = this.shadowRoot?.querySelector(".container");
 
       if (container) {
-        if (name === "width") container.style.width = newValue;
-        if (name === "height") container.style.height = newValue;
-        if (name === "src") this.loadContent(container);
+        // if (name === "width") container.style.width = newValue;
+        // if (name === "height") container.setAttribute("style", "");
+        // if (name === "src") this.loadContent(container);
       }
     }
   }
