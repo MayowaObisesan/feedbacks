@@ -20,7 +20,7 @@ import {
 import { LucideFileImage, LucideX } from "lucide-react";
 import { Image } from "@heroui/image";
 import { cn } from "@heroui/theme";
-import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 
 import { unkey } from "@/utils/unkey";
 import { Brand } from "@/types";
